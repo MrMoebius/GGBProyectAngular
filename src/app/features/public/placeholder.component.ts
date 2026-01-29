@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-placeholder',
@@ -7,15 +9,15 @@ import { Component } from '@angular/core';
     <div class="placeholder-container">
       <div class="content-box">
         <h1 class="title">GGBProyect</h1>
-        <p class="subtitle">¡Frontend Inicializado!</p>
-        <p class="description">Estilos nativos CSS/SCSS configurados y funcionando.</p>
+        <p class="subtitle">¡Bienvenido!</p>
+        <p class="description">Gestión de Ludoteca y Cafetería</p>
 
         <div class="actions">
-            <button class="btn btn-primary">
-              Acción Primaria
+            <button class="btn btn-primary" (click)="handlePrimaryAction()">
+              Acceso Personal
             </button>
             <button class="btn btn-secondary">
-              Acción Secundaria
+              Ver Catálogo
             </button>
         </div>
 
@@ -105,4 +107,28 @@ import { Component } from '@angular/core';
     }
   `]
 })
-export class PlaceholderComponent {}
+export class PlaceholderComponent {
+  private authService = inject(AuthService);
+  private router = inject(Router);
+
+  handlePrimaryAction() {
+    if (this.authService.isAuthenticated()) {
+      const role = this.authService.currentRole();
+      switch (role) {
+        case 'ADMIN':
+          this.router.navigate(['/admin/dashboard']);
+          break;
+        case 'EMPLEADO':
+          this.router.navigate(['/staff/sala']);
+          break;
+        case 'CLIENTE':
+          this.router.navigate(['/customer/dashboard']);
+          break;
+        default:
+          this.router.navigate(['/public']);
+      }
+    } else {
+      this.router.navigate(['/auth/login']);
+    }
+  }
+}

@@ -3,6 +3,6 @@ import { Cliente } from './cliente.interface';
 
 export interface AuthResponse {
   token: string;
-  usuario: Cliente | Empleado;
+  usuario: Cliente | Empleado | null;
   rol: 'CLIENTE' | 'EMPLEADO' | 'ADMIN';
 }
