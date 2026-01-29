@@ -1,1 +1,90 @@
-/* You can add global styles to this file, and also import other style files */
+/* Reset básico */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  /* Paleta de Colores */
+  --primary-coral: #FF7F50;
+  --primary-hover: #E67346;
+
+  --secondary-dark: #1F2937;
+  --secondary-light: #374151;
+  --secondary-bg: #F3F4F6;
+
+  --status-free: #10B981;
+  --status-occupied: #EF4444;
+  --status-reserved: #F59E0B;
+
+  --text-main: #1F2937;
+  --text-muted: #6B7280;
+  --text-white: #FFFFFF;
+
+  /* Tipografía */
+  --font-main: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+
+  /* Espaciado */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+
+  /* Bordes */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 1rem;
+}
+
+body {
+  font-family: var(--font-main);
+  background-color: var(--secondary-bg);
+  color: var(--text-main);
+  line-height: 1.5;
+}
+
+/* Utilidades Globales (Mixins simulados en CSS puro) */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.2s;
+}
+
+.btn-primary {
+  background-color: var(--primary-coral);
+  color: var(--text-white);
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+}
+
+.btn-secondary {
+  background-color: var(--secondary-dark);
+  color: var(--text-white);
+}
+
+.btn-secondary:hover {
+  background-color: var(--secondary-light);
+}
+
+.card {
+  background-color: white;
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-md);
+}
