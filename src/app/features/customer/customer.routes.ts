@@ -1,8 +1,7 @@
 import { Routes } from '@angular/router';
+import { CustomerDashboardComponent } from './dashboard/customer-dashboard.component';
 
 export const CUSTOMER_ROUTES: Routes = [
-  // { path: 'dashboard', component: DashboardComponent },
-  // { path: 'live-session/:id', component: LiveSessionComponent },
-  // { path: 'history', component: HistoryComponent },
+  { path: 'dashboard', component: CustomerDashboardComponent },
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
 ];

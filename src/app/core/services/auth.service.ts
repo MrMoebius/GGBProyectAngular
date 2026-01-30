@@ -28,6 +28,11 @@ export class AuthService {
       if (storedRole) {
         this._currentRole.set(storedRole);
       }
+      // Intentar recuperar usuario del localStorage si existe (persistencia básica)
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        this._currentUser.set(JSON.parse(storedUser));
+      }
     }
   }
 
@@ -36,12 +41,14 @@ export class AuthService {
       tap(response => {
         console.log('AuthService: Respuesta cruda del backend:', response);
         const normalizedRole = this.normalizeRole(response.role);
-        console.log('AuthService: Rol normalizado:', normalizedRole);
+
+        // Construir objeto usuario básico con el email recibido
+        const usuarioBasico = { email: response.email, nombre: 'Usuario' } as any;
 
         const authResponse: AuthResponse = {
           token: response.accessToken,
           rol: normalizedRole,
-          usuario: null
+          usuario: usuarioBasico
         };
         this.handleAuthSuccess(authResponse);
       })
@@ -54,15 +61,19 @@ export class AuthService {
     this._token.set(null);
     localStorage.removeItem('token');
     localStorage.removeItem('role');
+    localStorage.removeItem('user');
   }
 
   private handleAuthSuccess(response: AuthResponse): void {
     this._token.set(response.token);
     this._currentUser.set(response.usuario);
     this._currentRole.set(response.rol);
+
     localStorage.setItem('token', response.token);
     localStorage.setItem('role', response.rol);
-    console.log('AuthService: Estado actualizado. Current Role:', this._currentRole());
+    if (response.usuario) {
+      localStorage.setItem('user', JSON.stringify(response.usuario));
+    }
   }
 
   hasRole(role: 'CLIENTE' | 'EMPLEADO' | 'ADMIN'): boolean {

@@ -1,8 +1,7 @@
 import { Routes } from '@angular/router';
+import { AdminDashboardComponent } from './dashboard/admin-dashboard.component';
 
 export const ADMIN_ROUTES: Routes = [
-  // { path: 'inventory', component: InventoryComponent },
-  // { path: 'staff', component: StaffManagementComponent },
-  // { path: 'settings', component: SettingsComponent },
-  { path: '', redirectTo: 'inventory', pathMatch: 'full' }
+  { path: 'dashboard', component: AdminDashboardComponent },
+  { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
 ];
