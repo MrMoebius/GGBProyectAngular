@@ -1,6 +1,8 @@
 export interface Producto {
   id: number;
   nombre: string;
+  descripcion: string | null;
   precio: number;
-  categoria: string;
+  categoria: 'COMIDA' | 'BEBIDA' | 'ALCOHOL' | 'POSTRE' | 'SERVICIO';
+  activo: boolean;
 }

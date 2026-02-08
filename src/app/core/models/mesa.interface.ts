@@ -1,7 +1,9 @@
 export interface Mesa {
   id: number;
   numeroMesa: number;
+  nombreMesa: string;
   capacidad: number;
   zona: string;
-  estado: 'LIBRE' | 'OCUPADA' | 'RESERVADA'; // Ajustar según valores del backend
+  ubicacion: string;
+  estado: 'LIBRE' | 'OCUPADA' | 'RESERVADA' | 'FUERA_DE_SERVICIO';
 }

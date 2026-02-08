@@ -1,5 +1,4 @@
 import { Component, inject, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
@@ -7,61 +6,298 @@ import { AuthService } from '../../../core/services/auth.service';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [ReactiveFormsModule, RouterModule],
   template: `
-    <div class="min-h-screen flex items-center justify-center bg-gray-100">
-      <div class="max-w-md w-full bg-white rounded-lg shadow-md p-8">
-        <h2 class="text-2xl font-bold text-center text-gray-800 mb-8">Iniciar Sesión</h2>
+    <div class="login-page">
+      <div class="login-card">
+        <!-- Logo -->
+        <div class="login-logo">
+          <span class="logo-giber">GIBER</span>
+          <span class="logo-bar">BAR</span>
+        </div>
+        <p class="login-subtitle">Inicia sesion en tu cuenta</p>
 
-        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-6">
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
           <!-- Email Field -->
-          <div>
-            <label for="email" class="block text-sm font-medium text-gray-700">Correo Electrónico</label>
+          <div class="form-group">
+            <label for="email" class="form-label">Correo Electronico</label>
             <input
               type="email"
               id="email"
               formControlName="email"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              [ngClass]="{'border-red-500': isFieldInvalid('email')}"
+              class="form-input"
+              [class.input-error]="isFieldInvalid('email')"
+              placeholder="tu@email.com"
             >
-            <p *ngIf="isFieldInvalid('email')" class="mt-1 text-sm text-red-600">
-              Introduce un email válido
-            </p>
+            @if (isFieldInvalid('email')) {
+              <p class="field-error">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                Introduce un email valido
+              </p>
+            }
           </div>
 
           <!-- Password Field -->
-          <div>
-            <label for="password" class="block text-sm font-medium text-gray-700">Contraseña</label>
+          <div class="form-group">
+            <label for="password" class="form-label">Contrasena</label>
             <input
               type="password"
               id="password"
               formControlName="password"
-              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              [ngClass]="{'border-red-500': isFieldInvalid('password')}"
+              class="form-input"
+              [class.input-error]="isFieldInvalid('password')"
+              placeholder="Tu contrasena"
             >
-            <p *ngIf="isFieldInvalid('password')" class="mt-1 text-sm text-red-600">
-              La contraseña es obligatoria
-            </p>
+            @if (isFieldInvalid('password')) {
+              <p class="field-error">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                La contrasena es obligatoria
+              </p>
+            }
           </div>
 
           <!-- Error Message -->
-          <div *ngIf="errorMessage()" class="p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-            {{ errorMessage() }}
-          </div>
+          @if (errorMessage()) {
+            <div class="error-banner">
+              <i class="fa-solid fa-triangle-exclamation"></i>
+              {{ errorMessage() }}
+            </div>
+          }
 
           <!-- Submit Button -->
           <button
             type="submit"
+            class="btn-submit"
             [disabled]="loginForm.invalid || isLoading()"
-            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <span *ngIf="isLoading()">Cargando...</span>
-            <span *ngIf="!isLoading()">Entrar</span>
+            @if (isLoading()) {
+              <i class="fa-solid fa-spinner fa-spin"></i>
+              Cargando...
+            } @else {
+              <i class="fa-solid fa-right-to-bracket"></i>
+              Entrar
+            }
           </button>
         </form>
+
+        <!-- Back link -->
+        <a class="back-link" routerLink="/public">
+          <i class="fa-solid fa-arrow-left"></i>
+          Volver al inicio
+        </a>
       </div>
     </div>
-  `
+  `,
+  styles: [`
+    /* ===== Full page layout ===== */
+    .login-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1rem;
+      background: linear-gradient(135deg, var(--hero-gradient-start, #0F172A), var(--hero-gradient-end, #1E293B));
+    }
+
+    /* ===== Glass card ===== */
+    .login-card {
+      width: 100%;
+      max-width: 420px;
+      background-color: rgba(30, 41, 59, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-lg, 16px);
+      padding: 2.5rem 2rem;
+      box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        0 0 60px rgba(0, 255, 209, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    /* ===== Logo ===== */
+    .login-logo {
+      text-align: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .logo-giber {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--text-white, #fff);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+
+    .logo-bar {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--neon-cyan, #00FFD1);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      text-shadow: 0 0 10px var(--neon-cyan, #00FFD1), 0 0 20px rgba(0, 255, 209, 0.4);
+    }
+
+    .login-subtitle {
+      text-align: center;
+      color: var(--text-muted, #94a3b8);
+      font-size: 0.9rem;
+      margin: 0 0 2rem;
+    }
+
+    /* ===== Form ===== */
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+
+    .form-label {
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--text-muted, #94a3b8);
+      letter-spacing: 0.02em;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      font-size: 0.9rem;
+      color: var(--text-white, #fff);
+      background-color: var(--input-bg, rgba(255, 255, 255, 0.06));
+      border: 1px solid var(--input-border, rgba(255, 255, 255, 0.12));
+      border-radius: var(--radius-md, 8px);
+      outline: none;
+      transition: border-color 0.25s, box-shadow 0.25s;
+      box-sizing: border-box;
+    }
+
+    .form-input::placeholder {
+      color: var(--text-muted, #94a3b8);
+      opacity: 0.6;
+    }
+
+    .form-input:focus {
+      border-color: var(--input-focus, var(--neon-cyan, #00FFD1));
+      box-shadow: 0 0 0 3px rgba(0, 255, 209, 0.12);
+    }
+
+    .form-input.input-error {
+      border-color: var(--danger, #EF4444);
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+    }
+
+    /* ===== Field error ===== */
+    .field-error {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+      color: var(--danger, #EF4444);
+      margin: 0;
+    }
+
+    .field-error i {
+      font-size: 0.75rem;
+    }
+
+    /* ===== Error banner ===== */
+    .error-banner {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-md, 8px);
+      background-color: var(--danger-bg, rgba(239, 68, 68, 0.1));
+      border: 1px solid var(--danger, #EF4444);
+      color: var(--danger-text, #FCA5A5);
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .error-banner i {
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    /* ===== Submit button ===== */
+    .btn-submit {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
+      padding: 0.8rem 1.5rem;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #fff;
+      background-color: var(--primary-coral, #FF6B6B);
+      border: none;
+      border-radius: var(--radius-md, 8px);
+      cursor: pointer;
+      transition: background-color 0.25s, transform 0.15s, box-shadow 0.25s;
+      margin-top: 0.5rem;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      background-color: var(--primary-hover, #FF5252);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 18px rgba(255, 107, 107, 0.35);
+    }
+
+    .btn-submit:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* ===== Back link ===== */
+    .back-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 1.5rem;
+      color: var(--text-muted, #94a3b8);
+      font-size: 0.85rem;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .back-link:hover {
+      color: var(--neon-cyan, #00FFD1);
+    }
+
+    .back-link i {
+      font-size: 0.75rem;
+      transition: transform 0.2s;
+    }
+
+    .back-link:hover i {
+      transform: translateX(-3px);
+    }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 480px) {
+      .login-card {
+        padding: 2rem 1.25rem;
+      }
+
+      .logo-giber,
+      .logo-bar {
+        font-size: 1.65rem;
+      }
+    }
+  `]
 })
 export class LoginComponent {
   private fb = inject(FormBuilder);

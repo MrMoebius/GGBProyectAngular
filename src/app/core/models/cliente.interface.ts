@@ -3,5 +3,6 @@ export interface Cliente {
   nombre: string;
   email: string;
   telefono: string;
-  fechaAlta: string; // ISO date string
+  fechaAlta: string;
+  notas: string | null;
 }
