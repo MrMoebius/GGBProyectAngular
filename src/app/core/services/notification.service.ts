@@ -54,7 +54,7 @@ const SEED_NOTIFICATIONS: GGBNotification[] = [
   {
     id: 6,
     type: 'GENERAL',
-    title: 'Bienvenido a Giber Bar',
+    title: 'Bienvenido a Giber Games Bar',
     message: 'Gracias por unirte! Explora nuestro catalogo de juegos y no te pierdas los proximos eventos.',
     read: true,
     createdAt: '2026-01-28T10:00:00',

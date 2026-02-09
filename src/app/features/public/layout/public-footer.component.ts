@@ -14,24 +14,23 @@ import { NewsletterService } from '../../../core/services/newsletter.service';
           <!-- Column 1: Brand -->
           <div class="footer-col brand-col">
             <a class="logo" routerLink="/public">
-              <span class="logo-giber">GIBER</span>
-              <span class="logo-bar">BAR</span>
+              <img class="logo-img" src="assets/GGBarPhotoSlide/GiberGamesBarLogo.webp" alt="Giber Games Bar" />
             </a>
             <p class="brand-description">
-              Tu espacio para jugar, comer y disfrutar. Mas de 100 juegos de mesa,
-              comida artesanal y el mejor ambiente gaming de la ciudad.
+              Tu espacio para jugar, comer y disfrutar. Mas de 200 juegos de mesa,
+              cerveza, refrescos, comida rica y la mejor ludoteca de Alcorcon.
             </p>
             <div class="social-icons">
-              <a href="#" class="social-link" aria-label="Instagram">
+              <a href="https://www.instagram.com/gibergamesbar/" target="_blank" rel="noopener" class="social-link" aria-label="Instagram">
                 <i class="fa-brands fa-instagram"></i>
               </a>
-              <a href="#" class="social-link" aria-label="Twitter">
-                <i class="fa-brands fa-twitter"></i>
+              <a href="https://www.instagram.com/gibergames/" target="_blank" rel="noopener" class="social-link" aria-label="Instagram Giber Games">
+                <i class="fa-brands fa-instagram"></i>
               </a>
-              <a href="#" class="social-link" aria-label="Discord">
-                <i class="fa-brands fa-discord"></i>
+              <a href="https://x.com/giber_games" target="_blank" rel="noopener" class="social-link" aria-label="X (Twitter)">
+                <i class="fa-brands fa-x-twitter"></i>
               </a>
-              <a href="#" class="social-link" aria-label="TikTok">
+              <a href="https://www.tiktok.com/@gibergamesbar" target="_blank" rel="noopener" class="social-link" aria-label="TikTok">
                 <i class="fa-brands fa-tiktok"></i>
               </a>
             </div>
@@ -55,22 +54,24 @@ import { NewsletterService } from '../../../core/services/newsletter.service';
             <ul class="contact-list">
               <li>
                 <i class="fa-solid fa-location-dot"></i>
-                <span>Calle Ejemplo 42, Madrid</span>
+                <span>Av. Alcalde Jose Aranda 57, 28925 Alcorcon, Madrid</span>
               </li>
               <li>
                 <i class="fa-solid fa-phone"></i>
-                <span>+34 912 345 678</span>
+                <span>+34 614 449 475</span>
               </li>
               <li>
                 <i class="fa-solid fa-envelope"></i>
-                <span>hola&#64;giberbar.com</span>
+                <span>gibergamesbar&#64;gmail.com</span>
               </li>
             </ul>
             <div class="contact-divider"></div>
             <div class="hours">
               <p class="hours-title">Horario:</p>
-              <p class="hours-line">Lun-Jue: 16:00 - 00:00</p>
-              <p class="hours-line">Vie-Sab: 16:00 - 02:00</p>
+              <p class="hours-line">Lunes: Cerrado</p>
+              <p class="hours-line">Mar-Jue: 17:00 - 23:00</p>
+              <p class="hours-line">Vie: 17:00 - 00:00</p>
+              <p class="hours-line">Sab: 12:00 - 00:00</p>
               <p class="hours-line">Dom: 12:00 - 22:00</p>
             </div>
           </div>
@@ -103,7 +104,7 @@ import { NewsletterService } from '../../../core/services/newsletter.service';
       <div class="footer-bottom">
         <div class="footer-bottom-inner">
           <p class="copyright">
-            &copy; 2026 Giber Bar. Todos los derechos reservados.
+            &copy; 2026 Giber Games Bar. Todos los derechos reservados.
           </p>
           <a class="admin-link" routerLink="/admin">Panel Admin</a>
         </div>
@@ -174,21 +175,16 @@ import { NewsletterService } from '../../../core/services/newsletter.service';
       margin-bottom: 1rem;
     }
 
-    .logo-giber {
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: var(--text-white);
-      letter-spacing: 2px;
-      text-transform: uppercase;
+    .logo-img {
+      height: 36px;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 0 8px rgba(0, 255, 209, 0.3));
+      transition: filter 0.3s;
     }
 
-    .logo-bar {
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: var(--neon-cyan);
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px rgba(0, 255, 209, 0.4);
+    .logo:hover .logo-img {
+      filter: drop-shadow(0 0 14px rgba(0, 255, 209, 0.5));
     }
 
     .brand-description {

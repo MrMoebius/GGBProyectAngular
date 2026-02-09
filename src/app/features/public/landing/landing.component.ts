@@ -1,13 +1,11 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { JuegoService } from '../../../core/services/juego.service';
 import { RecommendationService } from '../../../core/services/recommendation.service';
-import { ProductoService } from '../../../core/services/producto.service';
 import { MesaService } from '../../../core/services/mesa.service';
 import { EventService } from '../../../core/services/event.service';
 import { JuegoExtended } from '../../../core/models/juego-extended.interface';
-import { Producto } from '../../../core/models/producto.interface';
 import { Mesa } from '../../../core/models/mesa.interface';
 import { GGBEvent } from '../../../core/models/evento.interface';
 import { GameCardPublicComponent } from '../../../shared/components/game-card-public/game-card-public.component';
@@ -19,7 +17,17 @@ import { GameCardPublicComponent } from '../../../shared/components/game-card-pu
   template: `
     <!-- HERO -->
     <section class="hero">
-      <div class="hero-bg"></div>
+      <div class="hero-bg">
+        @for (slide of heroSlides; track slide; let i = $index) {
+          <img
+            class="hero-slide"
+            [src]="slide"
+            [class.active]="i === currentSlide()"
+            alt=""
+          />
+        }
+        <div class="hero-overlay"></div>
+      </div>
       <div class="hero-content">
         <h1 class="hero-title animate-fade-in-up">
           Tu espacio para <span class="hero-highlight">jugar</span>,
@@ -27,7 +35,7 @@ import { GameCardPublicComponent } from '../../../shared/components/game-card-pu
           <span class="hero-highlight">disfrutar</span>
         </h1>
         <p class="hero-subtitle animate-fade-in-up">
-          Mas de 100 juegos de mesa, comida artesanal y el mejor ambiente gaming de la ciudad
+          Mas de 200 juegos de mesa, comida artesanal y el mejor ambiente gaming de Alcorcon
         </p>
         <div class="hero-actions animate-fade-in-up">
           <a routerLink="/public/juegos" class="btn btn-primary btn-lg">
@@ -45,7 +53,7 @@ import { GameCardPublicComponent } from '../../../shared/components/game-card-pu
             </div>
             <div class="hero-stat-divider"></div>
             <div class="hero-stat">
-              <span class="hero-stat-number">{{ featuredGames().length > 0 ? '100+' : '...' }}</span>
+              <span class="hero-stat-number">{{ featuredGames().length > 0 ? '200+' : '...' }}</span>
               <span class="hero-stat-label">Juegos</span>
             </div>
             <div class="hero-stat-divider"></div>
@@ -54,6 +62,16 @@ import { GameCardPublicComponent } from '../../../shared/components/game-card-pu
               <span class="hero-stat-label">Eventos proximos</span>
             </div>
           </div>
+        }
+      </div>
+      <div class="hero-dots">
+        @for (slide of heroSlides; track slide; let i = $index) {
+          <button
+            class="hero-dot"
+            [class.active]="i === currentSlide()"
+            (click)="goToSlide(i)"
+            [attr.aria-label]="'Imagen ' + (i + 1)"
+          ></button>
         }
       </div>
       <div class="hero-scroll-indicator">
@@ -104,10 +122,14 @@ import { GameCardPublicComponent } from '../../../shared/components/game-card-pu
             </div>
           </div>
           <div class="daily-visual">
-            <div class="daily-card-large">
-              <i class="fa-solid fa-dice-d20"></i>
-              <span class="daily-genre">{{ dailyPick()!.genero }}</span>
-            </div>
+            @if (dailyPick()!.imagenUrl) {
+              <img class="daily-img" [src]="dailyPick()!.imagenUrl" [alt]="dailyPick()!.nombre" />
+            } @else {
+              <div class="daily-card-large">
+                <i class="fa-solid fa-dice-d20"></i>
+                <span class="daily-genre">{{ dailyPick()!.genero }}</span>
+              </div>
+            }
           </div>
         </div>
       </section>
@@ -124,26 +146,24 @@ import { GameCardPublicComponent } from '../../../shared/components/game-card-pu
           Ver carta completa <i class="fa-solid fa-arrow-right"></i>
         </a>
       </div>
-      <div class="menu-grid">
-        @for (prod of featuredProducts(); track prod.id) {
-          <div class="menu-card card">
-            <div class="menu-card-icon" [class]="'cat-' + prod.categoria.toLowerCase()">
-              @switch (prod.categoria) {
-                @case ('COMIDA') { <i class="fa-solid fa-burger"></i> }
-                @case ('BEBIDA') { <i class="fa-solid fa-mug-hot"></i> }
-                @case ('ALCOHOL') { <i class="fa-solid fa-wine-glass"></i> }
-                @case ('POSTRE') { <i class="fa-solid fa-ice-cream"></i> }
-                @default { <i class="fa-solid fa-utensils"></i> }
-              }
-            </div>
-            <div class="menu-card-info">
-              <h4 class="menu-card-name">{{ prod.nombre }}</h4>
-              @if (prod.descripcion) {
-                <p class="menu-card-desc">{{ prod.descripcion }}</p>
-              }
-            </div>
-            <span class="menu-card-price">{{ prod.precio | number:'1.2-2' }} EUR</span>
-          </div>
+      <div class="food-carousel">
+        @for (slide of foodSlides; track slide; let i = $index) {
+          <img
+            class="food-slide"
+            [src]="slide"
+            [class.active]="i === currentFoodSlide()"
+            alt="Nuestra carta"
+          />
+        }
+      </div>
+      <div class="food-dots">
+        @for (slide of foodSlides; track slide; let i = $index) {
+          <button
+            class="food-dot"
+            [class.active]="i === currentFoodSlide()"
+            (click)="goToFoodSlide(i)"
+            [attr.aria-label]="'Imagen ' + (i + 1)"
+          ></button>
         }
       </div>
     </section>
@@ -228,17 +248,17 @@ import { GameCardPublicComponent } from '../../../shared/components/game-card-pu
       <div class="section cta-inner">
         <h2 class="cta-title">Ven a conocernos</h2>
         <p class="cta-text">
-          Giber Bar es mas que un bar. Es un punto de encuentro para amantes de los juegos de mesa,
-          la buena comida y la diversión. Abierto todos los dias con eventos semanales.
+          Giber Games Bar es mas que un bar. Es un punto de encuentro para amantes de los juegos de mesa,
+          cerveza, refrescos, comida rica y una amplia ludoteca con mas de 200 juegos.
         </p>
         <div class="cta-info">
           <div class="cta-info-item">
             <i class="fa-solid fa-location-dot"></i>
-            <span>Calle Ejemplo 42, Madrid</span>
+            <span>Av. Alcalde Jose Aranda 57, 28925 Alcorcon, Madrid</span>
           </div>
           <div class="cta-info-item">
             <i class="fa-solid fa-clock"></i>
-            <span>Lun-Jue 16:00-00:00 | Vie-Sab 16:00-02:00 | Dom 12:00-22:00</span>
+            <span>Mar-Jue 17:00-23:00 | Vie 17:00-00:00 | Sab 12:00-00:00 | Dom 12:00-22:00</span>
           </div>
         </div>
         <div class="cta-actions">
@@ -266,23 +286,39 @@ import { GameCardPublicComponent } from '../../../shared/components/game-card-pu
     .hero-bg {
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg, var(--hero-gradient-start) 0%, var(--hero-gradient-end) 50%, #1a1a2e 100%);
       z-index: 0;
+      background: #0F172A;
     }
 
-    .hero-bg::before {
-      content: '';
+    .hero-slide {
       position: absolute;
       inset: 0;
-      background:
-        radial-gradient(circle at 20% 50%, rgba(0, 255, 209, 0.08) 0%, transparent 50%),
-        radial-gradient(circle at 80% 50%, rgba(255, 107, 157, 0.08) 0%, transparent 50%),
-        radial-gradient(circle at 50% 80%, rgba(168, 85, 247, 0.06) 0%, transparent 50%);
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 1.2s ease-in-out;
+    }
+
+    .hero-slide.active {
+      opacity: 1;
+    }
+
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(15, 23, 42, 0.55) 0%,
+        rgba(15, 23, 42, 0.65) 50%,
+        rgba(15, 23, 42, 0.8) 100%
+      );
+      z-index: 1;
     }
 
     .hero-content {
       position: relative;
-      z-index: 1;
+      z-index: 2;
       max-width: 800px;
       padding: 2rem;
     }
@@ -365,10 +401,40 @@ import { GameCardPublicComponent } from '../../../shared/components/game-card-pu
       background: rgba(255, 255, 255, 0.15);
     }
 
+    .hero-dots {
+      position: absolute;
+      bottom: 4.5rem;
+      z-index: 3;
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .hero-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      background: transparent;
+      cursor: pointer;
+      padding: 0;
+      transition: background-color 0.3s, border-color 0.3s, transform 0.2s;
+    }
+
+    .hero-dot:hover {
+      border-color: rgba(255, 255, 255, 0.8);
+      transform: scale(1.2);
+    }
+
+    .hero-dot.active {
+      background: var(--neon-cyan);
+      border-color: var(--neon-cyan);
+      box-shadow: 0 0 8px var(--neon-cyan);
+    }
+
     .hero-scroll-indicator {
       position: absolute;
       bottom: 2rem;
-      z-index: 1;
+      z-index: 3;
       color: rgba(255, 255, 255, 0.4);
       font-size: 1.25rem;
       animation: bounce 2s ease-in-out infinite;
@@ -507,66 +573,65 @@ import { GameCardPublicComponent } from '../../../shared/components/game-card-pu
       letter-spacing: 0.1em;
     }
 
-    /* MENU CARDS */
-    .menu-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 1rem;
+    .daily-img {
+      width: 250px;
+      height: 300px;
+      object-fit: cover;
+      border-radius: var(--radius-lg);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
     }
 
-    .menu-card {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: 1rem 1.25rem;
-      transition: transform 0.2s;
-    }
-
-    .menu-card:hover {
-      transform: translateX(4px);
-    }
-
-    .menu-card-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: var(--radius-md);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.25rem;
-      flex-shrink: 0;
-    }
-
-    .cat-comida { background: rgba(239, 68, 68, 0.1); color: #EF4444; }
-    .cat-bebida { background: rgba(59, 130, 246, 0.1); color: #3B82F6; }
-    .cat-alcohol { background: rgba(168, 85, 247, 0.1); color: #A855F7; }
-    .cat-postre { background: rgba(245, 158, 11, 0.1); color: #F59E0B; }
-    .cat-servicio { background: rgba(16, 185, 129, 0.1); color: #10B981; }
-
-    .menu-card-info {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .menu-card-name {
-      font-weight: 600;
-      color: var(--text-main);
-      margin-bottom: 0.125rem;
-    }
-
-    .menu-card-desc {
-      font-size: 0.8125rem;
-      color: var(--text-muted);
-      white-space: nowrap;
+    /* FOOD CAROUSEL */
+    .food-carousel {
+      position: relative;
+      width: 100%;
+      height: 400px;
+      border-radius: var(--radius-lg);
       overflow: hidden;
-      text-overflow: ellipsis;
+      background: var(--card-bg, #1E293B);
     }
 
-    .menu-card-price {
-      font-weight: 700;
-      color: var(--primary-coral);
-      font-size: 1rem;
-      white-space: nowrap;
+    .food-slide {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 80%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
+    }
+
+    .food-slide.active {
+      opacity: 1;
+    }
+
+    .food-dots {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .food-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      border: 2px solid var(--text-muted);
+      background: transparent;
+      cursor: pointer;
+      padding: 0;
+      transition: background-color 0.3s, border-color 0.3s, transform 0.2s;
+    }
+
+    .food-dot:hover {
+      border-color: var(--primary-coral);
+      transform: scale(1.2);
+    }
+
+    .food-dot.active {
+      background: var(--primary-coral);
+      border-color: var(--primary-coral);
     }
 
     /* EVENT CARDS */
@@ -852,8 +917,8 @@ import { GameCardPublicComponent } from '../../../shared/components/game-card-pu
         display: none;
       }
 
-      .menu-grid {
-        grid-template-columns: 1fr;
+      .food-carousel {
+        height: 280px;
       }
 
       .section-header {
@@ -873,32 +938,60 @@ import { GameCardPublicComponent } from '../../../shared/components/game-card-pu
     }
   `]
 })
-export class LandingComponent implements OnInit {
+export class LandingComponent implements OnInit, OnDestroy {
   private mockJuegos = inject(JuegoService);
   private recommendation = inject(RecommendationService);
-  private productoService = inject(ProductoService);
   private mesaService = inject(MesaService);
   private eventService = inject(EventService);
 
   featuredGames = signal<JuegoExtended[]>([]);
   dailyPick = signal<JuegoExtended | null>(null);
-  featuredProducts = signal<Producto[]>([]);
   mesas = signal<Mesa[]>([]);
   upcomingEvents = signal<GGBEvent[]>([]);
   mesaStats = signal<{ total: number; libres: number }>({ total: 0, libres: 0 });
 
+  // Carousel
+  readonly heroSlides = [
+    'assets/GGBarPhotoSlide/GiberGamesBarSlide01.webp',
+    'assets/GGBarPhotoSlide/GiberGamesBarSlide02.webp',
+    'assets/GGBarPhotoSlide/GiberGamesBarSlide03.webp',
+    'assets/GGBarPhotoSlide/GiberGamesBarSlide04.webp',
+    'assets/GGBarPhotoSlide/GiberGamesBarSlide05.webp',
+    'assets/GGBarPhotoSlide/GiberGamesBarSlide06.webp',
+    'assets/GGBarPhotoSlide/GiberGamesBarSlide07.webp',
+    'assets/GGBarPhotoSlide/GiberGamesBarSlide08.webp',
+    // 'assets/GGBarPhotoSlide/GiberGamesBarSlide09.webp',
+    'assets/GGBarPhotoSlide/GiberGamesBarSlide10.webp',
+    'assets/GGBarPhotoSlide/GiberGamesBarSlide11.webp',
+    'assets/GGBarPhotoSlide/GiberGamesBarSlide12.webp',
+    'assets/GGBarPhotoSlide/GiberGamesBarSlide13.webp',
+    'assets/GGBarPhotoSlide/GiberGamesBarSlide14.webp',
+    'assets/GGBarPhotoSlide/GiberGamesBarSlide16.webp',
+    'assets/GGBarPhotoSlide/GiberGamesBarSlide17.webp',
+    'assets/GGBarPhotoSlide/GiberGamesBarSlide18.webp',
+    'assets/GGBarPhotoSlide/GiberGamesBarSlide19.webp',
+    'assets/GGBarPhotoSlide/GiberGamesBarSlide20.webp',
+  ];
+  currentSlide = signal(0);
+  private slideInterval: ReturnType<typeof setInterval> | null = null;
+
+  // Food carousel
+  readonly foodSlides = [
+    'assets/GGBarFood/GGBarFood01.webp',
+    'assets/GGBarFood/GGBarFood02.webp',
+    'assets/GGBarFood/GGBarFood003.webp',
+    'assets/GGBarFood/GGBarFood04.webp',
+    'assets/GGBarFood/GGBarFood05.webp',
+    'assets/GGBarFood/GGBarFood06.webp',
+  ];
+  currentFoodSlide = signal(0);
+  private foodInterval: ReturnType<typeof setInterval> | null = null;
+
   ngOnInit(): void {
+    this.startCarousel();
+    this.startFoodCarousel();
     this.mockJuegos.getFeatured().subscribe(games => this.featuredGames.set(games));
     this.recommendation.getDailyPick().subscribe(game => this.dailyPick.set(game));
-
-    this.productoService.getAll().subscribe({
-      next: (products) => {
-        const active = products.filter(p => p.activo);
-        const featured = active.slice(0, 4);
-        this.featuredProducts.set(featured);
-      },
-      error: () => {}
-    });
 
     this.mesaService.getAll().subscribe({
       next: (mesas) => {
@@ -917,5 +1010,44 @@ export class LandingComponent implements OnInit {
   formatDate(dateStr: string): string {
     const date = new Date(dateStr);
     return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+  }
+
+  // Carousel methods
+  goToSlide(index: number): void {
+    this.currentSlide.set(index);
+    this.restartCarousel();
+  }
+
+  private startCarousel(): void {
+    this.slideInterval = setInterval(() => {
+      this.currentSlide.update(i => (i + 1) % this.heroSlides.length);
+    }, 5000);
+  }
+
+  private restartCarousel(): void {
+    if (this.slideInterval) clearInterval(this.slideInterval);
+    this.startCarousel();
+  }
+
+  // Food carousel methods
+  goToFoodSlide(index: number): void {
+    this.currentFoodSlide.set(index);
+    this.restartFoodCarousel();
+  }
+
+  private startFoodCarousel(): void {
+    this.foodInterval = setInterval(() => {
+      this.currentFoodSlide.update(i => (i + 1) % this.foodSlides.length);
+    }, 4000);
+  }
+
+  private restartFoodCarousel(): void {
+    if (this.foodInterval) clearInterval(this.foodInterval);
+    this.startFoodCarousel();
+  }
+
+  ngOnDestroy(): void {
+    if (this.slideInterval) clearInterval(this.slideInterval);
+    if (this.foodInterval) clearInterval(this.foodInterval);
   }
 }

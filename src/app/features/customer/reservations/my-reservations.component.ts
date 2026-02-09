@@ -15,7 +15,7 @@ import { ReservasMesa } from '../../../core/models/reservas-mesa.interface';
           <i class="fa-solid fa-calendar-check"></i>
           Mis Reservas
         </h1>
-        <p class="page-subtitle">Gestiona tus reservas en Giber Bar</p>
+        <p class="page-subtitle">Gestiona tus reservas en Giber Games Bar</p>
       </div>
 
       <!-- Tabs -->

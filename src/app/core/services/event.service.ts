@@ -4,22 +4,24 @@ import { GGBEvent, EventSubscription } from '../models/evento.interface';
 import { LocalStorageService } from './local-storage.service';
 
 const EVENTS_KEY = 'events';
+const EVENTS_VERSION_KEY = 'events_version';
 const SUBS_KEY = 'event_subs';
+const CURRENT_SEED_VERSION = 2;
 
 const SEED_EVENTS: GGBEvent[] = [
   {
     id: 1,
     title: 'Torneo de Catan',
     description:
-      'Compite por el titulo de mejor colonizador en nuestro torneo mensual de Catan. ' +
+      'Compite por el titulo de mejor colonizador en nuestro torneo mensual de Catan en Giber Games Bar. ' +
       'Se jugaran rondas eliminatorias con las reglas oficiales del juego base. ' +
-      'Los tres primeros clasificados recibiran premios exclusivos de la tienda. ' +
+      'Los tres primeros clasificados recibiran premios exclusivos. ' +
       'Inscripcion abierta hasta completar aforo, no te quedes fuera!',
     date: '2026-02-14',
     time: '17:00',
     endTime: '22:00',
     imageUrl: 'assets/images/events/torneo-catan.webp',
-    location: 'Sala Principal',
+    location: 'Giber Games Bar, Alcorcon',
     capacity: 16,
     currentAttendees: 14,
     waitlistCount: 3,
@@ -38,9 +40,9 @@ const SEED_EVENTS: GGBEvent[] = [
       'Incluye merienda tematica y ambientacion inmersiva con musica y efectos de sonido.',
     date: '2026-02-21',
     time: '19:00',
-    endTime: '23:30',
+    endTime: '23:00',
     imageUrl: 'assets/images/events/noche-rol.webp',
-    location: 'Sala VIP',
+    location: 'Giber Games Bar, Alcorcon',
     capacity: 20,
     currentAttendees: 18,
     waitlistCount: 4,
@@ -58,10 +60,10 @@ const SEED_EVENTS: GGBEvent[] = [
       'Todo el material esta incluido: miniaturas, pinturas, pinceles y barniz. ' +
       'Al finalizar te llevas tu miniatura terminada y un kit basico de pinturas para seguir practicando.',
     date: '2026-02-28',
-    time: '11:00',
-    endTime: '14:00',
+    time: '12:00',
+    endTime: '15:00',
     imageUrl: 'assets/images/events/taller-miniaturas.webp',
-    location: 'Sala Creativa',
+    location: 'Giber Games Bar, Alcorcon',
     capacity: 12,
     currentAttendees: 8,
     waitlistCount: 0,
@@ -72,38 +74,38 @@ const SEED_EVENTS: GGBEvent[] = [
   },
   {
     id: 4,
-    title: 'Torneo Smash Bros Ultimate',
+    title: 'Torneo de Wingspan',
     description:
-      'El torneo definitivo de Super Smash Bros Ultimate llega a nuestra zona gaming. ' +
-      'Formato de doble eliminacion con reglas competitivas: 3 stocks, 7 minutos, stagelist oficial. ' +
-      'Trae tu propio mando o usa los nuestros, disponemos de mandos Pro y adaptadores de GameCube. ' +
-      'Habra retransmision en directo en nuestra pantalla gigante y premios para el top 3.',
+      'El torneo definitivo de Wingspan llega a Giber Games Bar. ' +
+      'Formato de rondas clasificatorias y final a 4 jugadores con las reglas oficiales. ' +
+      'Disponemos de varias copias del juego con todas las expansiones para que no falte de nada. ' +
+      'Habra premios para el top 3 y consumicion incluida para todos los participantes.',
     date: '2026-03-07',
-    time: '16:00',
-    endTime: '21:00',
-    imageUrl: 'assets/images/events/torneo-smash.webp',
-    location: 'Zona Gaming',
-    capacity: 32,
-    currentAttendees: 30,
-    waitlistCount: 5,
+    time: '17:00',
+    endTime: '22:00',
+    imageUrl: 'assets/images/events/torneo-wingspan.webp',
+    location: 'Giber Games Bar, Alcorcon',
+    capacity: 24,
+    currentAttendees: 20,
+    waitlistCount: 2,
     type: 'TORNEO',
     status: 'PROXIMO',
-    tags: ['videojuegos', 'competitivo', 'Nintendo'],
+    tags: ['estrategia', 'competitivo', 'Wingspan'],
     createdBy: 'Admin'
   },
   {
     id: 5,
     title: 'Noche de Juegos Party',
     description:
-      'Una velada perfecta para reir y pasarlo en grande con juegos de mesa party como Jungle Speed, Dobble y Dixit. ' +
+      'Una velada perfecta para reir y pasarlo en grande con juegos party de nuestra ludoteca: Jungle Speed, Dobble, Dixit y muchos mas. ' +
       'Ideal para grupos de amigos o para venir solo y conocer gente nueva en un ambiente distendido. ' +
       'Nuestro equipo rotara por las mesas explicando las reglas de cada juego. ' +
       'Incluye una consumicion gratuita y descuento del 10% en carta durante todo el evento.',
     date: '2026-03-14',
     time: '20:00',
-    endTime: '00:00',
+    endTime: '23:30',
     imageUrl: 'assets/images/events/noche-party.webp',
-    location: 'Sala Principal',
+    location: 'Giber Games Bar, Alcorcon',
     capacity: 30,
     currentAttendees: 12,
     waitlistCount: 0,
@@ -116,15 +118,15 @@ const SEED_EVENTS: GGBEvent[] = [
     id: 6,
     title: 'Escape Room en Mesa: El Misterio del Faro',
     description:
-      'Resuelve el misterio del faro abandonado en esta experiencia de escape room de mesa unica e inmersiva. ' +
+      'Resuelve el misterio del faro abandonado en esta experiencia de escape room de mesa. ' +
       'Trabajaras en equipo para descifrar enigmas, encontrar pistas ocultas y desvelar la verdad antes de que se agote el tiempo. ' +
-      'Cada grupo de 4 jugadores tendra su propio set de materiales exclusivos que incluyen sobres sellados y objetos fisicos. ' +
+      'Cada grupo de 4 jugadores tendra su propio set de materiales exclusivos con sobres sellados y objetos fisicos. ' +
       'Dificultad media-alta, recomendado para jugadores con experiencia en juegos de deduccion.',
     date: '2026-03-20',
     time: '18:00',
     endTime: '20:30',
     imageUrl: 'assets/images/events/escape-room.webp',
-    location: 'Sala VIP',
+    location: 'Giber Games Bar, Alcorcon',
     capacity: 8,
     currentAttendees: 6,
     waitlistCount: 2,
@@ -140,12 +142,12 @@ const SEED_EVENTS: GGBEvent[] = [
       'Participa en nuestra liga mensual de ajedrez con sistema suizo a 5 rondas y control de tiempo clasico. ' +
       'Abierta a todos los niveles, desde principiantes hasta jugadores de club experimentados. ' +
       'Se utilizaran tableros profesionales con reloj digital y se registraran las partidas para el ranking interno. ' +
-      'El ganador de la liga recibira una suscripcion premium a Chess.com y un trofeo conmemorativo.',
+      'El ganador de la liga recibira un premio especial y un trofeo conmemorativo.',
     date: '2026-03-22',
-    time: '10:00',
-    endTime: '15:00',
+    time: '12:00',
+    endTime: '17:00',
     imageUrl: 'assets/images/events/liga-ajedrez.webp',
-    location: 'Zona Tranquila',
+    location: 'Giber Games Bar, Alcorcon',
     capacity: 16,
     currentAttendees: 10,
     waitlistCount: 0,
@@ -161,12 +163,12 @@ const SEED_EVENTS: GGBEvent[] = [
       'Siempre quisiste jugar a D&D pero no sabias por donde empezar? Este taller es para ti. ' +
       'Aprenderemos las reglas basicas, crearemos personajes juntos y jugaremos una breve aventura introductoria. ' +
       'No necesitas traer nada, proporcionamos manuales, dados y hojas de personaje. ' +
-      'Al finalizar recibiras una guia impresa con recursos para seguir jugando por tu cuenta.',
+      'Al finalizar recibiras una guia con recursos para seguir jugando por tu cuenta.',
     date: '2026-03-28',
     time: '12:00',
     endTime: '16:00',
     imageUrl: 'assets/images/events/taller-dnd.webp',
-    location: 'Sala VIP',
+    location: 'Giber Games Bar, Alcorcon',
     capacity: 10,
     currentAttendees: 7,
     waitlistCount: 0,
@@ -179,15 +181,15 @@ const SEED_EVENTS: GGBEvent[] = [
     id: 9,
     title: 'Maraton de Juegos Cooperativos',
     description:
-      'Un dia entero dedicado a los mejores juegos cooperativos del momento: Pandemic Legacy, Gloomhaven y Spirit Island. ' +
+      'Un dia entero dedicado a los mejores juegos cooperativos de nuestra ludoteca: Pandemic Legacy, Gloomhaven y Spirit Island. ' +
       'Forma equipo con otros jugadores y enfrentaos a desafios que solo podreis superar trabajando juntos. ' +
       'Habra monitores en cada mesa para ensenar las reglas y resolver dudas durante la partida. ' +
       'Comida y bebida incluidas en la inscripcion para que no tengas que moverte de la mesa en todo el dia.',
     date: '2026-04-04',
-    time: '10:00',
-    endTime: '20:00',
+    time: '12:00',
+    endTime: '21:00',
     imageUrl: 'assets/images/events/maraton-coop.webp',
-    location: 'Sala Principal',
+    location: 'Giber Games Bar, Alcorcon',
     capacity: 24,
     currentAttendees: 15,
     waitlistCount: 0,
@@ -202,13 +204,13 @@ const SEED_EVENTS: GGBEvent[] = [
     description:
       'Pon a prueba tus conocimientos sobre videojuegos, comics, peliculas de ciencia ficcion, anime y juegos de mesa. ' +
       'Compite en equipos de 3 a 5 personas en 6 rondas tematicas con preguntas de dificultad creciente. ' +
-      'El equipo ganador se lleva un vale de 50 euros para gastar en nuestra tienda y bar. ' +
-      'Ambiente festivo garantizado con musica, decoracion tematica y cocteles especiales para la ocasion.',
+      'El equipo ganador se lleva un vale de 50 euros para gastar en Giber Games Bar. ' +
+      'Ambiente festivo garantizado con musica, decoracion tematica y bebidas especiales para la ocasion.',
     date: '2026-04-11',
     time: '20:00',
     endTime: '23:00',
     imageUrl: 'assets/images/events/trivial-friki.webp',
-    location: 'Sala Principal',
+    location: 'Giber Games Bar, Alcorcon',
     capacity: 40,
     currentAttendees: 22,
     waitlistCount: 0,
@@ -425,11 +427,18 @@ export class EventService {
   // ── Private helpers ──────────────────────────────────────
 
   private loadEvents(): GGBEvent[] {
+    const storedVersion = this.storage.load<number>(EVENTS_VERSION_KEY, 0);
+    if (storedVersion < CURRENT_SEED_VERSION) {
+      this.storage.save(EVENTS_KEY, SEED_EVENTS);
+      this.storage.save(EVENTS_VERSION_KEY, CURRENT_SEED_VERSION);
+      return [...SEED_EVENTS];
+    }
     const stored = this.storage.load<GGBEvent[] | null>(EVENTS_KEY, null);
     if (stored && stored.length > 0) {
       return stored;
     }
     this.storage.save(EVENTS_KEY, SEED_EVENTS);
+    this.storage.save(EVENTS_VERSION_KEY, CURRENT_SEED_VERSION);
     return [...SEED_EVENTS];
   }
 

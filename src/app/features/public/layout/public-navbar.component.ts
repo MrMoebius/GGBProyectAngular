@@ -17,8 +17,7 @@ import { NotificationService } from '../../../core/services/notification.service
       <div class="navbar-inner">
         <!-- Logo -->
         <a class="logo" routerLink="/public">
-          <span class="logo-giber">GIBER</span>
-          <span class="logo-bar">BAR</span>
+          <img class="logo-img" src="assets/GGBarPhotoSlide/GiberGamesBarLogo.webp" alt="Giber Games Bar" />
         </a>
 
         <!-- Center nav links (desktop) -->
@@ -154,13 +153,15 @@ import { NotificationService } from '../../../core/services/notification.service
       left: 0;
       right: 0;
       height: var(--public-nav-height);
-      background-color: transparent;
-      transition: background-color 0.35s ease, box-shadow 0.35s ease, backdrop-filter 0.35s ease;
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      transition: background 0.35s ease, box-shadow 0.35s ease, backdrop-filter 0.35s ease;
       z-index: 1000;
     }
 
     .navbar.scrolled {
-      background-color: var(--card-bg);
+      background: var(--card-bg);
       box-shadow: 0 2px 16px rgba(0, 0, 0, 0.15);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
@@ -186,21 +187,16 @@ import { NotificationService } from '../../../core/services/notification.service
       flex-shrink: 0;
     }
 
-    .logo-giber {
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: var(--text-white);
-      letter-spacing: 2px;
-      text-transform: uppercase;
+    .logo-img {
+      height: 42px;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 0 8px rgba(0, 255, 209, 0.3));
+      transition: filter 0.3s;
     }
 
-    .logo-bar {
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: var(--neon-cyan);
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px rgba(0, 255, 209, 0.4);
+    .logo:hover .logo-img {
+      filter: drop-shadow(0 0 14px rgba(0, 255, 209, 0.5));
     }
 
     /* ===== Desktop nav links ===== */

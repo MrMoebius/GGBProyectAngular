@@ -67,7 +67,7 @@ export class MockReservasService {
   }
 
   getAvailableSlots(date: string, mesaId: number): Observable<string[]> {
-    const allSlots = ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00'];
+    const allSlots = ['12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00'];
     const booked = this._reservas()
       .filter(r => r.fechaReserva === date && r.idMesa === mesaId && r.estado !== 'CANCELADA')
       .map(r => r.horaInicio);

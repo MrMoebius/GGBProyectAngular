@@ -21,7 +21,7 @@ import { JuegoExtended } from '../../../core/models/juego-extended.interface';
       <!-- Welcome -->
       <div class="welcome-section">
         <h1 class="welcome-title">Bienvenido, {{ userName() }}!</h1>
-        <p class="welcome-sub">Aqui tienes un resumen de tu actividad en Giber Bar</p>
+        <p class="welcome-sub">Aqui tienes un resumen de tu actividad en Giber Games Bar</p>
       </div>
 
       <!-- Stats cards -->

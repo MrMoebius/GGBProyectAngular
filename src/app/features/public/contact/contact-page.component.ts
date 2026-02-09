@@ -94,7 +94,7 @@ import { ToastService } from '../../../core/services/toast.service';
             </div>
             <div class="info-details">
               <h3 class="info-title">Direccion</h3>
-              <p class="info-text">Calle Ficticia 42, Madrid</p>
+              <p class="info-text">Av. Alcalde Jose Aranda 57, 28925 Alcorcon, Madrid</p>
             </div>
           </div>
 
@@ -105,7 +105,7 @@ import { ToastService } from '../../../core/services/toast.service';
             </div>
             <div class="info-details">
               <h3 class="info-title">Telefono</h3>
-              <p class="info-text">+34 912 345 678</p>
+              <p class="info-text">+34 614 449 475</p>
             </div>
           </div>
 
@@ -116,7 +116,7 @@ import { ToastService } from '../../../core/services/toast.service';
             </div>
             <div class="info-details">
               <h3 class="info-title">Email</h3>
-              <p class="info-text">info&#64;giberbar.es</p>
+              <p class="info-text">gibergamesbar&#64;gmail.com</p>
             </div>
           </div>
 
@@ -153,11 +153,19 @@ import { ToastService } from '../../../core/services/toast.service';
       </div>
     </section>
 
-    <!-- Map Placeholder -->
+    <!-- Map -->
     <section class="section map-section">
-      <div class="map-placeholder">
-        <i class="fa-solid fa-map-location-dot"></i>
-        <span>Mapa interactivo proximamente</span>
+      <div class="map-container">
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3040.5!2d-3.8308!3d40.3489!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd4188d6c9c9e8f1%3A0x0!2sAv.+del+Alcalde+Jos%C3%A9+Aranda%2C+57%2C+28925+Alcorc%C3%B3n%2C+Madrid!5e0!3m2!1ses!2ses!4v1700000000000!5m2!1ses!2ses"
+          width="100%"
+          height="350"
+          style="border:0; border-radius: var(--radius-lg);"
+          allowfullscreen=""
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          title="Ubicacion de Giber Games Bar"
+        ></iframe>
       </div>
     </section>
   `,
@@ -372,27 +380,15 @@ import { ToastService } from '../../../core/services/toast.service';
       margin: 0 auto;
     }
 
-    .map-placeholder {
-      background: linear-gradient(135deg, var(--hero-gradient-start), var(--hero-gradient-end));
-      border: 1px solid var(--card-border);
+    .map-container {
       border-radius: var(--radius-lg);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 1rem;
-      padding: 4rem 2rem;
-      color: var(--text-muted);
+      overflow: hidden;
+      border: 1px solid var(--card-border);
     }
 
-    .map-placeholder i {
-      font-size: 3rem;
-      opacity: 0.35;
-    }
-
-    .map-placeholder span {
-      font-size: 0.95rem;
-      opacity: 0.6;
+    .map-container iframe {
+      display: block;
+      width: 100%;
     }
 
     /* Responsive */
@@ -430,17 +426,18 @@ export class ContactPageComponent {
   ]);
 
   hours = signal([
-    { days: 'Lun - Jue', time: '16:00 - 00:00' },
-    { days: 'Vie', time: '16:00 - 02:00' },
-    { days: 'Sab', time: '12:00 - 02:00' },
-    { days: 'Dom', time: '12:00 - 22:00' }
+    { days: 'Lunes', time: 'Cerrado' },
+    { days: 'Mar - Jue', time: '17:00 - 23:00' },
+    { days: 'Viernes', time: '17:00 - 00:00' },
+    { days: 'Sabado', time: '12:00 - 00:00' },
+    { days: 'Domingo', time: '12:00 - 22:00' }
   ]);
 
   socials = signal([
-    { icon: 'fa-brands fa-instagram', url: '#', label: 'Instagram' },
-    { icon: 'fa-brands fa-twitter', url: '#', label: 'Twitter' },
-    { icon: 'fa-brands fa-discord', url: '#', label: 'Discord' },
-    { icon: 'fa-brands fa-tiktok', url: '#', label: 'TikTok' }
+    { icon: 'fa-brands fa-instagram', url: 'https://www.instagram.com/gibergamesbar/', label: 'Instagram Bar' },
+    { icon: 'fa-brands fa-instagram', url: 'https://www.instagram.com/gibergames/', label: 'Instagram Giber Games' },
+    { icon: 'fa-brands fa-x-twitter', url: 'https://x.com/giber_games', label: 'X (Twitter)' },
+    { icon: 'fa-brands fa-tiktok', url: 'https://www.tiktok.com/@gibergamesbar', label: 'TikTok' }
   ]);
 
   onSubmit(): void {

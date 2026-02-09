@@ -19,7 +19,7 @@ import { GGBNotification } from '../../../core/models/notification.interface';
               <span class="unread-badge">{{ notificationService.unreadCount() }}</span>
             }
           </h1>
-          <p class="page-subtitle">Mantente al dia con las novedades de Giber Bar</p>
+          <p class="page-subtitle">Mantente al dia con las novedades de Giber Games Bar</p>
         </div>
         @if (notificationService.unreadCount() > 0) {
           <button class="btn-mark-all" (click)="markAllRead()">

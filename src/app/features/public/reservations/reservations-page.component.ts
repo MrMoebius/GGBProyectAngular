@@ -26,7 +26,7 @@ interface ContactInfo {
           <i class="fa-solid fa-chair"></i>
           Reservar Mesa
         </h1>
-        <p class="wizard-subtitle">Giber Bar &mdash; Tu gaming bar favorito</p>
+        <p class="wizard-subtitle">Giber Games Bar &mdash; Av. Alcalde Jose Aranda 57, Alcorcon</p>
       </div>
 
       <!-- Progress Bar -->
@@ -454,7 +454,7 @@ interface ContactInfo {
                 <i class="fa-solid fa-circle-check"></i>
               </div>
               <h2 class="success-title">Reserva Confirmada!</h2>
-              <p class="success-subtitle">Tu mesa te espera en Giber Bar</p>
+              <p class="success-subtitle">Tu mesa te espera en Giber Games Bar</p>
 
               <div class="confirmation-card">
                 <div class="confirmation-id">
@@ -1438,8 +1438,8 @@ export class ReservationsPageComponent {
 
   // All time slots
   readonly allTimeSlots = [
-    '10:00', '11:00', '12:00', '13:00', '14:00', '15:00',
-    '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00'
+    '12:00', '13:00', '14:00', '15:00', '16:00',
+    '17:00', '18:00', '19:00', '20:00', '21:00', '22:00'
   ];
 
   // Step 1 signals

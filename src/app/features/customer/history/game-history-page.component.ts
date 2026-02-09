@@ -14,7 +14,7 @@ import { GameSession } from '../../../core/models/game-session.interface';
           <i class="fa-solid fa-clock-rotate-left"></i>
           Historial de Juegos
         </h1>
-        <p class="page-subtitle">Tu registro completo de partidas en Giber Bar</p>
+        <p class="page-subtitle">Tu registro completo de partidas en Giber Games Bar</p>
       </div>
 
       <!-- Stats summary -->
@@ -54,7 +54,7 @@ import { GameSession } from '../../../core/models/game-session.interface';
         <div class="empty-state">
           <div class="empty-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
           <h2 class="empty-title">Sin partidas registradas</h2>
-          <p class="empty-text">Cuando juegues en Giber Bar, tus partidas apareceran aqui.</p>
+          <p class="empty-text">Cuando juegues en Giber Games Bar, tus partidas apareceran aqui.</p>
         </div>
       } @else {
         <div class="sessions-table">

@@ -8,11 +8,14 @@ import { RouterModule } from '@angular/router';
   template: `
     <!-- Hero Section -->
     <section class="about-hero">
+      <img class="hero-bg-img" src="assets/GGBarPhotoSlide/GiberGamesBarSlide05.webp" alt="" />
+      <div class="hero-overlay"></div>
       <div class="hero-content">
-        <h1 class="hero-title">Sobre Giber Bar</h1>
+        <img class="hero-logo" src="assets/GGBarPhotoSlide/GiberGamesBarLogo.webp" alt="Giber Games Bar" />
+        <h1 class="hero-title">Sobre Giber Games Bar</h1>
         <p class="hero-subtitle">
-          Mas que un bar, somos un espacio donde la comunidad gamer y los amantes
-          de los juegos de mesa se reunen para compartir experiencias inolvidables.
+          Cerveza, refrescos, comida rica y una amplia ludoteca.
+          Tu bar de juegos de mesa en Alcorcon.
         </p>
       </div>
     </section>
@@ -23,34 +26,37 @@ import { RouterModule } from '@angular/router';
         <div class="story-text">
           <h2 class="section-title">Nuestra Historia</h2>
           <p class="story-paragraph">
-            Giber Bar nacio en 2023 de una idea simple pero poderosa: crear un lugar donde
-            las personas pudieran desconectar de la rutina y reconectar entre si a traves del juego.
+            Giber Games Bar nacio en 2025 de la pasion de su fundador por los juegos de mesa
+            y de una idea clara: crear un espacio en Alcorcon donde las personas pudieran
+            desconectar de la rutina, sentarse a una mesa y disfrutar de una buena partida
+            acompanados de cerveza, refrescos y comida casera.
           </p>
           <p class="story-paragraph">
-            Nuestros fundadores, apasionados por los juegos de mesa desde la infancia, soñaban
-            con un espacio acogedor donde cualquier persona, sin importar su experiencia, pudiera
-            sentarse a una mesa y descubrir la magia de jugar en compañia.
+            Inaugurado en abril de 2025 en la Avenida Alcalde Jose Aranda 57, el bar
+            rapidamente se convirtio en el punto de encuentro favorito de la comunidad
+            ludica del sur de Madrid. Un lugar acogedor donde cualquier persona, sin
+            importar su experiencia, puede descubrir la magia de jugar en compania.
           </p>
           <p class="story-paragraph">
-            Lo que empezo como un pequeño local con apenas 30 juegos ha crecido hasta convertirse
-            en el punto de encuentro favorito de la comunidad ludica de Madrid. Hoy contamos con
-            una coleccion de mas de 200 juegos, un equipo apasionado y una comunidad vibrante
-            que no para de crecer.
+            Hoy contamos con una coleccion de mas de 330 juegos de mesa de todos los
+            generos: desde party games rapidos hasta eurogames de estrategia, pasando por
+            cooperativos, juegos de rol, juegos infantiles y mucho mas. Y seguimos creciendo
+            cada semana.
           </p>
         </div>
-        <div class="story-image-placeholder">
-          <i class="fa-solid fa-store"></i>
-          <span>Foto del local</span>
+        <div class="story-image">
+          <img src="assets/GGBarPhotoSlide/GiberGamesBarSlide01.webp" alt="Interior de Giber Games Bar" />
         </div>
       </div>
     </section>
 
     <!-- Numbers Section -->
     <section class="section numbers-section">
-      <h2 class="section-title">Giber Bar en numeros</h2>
+      <h2 class="section-title">Giber Games Bar en numeros</h2>
       <div class="numbers-grid">
         @for (stat of stats(); track stat.label) {
           <div class="stat-card">
+            <i [class]="stat.icon"></i>
             <span class="stat-number">{{ stat.value }}</span>
             <span class="stat-label">{{ stat.label }}</span>
           </div>
@@ -60,8 +66,8 @@ import { RouterModule } from '@angular/router';
 
     <!-- Our Values Section -->
     <section class="section values-section">
-      <h2 class="section-title">Nuestros Valores</h2>
-      <p class="section-subtitle">Lo que nos mueve cada dia</p>
+      <h2 class="section-title">Que nos hace diferentes</h2>
+      <p class="section-subtitle">Mas que un bar, un espacio para compartir</p>
       <div class="values-grid">
         @for (value of values(); track value.title) {
           <div class="card value-card">
@@ -75,35 +81,50 @@ import { RouterModule } from '@angular/router';
       </div>
     </section>
 
-    <!-- Photo Gallery Placeholder -->
+    <!-- Photo Gallery -->
     <section class="section gallery-section">
       <h2 class="section-title">Nuestro Espacio</h2>
-      <p class="section-subtitle">Un vistazo a Giber Bar</p>
+      <p class="section-subtitle">Un vistazo a Giber Games Bar</p>
       <div class="gallery-grid">
-        @for (photo of galleryPhotos(); track photo.label) {
+        @for (photo of galleryPhotos; track photo) {
           <div class="gallery-item">
-            <i [class]="photo.icon"></i>
-            <span>{{ photo.label }}</span>
+            <img [src]="photo" alt="Giber Games Bar" loading="lazy" />
           </div>
         }
       </div>
     </section>
 
-    <!-- Team Section -->
-    <section class="section team-section">
-      <h2 class="section-title">Nuestro Equipo</h2>
-      <p class="section-subtitle">Las personas detras de Giber Bar</p>
-      <div class="team-grid">
-        @for (member of team(); track member.name) {
-          <div class="card team-card">
-            <div class="team-avatar">
-              <i class="fa-solid fa-user"></i>
-            </div>
-            <h3 class="team-name">{{ member.name }}</h3>
-            <span class="team-role">{{ member.role }}</span>
-            <p class="team-bio">{{ member.bio }}</p>
+    <!-- What We Offer Section -->
+    <section class="section offer-section">
+      <h2 class="section-title">Que ofrecemos</h2>
+      <div class="offer-grid">
+        @for (item of offerings(); track item.title) {
+          <div class="card offer-card">
+            <i [class]="item.icon"></i>
+            <h3 class="offer-title">{{ item.title }}</h3>
+            <p class="offer-desc">{{ item.description }}</p>
           </div>
         }
+      </div>
+    </section>
+
+    <!-- Social Section -->
+    <section class="section social-section">
+      <h2 class="section-title">Siguenos en redes</h2>
+      <p class="section-subtitle">Enterate de novedades, eventos y recomendaciones</p>
+      <div class="social-grid">
+        <a href="https://www.instagram.com/gibergamesbar/" target="_blank" rel="noopener" class="social-card">
+          <i class="fa-brands fa-instagram"></i>
+          <span class="social-handle">&#64;gibergamesbar</span>
+        </a>
+        <a href="https://www.instagram.com/gibergames/" target="_blank" rel="noopener" class="social-card">
+          <i class="fa-brands fa-instagram"></i>
+          <span class="social-handle">&#64;gibergames</span>
+        </a>
+        <a href="https://x.com/giber_games" target="_blank" rel="noopener" class="social-card">
+          <i class="fa-brands fa-x-twitter"></i>
+          <span class="social-handle">&#64;giber_games</span>
+        </a>
       </div>
     </section>
 
@@ -111,37 +132,55 @@ import { RouterModule } from '@angular/router';
     <section class="cta-section">
       <div class="cta-content">
         <h2 class="cta-title">Ven a conocernos</h2>
-        <p class="cta-address">
-          <i class="fa-solid fa-location-dot"></i>
-          Calle Ficticia 42, Madrid
-        </p>
-        <a routerLink="/public/reservas" class="btn btn-primary cta-button">
-          <i class="fa-solid fa-calendar-check"></i>
-          Reservar Mesa
-        </a>
+        <div class="cta-info">
+          <p class="cta-address">
+            <i class="fa-solid fa-location-dot"></i>
+            Av. Alcalde Jose Aranda 57, 28925 Alcorcon, Madrid
+          </p>
+        </div>
+        <div class="cta-actions">
+          <a routerLink="/public/reservas" class="btn btn-primary cta-button">
+            <i class="fa-solid fa-calendar-check"></i>
+            Reservar Mesa
+          </a>
+          <a routerLink="/public/contacto" class="btn btn-outline cta-button">
+            <i class="fa-solid fa-envelope"></i>
+            Contactar
+          </a>
+        </div>
       </div>
     </section>
   `,
   styles: [`
     /* Hero Section */
     .about-hero {
-      background: linear-gradient(135deg, var(--hero-gradient-start), var(--hero-gradient-end));
-      padding: 5rem 2rem;
-      text-align: center;
       position: relative;
+      padding: 6rem 2rem 5rem;
+      text-align: center;
       overflow: hidden;
+      min-height: 340px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    .about-hero::before {
-      content: '';
+    .hero-bg-img {
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: radial-gradient(circle at 30% 50%, rgba(255, 107, 107, 0.1) 0%, transparent 60%),
-                  radial-gradient(circle at 70% 50%, rgba(0, 212, 255, 0.08) 0%, transparent 60%);
-      pointer-events: none;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        to bottom,
+        rgba(15, 23, 42, 0.7) 0%,
+        rgba(15, 23, 42, 0.8) 60%,
+        rgba(15, 23, 42, 0.95) 100%
+      );
     }
 
     .hero-content {
@@ -151,16 +190,23 @@ import { RouterModule } from '@angular/router';
       z-index: 1;
     }
 
+    .hero-logo {
+      height: 180px;
+      width: auto;
+      margin-bottom: 1.5rem;
+      filter: drop-shadow(0 0 12px rgba(0, 255, 209, 0.4));
+    }
+
     .hero-title {
       font-size: 2.75rem;
       font-weight: 800;
-      color: var(--text-white);
+      color: #FFFFFF;
       margin: 0 0 1rem 0;
     }
 
     .hero-subtitle {
       font-size: 1.15rem;
-      color: var(--text-muted);
+      color: #94A3B8;
       line-height: 1.7;
       margin: 0;
     }
@@ -191,27 +237,18 @@ import { RouterModule } from '@angular/router';
       font-size: 0.95rem;
     }
 
-    .story-image-placeholder {
-      background: linear-gradient(135deg, var(--hero-gradient-start), var(--hero-gradient-end));
-      border: 1px solid var(--card-border);
+    .story-image {
       border-radius: var(--radius-lg);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 1rem;
+      overflow: hidden;
+      border: 1px solid var(--card-border);
+    }
+
+    .story-image img {
+      width: 100%;
+      height: 100%;
       min-height: 320px;
-      color: var(--text-muted);
-    }
-
-    .story-image-placeholder i {
-      font-size: 3rem;
-      opacity: 0.4;
-    }
-
-    .story-image-placeholder span {
-      font-size: 0.85rem;
-      opacity: 0.5;
+      object-fit: cover;
+      display: block;
     }
 
     /* Numbers Section */
@@ -240,6 +277,7 @@ import { RouterModule } from '@angular/router';
       padding: 2rem 1rem;
       display: flex;
       flex-direction: column;
+      align-items: center;
       gap: 0.5rem;
       transition: transform 0.3s ease, border-color 0.3s ease;
     }
@@ -247,6 +285,12 @@ import { RouterModule } from '@angular/router';
     .stat-card:hover {
       transform: translateY(-4px);
       border-color: var(--primary-coral);
+    }
+
+    .stat-card > i {
+      font-size: 1.5rem;
+      color: var(--neon-cyan);
+      margin-bottom: 0.25rem;
     }
 
     .stat-number {
@@ -343,109 +387,128 @@ import { RouterModule } from '@angular/router';
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 1rem;
-      max-width: 1000px;
+      max-width: 1100px;
       margin: 0 auto;
     }
 
     .gallery-item {
-      background: linear-gradient(135deg, var(--hero-gradient-start), var(--hero-gradient-end));
-      border: 1px solid var(--card-border);
       border-radius: var(--radius-md);
+      overflow: hidden;
       aspect-ratio: 4 / 3;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 0.75rem;
-      color: var(--text-muted);
-      transition: border-color 0.3s ease;
+      border: 1px solid var(--card-border);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
     .gallery-item:hover {
-      border-color: var(--neon-purple);
+      transform: scale(1.03);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
     }
 
-    .gallery-item i {
-      font-size: 2rem;
-      opacity: 0.35;
+    .gallery-item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
     }
 
-    .gallery-item span {
-      font-size: 0.8rem;
-      opacity: 0.5;
-    }
-
-    /* Team Section */
-    .team-section {
+    /* Offer Section */
+    .offer-section {
       padding: 4rem 2rem;
       max-width: 1100px;
       margin: 0 auto;
       text-align: center;
     }
 
-    .team-section .section-title {
-      margin-bottom: 0.5rem;
-    }
-
-    .team-section .section-subtitle {
+    .offer-section .section-title {
       margin-bottom: 2.5rem;
     }
 
-    .team-grid {
+    .offer-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1.5rem;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.25rem;
     }
 
-    .team-card {
-      padding: 2rem 1.5rem;
+    .offer-card {
+      padding: 2rem 1.25rem;
       text-align: center;
       transition: transform 0.3s ease, border-color 0.3s ease;
     }
 
-    .team-card:hover {
+    .offer-card:hover {
       transform: translateY(-4px);
-      border-color: var(--primary-coral);
+      border-color: var(--neon-cyan);
     }
 
-    .team-avatar {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, var(--hero-gradient-start), var(--hero-gradient-end));
-      border: 2px solid var(--card-border);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 1.25rem auto;
-    }
-
-    .team-avatar i {
+    .offer-card > i {
       font-size: 2rem;
-      color: var(--text-muted);
-      opacity: 0.6;
+      color: var(--neon-cyan);
+      margin-bottom: 1rem;
     }
 
-    .team-name {
-      font-size: 1.1rem;
+    .offer-title {
+      font-size: 1.05rem;
       font-weight: 700;
       color: var(--text-main);
-      margin: 0 0 0.25rem 0;
+      margin: 0 0 0.5rem 0;
     }
 
-    .team-role {
+    .offer-desc {
       font-size: 0.85rem;
-      color: var(--primary-coral);
-      font-weight: 600;
-      display: block;
-      margin-bottom: 0.75rem;
-    }
-
-    .team-bio {
-      font-size: 0.88rem;
       color: var(--text-muted);
       line-height: 1.6;
       margin: 0;
+    }
+
+    /* Social Section */
+    .social-section {
+      padding: 4rem 2rem;
+      background: var(--secondary-bg);
+      text-align: center;
+    }
+
+    .social-section .section-title {
+      margin-bottom: 0.5rem;
+    }
+
+    .social-section .section-subtitle {
+      margin-bottom: 2rem;
+    }
+
+    .social-grid {
+      display: flex;
+      gap: 1.25rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .social-card {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 1.75rem;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-md);
+      text-decoration: none;
+      transition: transform 0.2s, border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .social-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--neon-pink);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .social-card i {
+      font-size: 1.5rem;
+      color: var(--neon-pink);
+    }
+
+    .social-handle {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-main);
     }
 
     /* CTA Section */
@@ -459,10 +522,7 @@ import { RouterModule } from '@angular/router';
     .cta-section::before {
       content: '';
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
+      inset: 0;
       background: radial-gradient(circle at 50% 50%, rgba(255, 107, 107, 0.08) 0%, transparent 60%);
       pointer-events: none;
     }
@@ -475,14 +535,18 @@ import { RouterModule } from '@angular/router';
     .cta-title {
       font-size: 2rem;
       font-weight: 800;
-      color: var(--text-white);
-      margin: 0 0 1rem 0;
+      color: #FFFFFF;
+      margin: 0 0 1.25rem 0;
+    }
+
+    .cta-info {
+      margin-bottom: 2rem;
     }
 
     .cta-address {
       font-size: 1.05rem;
-      color: var(--text-muted);
-      margin: 0 0 2rem 0;
+      color: #94A3B8;
+      margin: 0;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -491,6 +555,13 @@ import { RouterModule } from '@angular/router';
 
     .cta-address i {
       color: var(--primary-coral);
+    }
+
+    .cta-actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
     }
 
     .cta-button {
@@ -502,10 +573,25 @@ import { RouterModule } from '@angular/router';
       text-decoration: none;
     }
 
+    .cta-actions .btn-outline {
+      color: #FFFFFF;
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    .cta-actions .btn-outline:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.6);
+      color: #FFFFFF;
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
       .hero-title {
         font-size: 2rem;
+      }
+
+      .hero-logo {
+        height: 56px;
       }
 
       .story-grid {
@@ -521,9 +607,12 @@ import { RouterModule } from '@angular/router';
         grid-template-columns: repeat(2, 1fr);
       }
 
-      .values-grid,
-      .team-grid {
+      .values-grid {
         grid-template-columns: 1fr;
+      }
+
+      .offer-grid {
+        grid-template-columns: repeat(2, 1fr);
       }
 
       .gallery-grid {
@@ -532,7 +621,8 @@ import { RouterModule } from '@angular/router';
     }
 
     @media (max-width: 480px) {
-      .numbers-grid {
+      .numbers-grid,
+      .offer-grid {
         grid-template-columns: 1fr;
       }
 
@@ -548,10 +638,10 @@ import { RouterModule } from '@angular/router';
 })
 export class AboutPageComponent {
   stats = signal([
-    { value: '+200', label: 'Juegos de mesa' },
-    { value: '+5000', label: 'Visitantes mensuales' },
-    { value: '+50', label: 'Eventos al mes' },
-    { value: '3', label: 'Anos de historia' }
+    { icon: 'fa-solid fa-dice-d20', value: '330+', label: 'Juegos de mesa' },
+    { icon: 'fa-solid fa-tags', value: '18', label: 'Generos diferentes' },
+    { icon: 'fa-solid fa-calendar-days', value: '2025', label: 'Año de apertura' },
+    { icon: 'fa-solid fa-location-dot', value: 'Alcorcon', label: 'Madrid Sur' }
   ]);
 
   values = signal([
@@ -562,40 +652,48 @@ export class AboutPageComponent {
     },
     {
       icon: 'fa-solid fa-dice',
-      title: 'Diversidad Ludica',
-      description: 'Desde party games hasta eurogames de estrategia, nuestra coleccion abarca todos los estilos para que cada persona encuentre su juego ideal.'
+      title: 'Ludoteca para todos',
+      description: 'Desde party games hasta eurogames de estrategia, nuestra coleccion de mas de 330 juegos abarca todos los estilos. Siempre hay un juego perfecto para ti.'
     },
     {
-      icon: 'fa-solid fa-star',
-      title: 'Experiencia',
-      description: 'Cada visita debe ser especial. Nos esforzamos por ofrecer un ambiente unico, con atencion personalizada y recomendaciones a medida.'
+      icon: 'fa-solid fa-utensils',
+      title: 'Comida y bebida',
+      description: 'Cerveza, refrescos y comida rica para acompanar tus partidas. Porque una buena partida se disfruta mejor con algo en la mesa.'
     }
   ]);
 
-  galleryPhotos = signal([
-    { icon: 'fa-solid fa-couch', label: 'Zona de juegos' },
-    { icon: 'fa-solid fa-utensils', label: 'Barra y cocina' },
-    { icon: 'fa-solid fa-chess-board', label: 'Mesa de estrategia' },
-    { icon: 'fa-solid fa-people-group', label: 'Evento comunitario' },
-    { icon: 'fa-solid fa-gamepad', label: 'Rincon gamer' },
-    { icon: 'fa-solid fa-champagne-glasses', label: 'Celebraciones' }
-  ]);
+  readonly galleryPhotos = [
+    'assets/GGBarPhotoSlide/GiberGamesBarSlide02.webp',
+    'assets/GGBarPhotoSlide/GiberGamesBarSlide03.webp',
+    'assets/GGBarPhotoSlide/GiberGamesBarSlide06.webp',
+    'assets/GGBarPhotoSlide/GiberGamesBarSlide08.webp',
+    'assets/GGBarPhotoSlide/GiberGamesBarSlide11.webp',
+    'assets/GGBarPhotoSlide/GiberGamesBarSlide13.webp',
+    'assets/GGBarPhotoSlide/GiberGamesBarSlide17.webp',
+    'assets/GGBarPhotoSlide/GiberGamesBarSlide19.webp',
+    'assets/GGBarPhotoSlide/GiberGamesBarSlide20.webp',
+  ];
 
-  team = signal([
+  offerings = signal([
     {
-      name: 'Carlos Martinez',
-      role: 'Fundador & Director',
-      bio: 'Apasionado de los juegos de mesa desde los 8 anos. Soño con crear un espacio donde todos pudieran compartir su amor por lo ludico.'
+      icon: 'fa-solid fa-chess-board',
+      title: 'Ludoteca',
+      description: 'Mas de 330 juegos de mesa disponibles para jugar. Te ayudamos a elegir el perfecto para tu grupo.'
     },
     {
-      name: 'Laura Gomez',
-      role: 'Coordinadora de Eventos',
-      bio: 'Experta en crear experiencias memorables. Organiza mas de 50 eventos mensuales entre torneos, noches tematicas y talleres.'
+      icon: 'fa-solid fa-beer-mug-empty',
+      title: 'Bar',
+      description: 'Cervezas, refrescos, cafes y una variada seleccion de bebidas para acompanar tus partidas.'
     },
     {
-      name: 'Miguel Torres',
-      role: 'Game Master & Barista',
-      bio: 'Conoce cada juego de la coleccion al detalle. Si no sabes que jugar, el siempre tiene la recomendacion perfecta para tu grupo.'
+      icon: 'fa-solid fa-burger',
+      title: 'Cocina',
+      description: 'Comida casera y rica pensada para comer mientras juegas. Bocados perfectos entre turno y turno.'
+    },
+    {
+      icon: 'fa-solid fa-trophy',
+      title: 'Eventos',
+      description: 'Torneos, noches tematicas, talleres y eventos especiales. Siempre hay algo nuevo que descubrir.'
     }
   ]);
 }

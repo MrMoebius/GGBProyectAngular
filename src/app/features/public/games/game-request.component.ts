@@ -31,7 +31,7 @@ const SEED_SUGGESTIONS: GameSuggestion[] = [
       <div class="page-header">
         <div>
           <h1 class="section-title">Sugiere un Juego</h1>
-          <p class="section-subtitle">Que juego te gustaria encontrar en Giber Bar? Sugierelo y vota por los de otros!</p>
+          <p class="section-subtitle">Que juego te gustaria encontrar en Giber Games Bar? Sugierelo y vota por los de otros!</p>
         </div>
         <a routerLink="/public/juegos" class="btn btn-ghost">
           <i class="fa-solid fa-arrow-left"></i> Volver al catalogo
@@ -55,7 +55,7 @@ const SEED_SUGGESTIONS: GameSuggestion[] = [
           <textarea
             class="form-input"
             rows="3"
-            placeholder="Cuentanos por que este juego seria genial para Giber Bar..."
+            placeholder="Cuentanos por que este juego seria genial para Giber Games Bar..."
             [(ngModel)]="newReason"
           ></textarea>
         </div>
