@@ -94,6 +94,78 @@ interface CategoryTab {
       }
     </section>
 
+    <!-- Customizer Modal -->
+    @if (customizingProduct()) {
+      <div class="customizer-overlay" (click)="closeCustomizer()">
+        <div class="customizer-modal" (click)="$event.stopPropagation()">
+          <div class="customizer-header">
+            <div>
+              <h2 class="customizer-title">{{ customizingProduct()!.nombre }}</h2>
+              <span class="customizer-base-price">Base: {{ customizingProduct()!.precio.toFixed(2) }} EUR</span>
+            </div>
+            <button class="customizer-close" (click)="closeCustomizer()">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
+
+          <div class="customizer-body">
+            <div class="customizer-section">
+              <h3 class="section-label">
+                <i class="fa-solid fa-list-check"></i>
+                Ingredientes
+              </h3>
+              <p class="section-hint">Desmarca los que no quieras</p>
+              <ul class="ingredient-list">
+                @for (ing of currentIngredients(); track ing) {
+                  <li class="ingredient-item" [class.removed]="!ingredientStates()[ing]">
+                    <label class="check-label">
+                      <input
+                        type="checkbox"
+                        [checked]="ingredientStates()[ing]"
+                        (change)="toggleIngredient(ing)" />
+                      <span class="check-custom"></span>
+                      <span class="check-text">{{ ing }}</span>
+                    </label>
+                  </li>
+                }
+              </ul>
+            </div>
+
+            <div class="customizer-section">
+              <h3 class="section-label">
+                <i class="fa-solid fa-plus-circle"></i>
+                Extras
+              </h3>
+              <p class="section-hint">Anade extras a tu hamburguesa</p>
+              <ul class="extras-list">
+                @for (extra of extras(); track extra.id) {
+                  <li class="extra-item" [class.selected]="extraStates()[extra.id]">
+                    <label class="check-label">
+                      <input
+                        type="checkbox"
+                        [checked]="extraStates()[extra.id]"
+                        (change)="toggleExtra(extra.id)" />
+                      <span class="check-custom"></span>
+                      <span class="check-text">{{ extra.nombre.replace('Extra ', '') }}</span>
+                    </label>
+                    <span class="extra-price">+{{ extra.precio.toFixed(2) }} EUR</span>
+                  </li>
+                }
+              </ul>
+            </div>
+          </div>
+
+          <div class="customizer-footer">
+            <span class="customizer-total">Total: {{ customizedPrice().toFixed(2) }} EUR</span>
+            <button class="btn-confirm" (click)="confirmCustomized()">
+              <i class="fa-solid fa-cart-plus"></i>
+              Anadir al pedido
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
     <!-- Floating Cart Bar -->
     @if (cartService.itemCount() > 0) {
       <div class="floating-cart">
@@ -485,6 +557,231 @@ interface CategoryTab {
       background: rgba(255, 255, 255, 0.2);
     }
 
+    /* === Customizer Modal === */
+    .customizer-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 2000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .customizer-modal {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg, 1rem);
+      width: 100%;
+      max-width: 480px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: scaleIn 0.2s ease-out;
+    }
+
+    @keyframes scaleIn {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .customizer-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--card-border);
+    }
+
+    .customizer-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin-bottom: 0.25rem;
+    }
+
+    .customizer-base-price {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .customizer-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.25rem;
+      cursor: pointer;
+      padding: 0.25rem;
+      transition: color 0.2s;
+    }
+
+    .customizer-close:hover {
+      color: var(--text-main);
+    }
+
+    .customizer-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 1rem 1.5rem;
+    }
+
+    .customizer-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .customizer-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .section-label {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .section-label i {
+      color: var(--primary-coral);
+      font-size: 0.9rem;
+    }
+
+    .section-hint {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .ingredient-list,
+    .extras-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .ingredient-item,
+    .extra-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.6rem 0.75rem;
+      border-radius: var(--radius-md, 0.5rem);
+      background: var(--secondary-bg, #F3F4F6);
+      transition: background 0.2s, opacity 0.2s;
+    }
+
+    .ingredient-item.removed {
+      opacity: 0.5;
+    }
+
+    .ingredient-item.removed .check-text {
+      text-decoration: line-through;
+    }
+
+    .extra-item.selected {
+      background: rgba(239, 68, 68, 0.08);
+    }
+
+    .check-label {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      cursor: pointer;
+      flex: 1;
+    }
+
+    .check-label input[type="checkbox"] {
+      display: none;
+    }
+
+    .check-custom {
+      width: 20px;
+      height: 20px;
+      min-width: 20px;
+      border: 2px solid var(--text-muted);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .check-label input:checked + .check-custom {
+      background: var(--primary-coral);
+      border-color: var(--primary-coral);
+    }
+
+    .check-label input:checked + .check-custom::after {
+      content: '';
+      width: 6px;
+      height: 10px;
+      border: solid #fff;
+      border-width: 0 2px 2px 0;
+      transform: rotate(45deg);
+      margin-top: -2px;
+    }
+
+    .check-text {
+      font-size: 0.9rem;
+      color: var(--text-main);
+      text-transform: capitalize;
+    }
+
+    .extra-price {
+      font-size: 0.825rem;
+      font-weight: 600;
+      color: var(--primary-coral);
+      white-space: nowrap;
+    }
+
+    .customizer-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--card-border);
+      background: var(--card-bg);
+    }
+
+    .customizer-total {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .btn-confirm {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1.25rem;
+      border-radius: var(--radius-md, 0.5rem);
+      font-size: 0.875rem;
+      font-weight: 600;
+      background: var(--primary-coral);
+      color: var(--text-white, #FFFFFF);
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-family: inherit;
+    }
+
+    .btn-confirm:hover {
+      background: var(--primary-hover);
+    }
+
     /* === Responsive === */
     @media (max-width: 768px) {
       .menu-title {
@@ -540,6 +837,10 @@ export class MenuPageComponent implements OnInit {
   readonly searchTerm = signal('');
   readonly allProducts = signal<Producto[]>([]);
 
+  readonly customizingProduct = signal<Producto | null>(null);
+  readonly ingredientStates = signal<Record<string, boolean>>({});
+  readonly extraStates = signal<Record<number, boolean>>({});
+
   readonly categoryTabs: CategoryTab[] = [
     { key: 'TODOS',    label: 'Todos',    icon: '' },
     { key: 'COMIDA',   label: 'Comida',   icon: 'fa-burger' },
@@ -549,8 +850,29 @@ export class MenuPageComponent implements OnInit {
     { key: 'SERVICIO', label: 'Servicio', icon: 'fa-concierge-bell' },
   ];
 
+  readonly extras = computed(() =>
+    this.allProducts().filter(p => p.activo && p.nombre.toLowerCase().startsWith('extra '))
+  );
+
+  readonly currentIngredients = computed(() => {
+    const product = this.customizingProduct();
+    if (!product?.descripcion) return [];
+    return product.descripcion.split(',').map(s => s.trim()).filter(s => s.length > 0);
+  });
+
+  readonly customizedPrice = computed(() => {
+    const product = this.customizingProduct();
+    if (!product) return 0;
+    const extrasTotal = this.extras()
+      .filter(e => this.extraStates()[e.id])
+      .reduce((sum, e) => sum + e.precio, 0);
+    return product.precio + extrasTotal;
+  });
+
   readonly filteredProducts = computed(() => {
-    let products = this.allProducts().filter(p => p.activo);
+    let products = this.allProducts().filter(p =>
+      p.activo && !p.nombre.toLowerCase().startsWith('extra ')
+    );
 
     const category = this.selectedCategory();
     if (category !== 'TODOS') {
@@ -586,7 +908,58 @@ export class MenuPageComponent implements OnInit {
     return this.categoryIconMap[categoria] || 'fa-utensils';
   }
 
+  isCustomizable(product: Producto): boolean {
+    return product.categoria === 'COMIDA'
+      && !!product.descripcion
+      && product.descripcion.includes(',')
+      && product.precio >= 10;
+  }
+
   addToCart(product: Producto): void {
-    this.cartService.addToCart(product);
+    if (this.isCustomizable(product)) {
+      this.openCustomizer(product);
+    } else {
+      this.cartService.addToCart(product);
+    }
+  }
+
+  openCustomizer(product: Producto): void {
+    this.customizingProduct.set(product);
+    const ingredients = product.descripcion!.split(',').map(s => s.trim()).filter(s => s.length > 0);
+    const ingStates: Record<string, boolean> = {};
+    ingredients.forEach(ing => ingStates[ing] = true);
+    this.ingredientStates.set(ingStates);
+    const extStates: Record<number, boolean> = {};
+    this.extras().forEach(e => extStates[e.id] = false);
+    this.extraStates.set(extStates);
+  }
+
+  closeCustomizer(): void {
+    this.customizingProduct.set(null);
+  }
+
+  toggleIngredient(ingredient: string): void {
+    this.ingredientStates.update(states => ({
+      ...states,
+      [ingredient]: !states[ingredient]
+    }));
+  }
+
+  toggleExtra(extraId: number): void {
+    this.extraStates.update(states => ({
+      ...states,
+      [extraId]: !states[extraId]
+    }));
+  }
+
+  confirmCustomized(): void {
+    const product = this.customizingProduct();
+    if (!product) return;
+    const removed = Object.entries(this.ingredientStates())
+      .filter(([_, included]) => !included)
+      .map(([name]) => name);
+    const selectedExtras = this.extras().filter(e => this.extraStates()[e.id]);
+    this.cartService.addCustomizedToCart(product, removed, selectedExtras);
+    this.closeCustomizer();
   }
 }

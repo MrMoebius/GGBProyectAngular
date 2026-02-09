@@ -233,11 +233,17 @@ export class EventService {
 
   // ── Queries ──────────────────────────────────────────────
 
+  private refreshFromStorage(): void {
+    this._events.set(this.loadEvents());
+  }
+
   getAll(): Observable<GGBEvent[]> {
+    this.refreshFromStorage();
     return of(this._events());
   }
 
   getUpcoming(limit?: number): Observable<GGBEvent[]> {
+    this.refreshFromStorage();
     const upcoming = this._events()
       .filter(e => e.status === 'PROXIMO')
       .sort((a, b) => {
@@ -248,6 +254,7 @@ export class EventService {
   }
 
   getById(id: number): Observable<GGBEvent | undefined> {
+    this.refreshFromStorage();
     return of(this._events().find(e => e.id === id));
   }
 

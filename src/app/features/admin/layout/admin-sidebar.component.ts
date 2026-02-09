@@ -39,6 +39,14 @@ interface NavItem {
         </ul>
       </nav>
 
+      <!-- External link -->
+      <div class="sidebar-external">
+        <a routerLink="/public" class="nav-link external-link" [title]="collapsed ? 'Ver Web' : ''">
+          <i class="fa-solid fa-arrow-up-right-from-square nav-icon"></i>
+          <span class="nav-label" *ngIf="!collapsed">Ver Web</span>
+        </a>
+      </div>
+
       <!-- Collapse toggle -->
       <div class="sidebar-footer">
         <button class="collapse-btn" (click)="toggleCollapse.emit()">
@@ -194,6 +202,26 @@ interface NavItem {
 
     .sidebar.collapsed .logo-link {
       justify-content: center;
+    }
+
+    /* External link */
+    .sidebar-external {
+      padding: 0.5rem 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      flex-shrink: 0;
+    }
+
+    .external-link {
+      opacity: 0.7;
+    }
+
+    .external-link:hover {
+      opacity: 1;
+    }
+
+    .sidebar.collapsed .sidebar-external .nav-link {
+      justify-content: center;
+      padding: 0.7rem 0;
     }
 
     /* Footer / collapse toggle */
