@@ -2,7 +2,7 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { MockJuegosService } from '../../../core/services/mock-juegos.service';
+import { JuegoService } from '../../../core/services/juego.service';
 import { FavoritesService } from '../../../core/services/favorites.service';
 import { RatingService } from '../../../core/services/rating.service';
 import { AuthService } from '../../../core/services/auth.service';
@@ -17,16 +17,24 @@ interface GenreConfig {
 }
 
 const GENRE_MAP: Record<string, GenreConfig> = {
-  ESTRATEGIA:  { gradient: 'linear-gradient(135deg, #1a365d, #2d3748)', colors: ['#1a365d', '#2d3748'], icon: 'fa-solid fa-chess' },
-  FAMILIAR:    { gradient: 'linear-gradient(135deg, #2d6a4f, #40916c)', colors: ['#2d6a4f', '#40916c'], icon: 'fa-solid fa-people-group' },
-  PARTY:       { gradient: 'linear-gradient(135deg, #7c2d12, #c2410c)', colors: ['#7c2d12', '#c2410c'], icon: 'fa-solid fa-champagne-glasses' },
-  COOPERATIVO: { gradient: 'linear-gradient(135deg, #312e81, #4338ca)', colors: ['#312e81', '#4338ca'], icon: 'fa-solid fa-handshake' },
-  ROL:         { gradient: 'linear-gradient(135deg, #581c87, #7c3aed)', colors: ['#581c87', '#7c3aed'], icon: 'fa-solid fa-hat-wizard' },
-  DEDUCCION:   { gradient: 'linear-gradient(135deg, #064e3b, #047857)', colors: ['#064e3b', '#047857'], icon: 'fa-solid fa-magnifying-glass' },
-  CARTAS:      { gradient: 'linear-gradient(135deg, #7f1d1d, #dc2626)', colors: ['#7f1d1d', '#dc2626'], icon: 'fa-solid fa-clone' },
-  DADOS:       { gradient: 'linear-gradient(135deg, #78350f, #d97706)', colors: ['#78350f', '#d97706'], icon: 'fa-solid fa-dice' },
-  ABSTRACTO:   { gradient: 'linear-gradient(135deg, #1e3a5f, #3b82f6)', colors: ['#1e3a5f', '#3b82f6'], icon: 'fa-solid fa-shapes' },
-  TEMATICO:    { gradient: 'linear-gradient(135deg, #4a1942, #c026d3)', colors: ['#4a1942', '#c026d3'], icon: 'fa-solid fa-masks-theater' },
+  ESTRATEGIA:   { gradient: 'linear-gradient(135deg, #1a365d, #2d3748)', colors: ['#1a365d', '#2d3748'], icon: 'fa-solid fa-chess' },
+  FAMILIAR:     { gradient: 'linear-gradient(135deg, #2d6a4f, #40916c)', colors: ['#2d6a4f', '#40916c'], icon: 'fa-solid fa-people-group' },
+  PARTY:        { gradient: 'linear-gradient(135deg, #7c2d12, #c2410c)', colors: ['#7c2d12', '#c2410c'], icon: 'fa-solid fa-champagne-glasses' },
+  COOPERATIVO:  { gradient: 'linear-gradient(135deg, #312e81, #4338ca)', colors: ['#312e81', '#4338ca'], icon: 'fa-solid fa-handshake' },
+  ROL:          { gradient: 'linear-gradient(135deg, #581c87, #7c3aed)', colors: ['#581c87', '#7c3aed'], icon: 'fa-solid fa-hat-wizard' },
+  CARTAS:       { gradient: 'linear-gradient(135deg, #7f1d1d, #dc2626)', colors: ['#7f1d1d', '#dc2626'], icon: 'fa-solid fa-clone' },
+  DADOS:        { gradient: 'linear-gradient(135deg, #78350f, #d97706)', colors: ['#78350f', '#d97706'], icon: 'fa-solid fa-dice' },
+  ACCION:       { gradient: 'linear-gradient(135deg, #991b1b, #ef4444)', colors: ['#991b1b', '#ef4444'], icon: 'fa-solid fa-bolt' },
+  AVENTURA:     { gradient: 'linear-gradient(135deg, #065f46, #10b981)', colors: ['#065f46', '#10b981'], icon: 'fa-solid fa-compass' },
+  MISTERIO:     { gradient: 'linear-gradient(135deg, #1e3a5f, #3b82f6)', colors: ['#1e3a5f', '#3b82f6'], icon: 'fa-solid fa-magnifying-glass' },
+  INFANTIL:     { gradient: 'linear-gradient(135deg, #d97706, #fbbf24)', colors: ['#d97706', '#fbbf24'], icon: 'fa-solid fa-child' },
+  PUZZLE:       { gradient: 'linear-gradient(135deg, #5b21b6, #8b5cf6)', colors: ['#5b21b6', '#8b5cf6'], icon: 'fa-solid fa-puzzle-piece' },
+  TERROR:       { gradient: 'linear-gradient(135deg, #1f2937, #4b5563)', colors: ['#1f2937', '#4b5563'], icon: 'fa-solid fa-skull' },
+  SOLITARIO:    { gradient: 'linear-gradient(135deg, #064e3b, #047857)', colors: ['#064e3b', '#047857'], icon: 'fa-solid fa-user' },
+  MAZOS:        { gradient: 'linear-gradient(135deg, #7f1d1d, #b91c1c)', colors: ['#7f1d1d', '#b91c1c'], icon: 'fa-solid fa-layer-group' },
+  MINIATURAS:   { gradient: 'linear-gradient(135deg, #4a1942, #c026d3)', colors: ['#4a1942', '#c026d3'], icon: 'fa-solid fa-chess-knight' },
+  ROLESOCULTOS: { gradient: 'linear-gradient(135deg, #3730a3, #6366f1)', colors: ['#3730a3', '#6366f1'], icon: 'fa-solid fa-masks-theater' },
+  CARRERAS:     { gradient: 'linear-gradient(135deg, #b45309, #f59e0b)', colors: ['#b45309', '#f59e0b'], icon: 'fa-solid fa-flag-checkered' },
 };
 
 const DEFAULT_GENRE: GenreConfig = {
@@ -46,15 +54,24 @@ const DEFAULT_GENRE: GenreConfig = {
         <!-- ============== HERO AREA ============== -->
         <section class="hero" [ngStyle]="{ 'background': genreConfig().gradient }">
           <div class="hero-overlay"></div>
-          <div class="hero-icon">
-            <i [ngClass]="genreConfig().icon"></i>
-          </div>
+          @if (game()!.imagenUrl) {
+            <img
+              [src]="game()!.imagenUrl"
+              [alt]="game()!.nombre"
+              class="hero-game-img"
+            />
+          } @else {
+            <div class="hero-icon">
+              <i [ngClass]="genreConfig().icon"></i>
+            </div>
+          }
           <div class="hero-content">
             <div class="hero-top-row">
-              <span class="genre-pill" [ngStyle]="genrePillStyle()">
-                <i [ngClass]="genreConfig().icon" class="pill-icon"></i>
-                {{ game()!.genero }}
-              </span>
+              @for (genre of genres(); track genre) {
+                <span class="genre-pill" [ngStyle]="genrePillStyle()">
+                  {{ genre }}
+                </span>
+              }
               <button
                 class="hero-favorite-btn"
                 [class.is-favorite]="isFav()"
@@ -65,12 +82,6 @@ const DEFAULT_GENRE: GenreConfig = {
               </button>
             </div>
             <h1 class="hero-title">{{ game()!.nombre }}</h1>
-            @if (game()!.editorial) {
-              <p class="hero-editorial">
-                <i class="fa-solid fa-building"></i>
-                {{ game()!.editorial }}
-              </p>
-            }
           </div>
         </section>
 
@@ -314,6 +325,16 @@ const DEFAULT_GENRE: GenreConfig = {
       pointer-events: none;
     }
 
+    .hero-game-img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.35;
+    }
+
     .hero-icon {
       position: absolute;
       top: 50%;
@@ -337,8 +358,12 @@ const DEFAULT_GENRE: GenreConfig = {
     .hero-top-row {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .hero-top-row .hero-favorite-btn {
+      margin-left: auto;
     }
 
     .genre-pill {
@@ -993,7 +1018,7 @@ const DEFAULT_GENRE: GenreConfig = {
 export class GameDetailComponent implements OnInit {
   // ---------- DI ----------
   private readonly route = inject(ActivatedRoute);
-  private readonly juegosService = inject(MockJuegosService);
+  private readonly juegosService = inject(JuegoService);
   private readonly favoritesService = inject(FavoritesService);
   private readonly ratingService = inject(RatingService);
   private readonly authService = inject(AuthService);
@@ -1011,9 +1036,14 @@ export class GameDetailComponent implements OnInit {
   Math = Math;
 
   // ---------- Computed ----------
+  genres = computed<string[]>(() => {
+    const raw = this.game()?.genero ?? '';
+    return raw.split(',').map(g => g.trim()).filter(g => g.length > 0);
+  });
+
   genreConfig = computed<GenreConfig>(() => {
-    const genre = this.game()?.genero?.toUpperCase() ?? '';
-    return GENRE_MAP[genre] ?? DEFAULT_GENRE;
+    const first = this.genres()[0]?.toUpperCase() ?? '';
+    return GENRE_MAP[first] ?? DEFAULT_GENRE;
   });
 
   isFav = computed(() => {
@@ -1023,9 +1053,9 @@ export class GameDetailComponent implements OnInit {
 
   complexityLevel = computed<number>(() => {
     const c = this.game()?.complejidad?.toUpperCase() ?? '';
-    if (c === 'BAJA') return 1;
-    if (c === 'MEDIA') return 2;
-    if (c === 'ALTA') return 3;
+    if (c === 'BAJA' || c === 'VERDE') return 1;
+    if (c === 'MEDIA' || c === 'AMARILLO') return 2;
+    if (c === 'ALTA' || c === 'ROJO') return 3;
     return 0;
   });
 
@@ -1082,7 +1112,9 @@ export class GameDetailComponent implements OnInit {
   }
 
   private loadRelatedGames(genero: string, currentId: number): void {
-    this.juegosService.getByGenero(genero).subscribe(games => {
+    const firstGenre = (genero || '').split(',')[0]?.trim();
+    if (!firstGenre) return;
+    this.juegosService.getByGenero(firstGenre).subscribe(games => {
       const filtered = games.filter(g => g.id !== currentId).slice(0, 4);
       this.relatedGames.set(filtered);
     });

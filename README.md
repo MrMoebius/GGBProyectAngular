@@ -51,3 +51,10 @@ El proyecto sigue una arquitectura modular con carga perezosa (Lazy Loading) y S
 1.  Instalar dependencias: `npm install`
 2.  Iniciar servidor de desarrollo: `ng serve`
 3.  Acceder a `http://localhost:4200`
+
+
+
+API https://boardgamegeek.com/join
+Usuario: GiberGamesBar
+Mail:  picoc90328@aixind.com 
+Pass: bgX@wQQjGGh4F!i

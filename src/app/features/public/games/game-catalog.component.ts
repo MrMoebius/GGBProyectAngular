@@ -2,7 +2,7 @@ import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { MockJuegosService } from '../../../core/services/mock-juegos.service';
+import { JuegoService } from '../../../core/services/juego.service';
 import { JuegoExtended } from '../../../core/models/juego-extended.interface';
 import { GameCardPublicComponent } from '../../../shared/components/game-card-public/game-card-public.component';
 import { FavoritesService } from '../../../core/services/favorites.service';
@@ -1142,13 +1142,15 @@ import { FavoritesService } from '../../../core/services/favorites.service';
 export class GameCatalogComponent implements OnInit {
 
   // ---------- DI ----------
-  private readonly juegosService = inject(MockJuegosService);
+  private readonly juegosService = inject(JuegoService);
   readonly favoritesService = inject(FavoritesService);
 
   // ---------- Static data ----------
   readonly genres: string[] = [
     'ESTRATEGIA', 'FAMILIAR', 'PARTY', 'COOPERATIVO', 'ROL',
-    'DEDUCCION', 'CARTAS', 'DADOS', 'ABSTRACTO', 'TEMATICO'
+    'CARTAS', 'DADOS', 'ACCION', 'AVENTURA', 'MISTERIO',
+    'INFANTIL', 'PUZZLE', 'TERROR', 'SOLITARIO', 'MAZOS',
+    'MINIATURAS', 'ROLESOCULTOS', 'CARRERAS'
   ];
 
   readonly complexities = [
@@ -1167,33 +1169,49 @@ export class GameCatalogComponent implements OnInit {
   readonly languages = [
     { label: 'ESPANOL', value: 'ESPANOL' },
     { label: 'INGLES', value: 'INGLES' },
-    { label: 'MULTI', value: 'MULTI' },
+    { label: 'INDEPENDIENTE', value: 'INDEPENDIENTE' },
   ];
 
   private readonly GENRE_GRADIENTS: Record<string, string> = {
-    ESTRATEGIA:  'linear-gradient(135deg, #1a365d, #2d3748)',
-    FAMILIAR:    'linear-gradient(135deg, #2d6a4f, #40916c)',
-    PARTY:       'linear-gradient(135deg, #7c2d12, #c2410c)',
-    COOPERATIVO: 'linear-gradient(135deg, #312e81, #4338ca)',
-    ROL:         'linear-gradient(135deg, #581c87, #7c3aed)',
-    DEDUCCION:   'linear-gradient(135deg, #064e3b, #047857)',
-    CARTAS:      'linear-gradient(135deg, #7f1d1d, #dc2626)',
-    DADOS:       'linear-gradient(135deg, #78350f, #d97706)',
-    ABSTRACTO:   'linear-gradient(135deg, #1e3a5f, #3b82f6)',
-    TEMATICO:    'linear-gradient(135deg, #4a1942, #c026d3)',
+    ESTRATEGIA:   'linear-gradient(135deg, #1a365d, #2d3748)',
+    FAMILIAR:     'linear-gradient(135deg, #2d6a4f, #40916c)',
+    PARTY:        'linear-gradient(135deg, #7c2d12, #c2410c)',
+    COOPERATIVO:  'linear-gradient(135deg, #312e81, #4338ca)',
+    ROL:          'linear-gradient(135deg, #581c87, #7c3aed)',
+    CARTAS:       'linear-gradient(135deg, #7f1d1d, #dc2626)',
+    DADOS:        'linear-gradient(135deg, #78350f, #d97706)',
+    ACCION:       'linear-gradient(135deg, #991b1b, #ef4444)',
+    AVENTURA:     'linear-gradient(135deg, #065f46, #10b981)',
+    MISTERIO:     'linear-gradient(135deg, #1e3a5f, #3b82f6)',
+    INFANTIL:     'linear-gradient(135deg, #d97706, #fbbf24)',
+    PUZZLE:       'linear-gradient(135deg, #5b21b6, #8b5cf6)',
+    TERROR:       'linear-gradient(135deg, #1f2937, #4b5563)',
+    SOLITARIO:    'linear-gradient(135deg, #064e3b, #047857)',
+    MAZOS:        'linear-gradient(135deg, #7f1d1d, #b91c1c)',
+    MINIATURAS:   'linear-gradient(135deg, #4a1942, #c026d3)',
+    ROLESOCULTOS: 'linear-gradient(135deg, #3730a3, #6366f1)',
+    CARRERAS:     'linear-gradient(135deg, #b45309, #f59e0b)',
   };
 
   private readonly GENRE_ICONS: Record<string, string> = {
-    ESTRATEGIA:  'fa-solid fa-chess',
-    FAMILIAR:    'fa-solid fa-people-group',
-    PARTY:       'fa-solid fa-champagne-glasses',
-    COOPERATIVO: 'fa-solid fa-handshake',
-    ROL:         'fa-solid fa-hat-wizard',
-    DEDUCCION:   'fa-solid fa-magnifying-glass',
-    CARTAS:      'fa-solid fa-clone',
-    DADOS:       'fa-solid fa-dice',
-    ABSTRACTO:   'fa-solid fa-shapes',
-    TEMATICO:    'fa-solid fa-masks-theater',
+    ESTRATEGIA:   'fa-solid fa-chess',
+    FAMILIAR:     'fa-solid fa-people-group',
+    PARTY:        'fa-solid fa-champagne-glasses',
+    COOPERATIVO:  'fa-solid fa-handshake',
+    ROL:          'fa-solid fa-hat-wizard',
+    CARTAS:       'fa-solid fa-clone',
+    DADOS:        'fa-solid fa-dice',
+    ACCION:       'fa-solid fa-bolt',
+    AVENTURA:     'fa-solid fa-compass',
+    MISTERIO:     'fa-solid fa-magnifying-glass',
+    INFANTIL:     'fa-solid fa-child',
+    PUZZLE:       'fa-solid fa-puzzle-piece',
+    TERROR:       'fa-solid fa-skull',
+    SOLITARIO:    'fa-solid fa-user',
+    MAZOS:        'fa-solid fa-layer-group',
+    MINIATURAS:   'fa-solid fa-chess-knight',
+    ROLESOCULTOS: 'fa-solid fa-masks-theater',
+    CARRERAS:     'fa-solid fa-flag-checkered',
   };
 
   // ---------- Signals (filter state) ----------
@@ -1245,13 +1263,22 @@ export class GameCatalogComponent implements OnInit {
     // Genre filter (multi-select)
     const genres = this.selectedGenres();
     if (genres.length > 0) {
-      games = games.filter(g => genres.includes(g.genero));
+      games = games.filter(g => {
+        const gameGenres = (g.genero || '').split(',').map(x => x.trim());
+        return genres.some(sel => gameGenres.includes(sel));
+      });
     }
 
-    // Complexity filter
+    // Complexity filter (BAJA=VERDE, MEDIA=AMARILLO, ALTA=ROJO)
     const complexity = this.selectedComplexity();
     if (complexity) {
-      games = games.filter(g => g.complejidad === complexity);
+      const equivalents: Record<string, string[]> = {
+        BAJA: ['BAJA', 'VERDE'],
+        MEDIA: ['MEDIA', 'AMARILLO'],
+        ALTA: ['ALTA', 'ROJO'],
+      };
+      const valid = equivalents[complexity] ?? [complexity];
+      games = games.filter(g => valid.includes(g.complejidad));
     }
 
     // Player count min
@@ -1305,7 +1332,7 @@ export class GameCatalogComponent implements OnInit {
         games.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
         break;
       case 'complejidad-asc': {
-        const order: Record<string, number> = { 'BAJA': 1, 'MEDIA': 2, 'ALTA': 3 };
+        const order: Record<string, number> = { 'BAJA': 1, 'VERDE': 1, 'MEDIA': 2, 'AMARILLO': 2, 'ALTA': 3, 'ROJO': 3 };
         games.sort((a, b) => (order[a.complejidad] ?? 99) - (order[b.complejidad] ?? 99));
         break;
       }
@@ -1411,10 +1438,12 @@ export class GameCatalogComponent implements OnInit {
   }
 
   getGenreGradient(genero: string): string {
-    return this.GENRE_GRADIENTS[genero?.toUpperCase()] ?? 'linear-gradient(135deg, #374151, #6b7280)';
+    const first = (genero || '').split(',')[0]?.trim().toUpperCase();
+    return this.GENRE_GRADIENTS[first] ?? 'linear-gradient(135deg, #374151, #6b7280)';
   }
 
   getGenreIcon(genero: string): string {
-    return this.GENRE_ICONS[genero?.toUpperCase()] ?? 'fa-solid fa-puzzle-piece';
+    const first = (genero || '').split(',')[0]?.trim().toUpperCase();
+    return this.GENRE_ICONS[first] ?? 'fa-solid fa-puzzle-piece';
   }
 }

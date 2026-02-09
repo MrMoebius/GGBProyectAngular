@@ -1,14 +1,19 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map, switchMap } from 'rxjs';
 import { Juego } from '../models/juego.interface';
+import { JuegoExtended } from '../models/juego-extended.interface';
+import { BggService } from './bgg.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class JuegoService {
   private http = inject(HttpClient);
+  private bgg = inject(BggService);
   private apiUrl = '/api/juegos';
+
+  // === Metodos CRUD (backend directo) ===
 
   getJuegos(): Observable<Juego[]> {
     return this.http.get<Juego[]>(this.apiUrl);
@@ -28,5 +33,61 @@ export class JuegoService {
 
   deleteJuego(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  // === Metodos para componentes publicos ===
+  // Cargan metadata BGG local y devuelven JuegoExtended[]
+
+  getAll(): Observable<JuegoExtended[]> {
+    return this.bgg.loadMetadata().pipe(
+      switchMap(() => this.getJuegos()),
+      map(juegos => juegos.map(j => this.toExtended(j)))
+    );
+  }
+
+  getById(id: number): Observable<JuegoExtended | undefined> {
+    return this.bgg.loadMetadata().pipe(
+      switchMap(() => this.getJuegoById(id)),
+      map(juego => this.toExtended(juego))
+    );
+  }
+
+  getByGenero(genero: string): Observable<JuegoExtended[]> {
+    return this.getAll().pipe(
+      map(juegos => juegos.filter(j =>
+        (j.genero || '').split(',').some(g => g.trim() === genero)
+      ))
+    );
+  }
+
+  getFeatured(): Observable<JuegoExtended[]> {
+    return this.getAll().pipe(
+      map(juegos => {
+        const sorted = [...juegos].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+        return sorted.slice(0, 6);
+      })
+    );
+  }
+
+  search(term: string): Observable<JuegoExtended[]> {
+    const lower = term.toLowerCase();
+    return this.getAll().pipe(
+      map(juegos => juegos.filter(j =>
+        j.nombre.toLowerCase().includes(lower) ||
+        (j.genero || '').toLowerCase().includes(lower)
+      ))
+    );
+  }
+
+  // === Merge con metadata BGG local ===
+
+  private toExtended(juego: Juego): JuegoExtended {
+    const bgg = this.bgg.getForGame(juego.id);
+    return {
+      ...juego,
+      imagenUrl: bgg.imagenUrl,
+      rating: bgg.rating,
+      totalRatings: bgg.totalRatings,
+    };
   }
 }

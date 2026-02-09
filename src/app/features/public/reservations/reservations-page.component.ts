@@ -1,7 +1,7 @@
 import { Component, signal, computed, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MockReservasService } from '../../../core/services/mock-reservas.service';
-import { MockJuegosService } from '../../../core/services/mock-juegos.service';
+import { JuegoService } from '../../../core/services/juego.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { TableMapComponent } from '../../../shared/components/table-map/table-map.component';
 import { Mesa } from '../../../core/models/mesa.interface';
@@ -1419,7 +1419,7 @@ interface ContactInfo {
 })
 export class ReservationsPageComponent {
   private reservasService = inject(MockReservasService);
-  private juegosService = inject(MockJuegosService);
+  private juegosService = inject(JuegoService);
   private toastService = inject(ToastService);
 
   // Progress steps

@@ -1,7 +1,7 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { MockJuegosService } from '../../../core/services/mock-juegos.service';
+import { JuegoService } from '../../../core/services/juego.service';
 import { RecommendationService } from '../../../core/services/recommendation.service';
 import { ProductoService } from '../../../core/services/producto.service';
 import { MesaService } from '../../../core/services/mesa.service';
@@ -874,7 +874,7 @@ import { GameCardPublicComponent } from '../../../shared/components/game-card-pu
   `]
 })
 export class LandingComponent implements OnInit {
-  private mockJuegos = inject(MockJuegosService);
+  private mockJuegos = inject(JuegoService);
   private recommendation = inject(RecommendationService);
   private productoService = inject(ProductoService);
   private mesaService = inject(MesaService);

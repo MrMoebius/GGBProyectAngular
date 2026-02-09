@@ -1,4 +1,4 @@
-import { Component, inject, input, computed } from '@angular/core';
+import { Component, inject, input, computed, signal } from '@angular/core';
 import { NgClass, NgStyle } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { JuegoExtended } from '../../../core/models/juego-extended.interface';
@@ -10,16 +10,24 @@ interface GenreConfig {
 }
 
 const GENRE_MAP: Record<string, GenreConfig> = {
-  ESTRATEGIA:  { gradient: 'linear-gradient(135deg, #1a365d, #2d3748)', icon: 'fa-solid fa-chess' },
-  FAMILIAR:    { gradient: 'linear-gradient(135deg, #2d6a4f, #40916c)', icon: 'fa-solid fa-people-group' },
-  PARTY:       { gradient: 'linear-gradient(135deg, #7c2d12, #c2410c)', icon: 'fa-solid fa-champagne-glasses' },
-  COOPERATIVO: { gradient: 'linear-gradient(135deg, #312e81, #4338ca)', icon: 'fa-solid fa-handshake' },
-  ROL:         { gradient: 'linear-gradient(135deg, #581c87, #7c3aed)', icon: 'fa-solid fa-hat-wizard' },
-  DEDUCCION:   { gradient: 'linear-gradient(135deg, #064e3b, #047857)', icon: 'fa-solid fa-magnifying-glass' },
-  CARTAS:      { gradient: 'linear-gradient(135deg, #7f1d1d, #dc2626)', icon: 'fa-solid fa-clone' },
-  DADOS:       { gradient: 'linear-gradient(135deg, #78350f, #d97706)', icon: 'fa-solid fa-dice' },
-  ABSTRACTO:   { gradient: 'linear-gradient(135deg, #1e3a5f, #3b82f6)', icon: 'fa-solid fa-shapes' },
-  TEMATICO:    { gradient: 'linear-gradient(135deg, #4a1942, #c026d3)', icon: 'fa-solid fa-masks-theater' },
+  ESTRATEGIA:   { gradient: 'linear-gradient(135deg, #1a365d, #2d3748)', icon: 'fa-solid fa-chess' },
+  FAMILIAR:     { gradient: 'linear-gradient(135deg, #2d6a4f, #40916c)', icon: 'fa-solid fa-people-group' },
+  PARTY:        { gradient: 'linear-gradient(135deg, #7c2d12, #c2410c)', icon: 'fa-solid fa-champagne-glasses' },
+  COOPERATIVO:  { gradient: 'linear-gradient(135deg, #312e81, #4338ca)', icon: 'fa-solid fa-handshake' },
+  ROL:          { gradient: 'linear-gradient(135deg, #581c87, #7c3aed)', icon: 'fa-solid fa-hat-wizard' },
+  CARTAS:       { gradient: 'linear-gradient(135deg, #7f1d1d, #dc2626)', icon: 'fa-solid fa-clone' },
+  DADOS:        { gradient: 'linear-gradient(135deg, #78350f, #d97706)', icon: 'fa-solid fa-dice' },
+  ACCION:       { gradient: 'linear-gradient(135deg, #991b1b, #ef4444)', icon: 'fa-solid fa-bolt' },
+  AVENTURA:     { gradient: 'linear-gradient(135deg, #065f46, #10b981)', icon: 'fa-solid fa-compass' },
+  MISTERIO:     { gradient: 'linear-gradient(135deg, #1e3a5f, #3b82f6)', icon: 'fa-solid fa-magnifying-glass' },
+  INFANTIL:     { gradient: 'linear-gradient(135deg, #d97706, #fbbf24)', icon: 'fa-solid fa-child' },
+  PUZZLE:       { gradient: 'linear-gradient(135deg, #5b21b6, #8b5cf6)', icon: 'fa-solid fa-puzzle-piece' },
+  TERROR:       { gradient: 'linear-gradient(135deg, #1f2937, #4b5563)', icon: 'fa-solid fa-skull' },
+  SOLITARIO:    { gradient: 'linear-gradient(135deg, #064e3b, #047857)', icon: 'fa-solid fa-user' },
+  MAZOS:        { gradient: 'linear-gradient(135deg, #7f1d1d, #b91c1c)', icon: 'fa-solid fa-layer-group' },
+  MINIATURAS:   { gradient: 'linear-gradient(135deg, #4a1942, #c026d3)', icon: 'fa-solid fa-chess-knight' },
+  ROLESOCULTOS: { gradient: 'linear-gradient(135deg, #3730a3, #6366f1)', icon: 'fa-solid fa-masks-theater' },
+  CARRERAS:     { gradient: 'linear-gradient(135deg, #b45309, #f59e0b)', icon: 'fa-solid fa-flag-checkered' },
 };
 
 const DEFAULT_GENRE: GenreConfig = {
@@ -39,7 +47,18 @@ const DEFAULT_GENRE: GenreConfig = {
         class="card-image"
         [ngStyle]="{ 'background': genreConfig().gradient }"
       >
-        <i class="genre-icon" [ngClass]="genreConfig().icon"></i>
+        @if (game().imagenUrl) {
+          <img
+            [src]="game().imagenUrl"
+            [alt]="game().nombre"
+            class="card-img"
+            (error)="imgError.set(true)"
+            [style.display]="imgError() ? 'none' : 'block'"
+          />
+        }
+        @if (!game().imagenUrl || imgError()) {
+          <i class="genre-icon" [ngClass]="genreConfig().icon"></i>
+        }
 
         <!-- Favorite heart overlay -->
         @if (showFavorite()) {
@@ -59,10 +78,14 @@ const DEFAULT_GENRE: GenreConfig = {
         <!-- Title -->
         <h3 class="card-title">{{ game().nombre }}</h3>
 
-        <!-- Genre pill -->
-        <span class="genre-pill" [ngStyle]="genrePillStyle()">
-          {{ game().genero }}
-        </span>
+        <!-- Genre pills -->
+        <div class="genre-pills">
+          @for (genre of genres(); track genre) {
+            <span class="genre-pill" [ngStyle]="getGenrePillStyle(genre)">
+              {{ genre }}
+            </span>
+          }
+        </div>
 
         <!-- Complexity dots -->
         <div class="complexity-row">
@@ -161,11 +184,20 @@ const DEFAULT_GENRE: GenreConfig = {
     /* ===== Image / Gradient placeholder ===== */
     .card-image {
       position: relative;
-      height: 160px;
+      height: 180px;
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
+    }
+
+    .card-img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
     .genre-icon {
@@ -180,6 +212,7 @@ const DEFAULT_GENRE: GenreConfig = {
       position: absolute;
       top: 0.75rem;
       right: 0.75rem;
+      z-index: 2;
       width: 36px;
       height: 36px;
       border: none;
@@ -232,13 +265,18 @@ const DEFAULT_GENRE: GenreConfig = {
       text-overflow: ellipsis;
     }
 
-    /* Genre pill */
+    /* Genre pills */
+    .genre-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.3rem;
+    }
+
     .genre-pill {
       display: inline-flex;
-      align-self: flex-start;
-      padding: 0.2rem 0.625rem;
+      padding: 0.15rem 0.5rem;
       border-radius: 9999px;
-      font-size: 0.6875rem;
+      font-size: 0.625rem;
       font-weight: 600;
       letter-spacing: 0.025em;
       text-transform: uppercase;
@@ -393,19 +431,29 @@ export class GameCardPublicComponent {
   game = input.required<JuegoExtended>();
   showFavorite = input<boolean>(true);
 
+  // ---------- State ----------
+  imgError = signal(false);
+
   // ---------- Computed ----------
+  /** Separa genero multi-valor en array */
+  genres = computed<string[]>(() => {
+    const raw = this.game().genero ?? '';
+    return raw.split(',').map(g => g.trim()).filter(g => g.length > 0);
+  });
+
+  /** Usa el primer genero para gradient/icon */
   genreConfig = computed<GenreConfig>(() => {
-    const genre = this.game().genero?.toUpperCase() ?? '';
-    return GENRE_MAP[genre] ?? DEFAULT_GENRE;
+    const first = this.genres()[0]?.toUpperCase() ?? '';
+    return GENRE_MAP[first] ?? DEFAULT_GENRE;
   });
 
   isFav = computed(() => this.favoritesService.isFavorite(this.game().id));
 
   complexityLevel = computed<number>(() => {
     const c = this.game().complejidad?.toUpperCase() ?? '';
-    if (c === 'BAJA') return 1;
-    if (c === 'MEDIA') return 2;
-    if (c === 'ALTA') return 3;
+    if (c === 'BAJA' || c === 'VERDE') return 1;
+    if (c === 'MEDIA' || c === 'AMARILLO') return 2;
+    if (c === 'ALTA' || c === 'ROJO') return 3;
     return 0;
   });
 
@@ -416,9 +464,9 @@ export class GameCardPublicComponent {
     return r != null ? r.toFixed(1) : '0.0';
   });
 
-  genrePillStyle = computed(() => {
-    const cfg = this.genreConfig();
-    // Extract the second (lighter) colour from the gradient for the pill background
+  // ---------- Methods ----------
+  getGenrePillStyle(genre: string): Record<string, string> {
+    const cfg = GENRE_MAP[genre.toUpperCase()] ?? DEFAULT_GENRE;
     const match = cfg.gradient.match(/#[0-9a-fA-F]{6}/g);
     const bgColor = match && match.length >= 2 ? match[1] : '#6b7280';
     return {
@@ -426,9 +474,8 @@ export class GameCardPublicComponent {
       'color': bgColor,
       'border': `1px solid ${bgColor}44`,
     };
-  });
+  }
 
-  // ---------- Actions ----------
   toggleFavorite(event: Event): void {
     event.preventDefault();
     event.stopPropagation();

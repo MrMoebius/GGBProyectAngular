@@ -1,6 +1,6 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FavoritesService } from '../../../core/services/favorites.service';
-import { MockJuegosService } from '../../../core/services/mock-juegos.service';
+import { JuegoService } from '../../../core/services/juego.service';
 import { GameCardPublicComponent } from '../../../shared/components/game-card-public/game-card-public.component';
 import { JuegoExtended } from '../../../core/models/juego-extended.interface';
 
@@ -145,7 +145,7 @@ import { JuegoExtended } from '../../../core/models/juego-extended.interface';
 })
 export class FavoritesPageComponent implements OnInit {
   private favoritesService = inject(FavoritesService);
-  private juegosService = inject(MockJuegosService);
+  private juegosService = inject(JuegoService);
 
   private allGames = signal<JuegoExtended[]>([]);
 

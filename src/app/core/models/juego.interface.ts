@@ -8,6 +8,7 @@ export interface Juego {
   genero: string;
   idioma?: string;
   descripcion?: string;
+  observaciones?: string;
   ubicacion: string;
   recomendadoDosJugadores?: boolean;
   activo?: boolean;

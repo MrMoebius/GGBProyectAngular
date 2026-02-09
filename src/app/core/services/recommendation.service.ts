@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { JuegoExtended } from '../models/juego-extended.interface';
-import { MockJuegosService } from './mock-juegos.service';
+import { JuegoService } from './juego.service';
 
 export interface QuizAnswers {
   playerCount?: number;
@@ -13,7 +13,7 @@ export interface QuizAnswers {
 
 @Injectable({ providedIn: 'root' })
 export class RecommendationService {
-  private mockJuegos = inject(MockJuegosService);
+  private mockJuegos = inject(JuegoService);
 
   getDailyPick(): Observable<JuegoExtended> {
     return this.mockJuegos.getAll().pipe(
