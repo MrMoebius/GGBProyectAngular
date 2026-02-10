@@ -98,7 +98,7 @@ export class JuegoService {
     const bgg = this.bgg.getForGame(juego.id);
     return {
       ...juego,
-      imagenUrl: bgg.imagenUrl,
+      imagenUrl: `/api/juegos/${juego.id}/imagen`,
       rating: bgg.rating,
       totalRatings: bgg.totalRatings,
     };
