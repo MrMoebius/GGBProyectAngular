@@ -132,11 +132,11 @@ import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/
             <div class="form-group">
               <label class="form-label">Ubicacion</label>
               <select class="form-input" formControlName="ubicacion">
+                <option value="ENTRADA">Entrada</option>
                 <option value="PASILLO">Pasillo</option>
-                <option value="BARRA">Barra</option>
-                <option value="TERRAZA">Terraza</option>
-                <option value="COMEDOR">Comedor</option>
-                <option value="SALA_VIP">Sala VIP</option>
+                <option value="SALON">Salon</option>
+                <option value="ALMACEN">Almacen</option>
+                <option value="MOSTRADOR">Mostrador</option>
               </select>
             </div>
             <div class="form-group">
@@ -145,7 +145,7 @@ import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/
                 <option value="LIBRE">Libre</option>
                 <option value="OCUPADA">Ocupada</option>
                 <option value="RESERVADA">Reservada</option>
-                <option value="FUERA_DE_SERVICIO">Fuera de servicio</option>
+                <option value="MANTENIMIENTO">Mantenimiento</option>
               </select>
             </div>
           </div>
@@ -306,7 +306,7 @@ export class MesasListComponent implements OnInit {
     numeroMesa: [0, Validators.required],
     capacidad: [1, [Validators.required, Validators.min(1)]],
     zona: ['', Validators.required],
-    ubicacion: ['PASILLO'],
+    ubicacion: ['SALON'],
     estado: ['LIBRE']
   });
 
@@ -329,7 +329,7 @@ export class MesasListComponent implements OnInit {
       numeroMesa: 0,
       capacidad: 1,
       zona: '',
-      ubicacion: 'PASILLO',
+      ubicacion: 'SALON',
       estado: 'LIBRE'
     });
     this.showFormModal.set(true);

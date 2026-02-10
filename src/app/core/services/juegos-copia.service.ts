@@ -11,7 +11,7 @@ export class JuegosCopiaService {
   private endpoint = 'juegos-copia';
 
   getAll(): Observable<JuegosCopia[]> {
-    return this.api.get<JuegosCopia[]>(this.endpoint);
+    return this.api.getAll<JuegosCopia>(this.endpoint);
   }
 
   getById(id: number): Observable<JuegosCopia> {

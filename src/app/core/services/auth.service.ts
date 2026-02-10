@@ -37,6 +37,7 @@ export class AuthService {
   }
 
   login(credentials: { email: string; password: string }): Observable<any> {
+    this.logout();
     return this.http.post<any>(`${this.apiUrl}/login`, credentials).pipe(
       tap(response => {
         console.log('AuthService: Respuesta cruda del backend:', response);

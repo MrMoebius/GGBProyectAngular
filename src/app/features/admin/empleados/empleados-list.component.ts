@@ -142,16 +142,24 @@ import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/
               <select class="form-input" formControlName="estado">
                 <option value="ACTIVO">ACTIVO</option>
                 <option value="INACTIVO">INACTIVO</option>
+                <option value="VACACIONES">VACACIONES</option>
                 <option value="BAJA">BAJA</option>
               </select>
             </div>
           </div>
 
           <div class="form-group">
-            <label class="form-label">Fecha de Ingreso *</label>
+            <label class="form-label">Fecha de Ingreso</label>
             <input type="date" class="form-input" formControlName="fechaIngreso" />
-            @if (form.get('fechaIngreso')?.invalid && form.get('fechaIngreso')?.touched) {
-              <span class="form-error">La fecha de ingreso es obligatoria</span>
+            <span class="form-hint">Si se deja vacio, se usara la fecha de hoy</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">{{ isEditing() ? 'Nueva Contrasena' : 'Contrasena *' }}</label>
+            <input type="password" class="form-input" formControlName="password"
+              [placeholder]="isEditing() ? 'Dejar vacio para mantener la actual' : 'Minimo 6 caracteres'" />
+            @if (form.get('password')?.invalid && form.get('password')?.touched) {
+              <span class="form-error">La contrasena debe tener al menos 6 caracteres</span>
             }
           </div>
         </form>
@@ -290,6 +298,13 @@ import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/
       flex: 1;
     }
 
+    .form-hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+      display: block;
+    }
+
     @media (max-width: 768px) {
       .page-wrapper {
         padding: var(--spacing-md);
@@ -337,9 +352,10 @@ export class EmpleadosListComponent implements OnInit {
     nombre: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
     telefono: [''],
+    password: ['', [Validators.required, Validators.minLength(6)]],
     idRol: [2 as number, Validators.required],
     estado: ['ACTIVO' as string, Validators.required],
-    fechaIngreso: ['', Validators.required]
+    fechaIngreso: ['']
   });
 
   ngOnInit(): void {
@@ -357,6 +373,8 @@ export class EmpleadosListComponent implements OnInit {
     this.isEditing.set(false);
     this.currentId.set(null);
     this.form.reset({ idRol: 2, estado: 'ACTIVO', fechaIngreso: '' });
+    this.form.get('password')?.setValidators([Validators.required, Validators.minLength(6)]);
+    this.form.get('password')?.updateValueAndValidity();
     this.showFormModal.set(true);
   }
 
@@ -371,6 +389,8 @@ export class EmpleadosListComponent implements OnInit {
       estado: emp.estado,
       fechaIngreso: emp.fechaIngreso
     });
+    this.form.get('password')?.clearValidators();
+    this.form.get('password')?.updateValueAndValidity();
     this.showFormModal.set(true);
   }
 
@@ -383,6 +403,9 @@ export class EmpleadosListComponent implements OnInit {
     if (this.form.invalid) return;
 
     const payload = this.form.getRawValue() as any;
+    if (this.isEditing() && !payload.password) {
+      delete payload.password;
+    }
 
     if (this.isEditing() && this.currentId()) {
       this.empleadoService.update(this.currentId()!, payload).subscribe({

@@ -47,7 +47,7 @@ export class BggService {
     const entry = this.metadata[String(gameId)];
     if (!entry) return {};
     return {
-      imagenUrl: entry.has_image ? `assets/games/${gameId}.jpg` : undefined,
+      imagenUrl: entry.has_image ? `/api/juegos/${gameId}/imagen` : undefined,
       rating: entry.rating != null ? Math.round((entry.rating / 2) * 10) / 10 : undefined,
       totalRatings: entry.num_ratings ?? undefined,
       description: entry.description ?? undefined,

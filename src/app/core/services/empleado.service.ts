@@ -11,7 +11,7 @@ export class EmpleadoService {
   private endpoint = 'empleados';
 
   getAll(): Observable<Empleado[]> {
-    return this.api.get<Empleado[]>(this.endpoint);
+    return this.api.getAll<Empleado>(this.endpoint);
   }
 
   getById(id: number): Observable<Empleado> {

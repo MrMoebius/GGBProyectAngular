@@ -124,6 +124,15 @@ import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/
           </div>
 
           <div class="form-group">
+            <label class="form-label">{{ isEditing() ? 'Nueva Contrasena' : 'Contrasena' }}</label>
+            <input type="password" class="form-input" formControlName="password"
+              [placeholder]="isEditing() ? 'Dejar vacio para mantener la actual' : 'Minimo 6 caracteres (opcional)'" />
+            @if (form.get('password')?.invalid && form.get('password')?.touched) {
+              <span class="form-error">La contrasena debe tener al menos 6 caracteres</span>
+            }
+          </div>
+
+          <div class="form-group">
             <label class="form-label">Notas</label>
             <textarea class="form-input" formControlName="notas" placeholder="Notas adicionales sobre el cliente..." rows="3"></textarea>
           </div>
@@ -301,6 +310,7 @@ export class ClientesListComponent implements OnInit {
     nombre: ['', Validators.required],
     email: ['', [Validators.required, Validators.email]],
     telefono: [''],
+    password: ['', Validators.minLength(6)],
     notas: ['']
   });
 
@@ -343,6 +353,9 @@ export class ClientesListComponent implements OnInit {
     if (this.form.invalid) return;
 
     const payload = this.form.getRawValue() as any;
+    if (!payload.password) {
+      delete payload.password;
+    }
 
     if (this.isEditing() && this.currentId()) {
       this.clienteService.update(this.currentId()!, payload).subscribe({

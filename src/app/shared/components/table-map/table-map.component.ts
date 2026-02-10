@@ -418,7 +418,7 @@ export class TableMapComponent implements OnInit, OnDestroy {
     'LIBRE': 'Libre',
     'OCUPADA': 'Ocupada',
     'RESERVADA': 'Reservada',
-    'FUERA_DE_SERVICIO': 'Fuera de servicio',
+    'MANTENIMIENTO': 'Mantenimiento',
   };
 
   ngOnInit(): void {

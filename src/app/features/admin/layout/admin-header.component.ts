@@ -1,6 +1,8 @@
 import { Component, Input, Output, EventEmitter, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { ThemeService } from '../../../core/services/theme.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-admin-header',
@@ -21,8 +23,11 @@ import { ThemeService } from '../../../core/services/theme.service';
         </button>
         <div class="user-badge">
           <i class="fa-solid fa-circle-user"></i>
-          <span class="user-label">Admin</span>
+          <span class="user-label">{{ authService.currentUser()?.email || 'Admin' }}</span>
         </div>
+        <button class="header-btn logout-btn" (click)="logout()" title="Cerrar sesion">
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </button>
       </div>
     </header>
   `,
@@ -104,6 +109,20 @@ import { ThemeService } from '../../../core/services/theme.service';
 
     .user-label {
       white-space: nowrap;
+      max-width: 200px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .logout-btn {
+      color: var(--danger, #EF4444);
+      border-color: rgba(239, 68, 68, 0.3);
+    }
+
+    .logout-btn:hover {
+      background-color: rgba(239, 68, 68, 0.1);
+      color: var(--danger, #EF4444);
+      border-color: var(--danger, #EF4444);
     }
   `]
 })
@@ -112,4 +131,11 @@ export class AdminHeaderComponent {
   @Output() toggleSidebar = new EventEmitter<void>();
 
   themeService = inject(ThemeService);
+  authService = inject(AuthService);
+  private router = inject(Router);
+
+  logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/auth/login']);
+  }
 }

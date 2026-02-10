@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -12,6 +12,14 @@ export class ApiService {
 
   get<T>(path: string, params: HttpParams = new HttpParams()): Observable<T> {
     return this.http.get<T>(`${this.baseUrl}/${path}`, { params });
+  }
+
+  /** GET paginado: pide todos los registros y extrae content del Page<T> */
+  getAll<T>(path: string): Observable<T[]> {
+    const params = new HttpParams().set('size', '10000');
+    return this.http.get<any>(`${this.baseUrl}/${path}`, { params }).pipe(
+      map(page => page.content)
+    );
   }
 
   post<T>(path: string, body: any): Observable<T> {
