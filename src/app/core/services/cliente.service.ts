@@ -11,7 +11,7 @@ export class ClienteService {
   private endpoint = 'clientes';
 
   getAll(): Observable<Cliente[]> {
-    return this.api.get<Cliente[]>(this.endpoint);
+    return this.api.getAll<Cliente>(this.endpoint);
   }
 
   getById(id: number): Observable<Cliente> {

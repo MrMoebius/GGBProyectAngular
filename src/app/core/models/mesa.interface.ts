@@ -5,5 +5,5 @@ export interface Mesa {
   capacidad: number;
   zona: string;
   ubicacion: string;
-  estado: 'LIBRE' | 'OCUPADA' | 'RESERVADA' | 'FUERA_DE_SERVICIO';
+  estado: 'LIBRE' | 'OCUPADA' | 'RESERVADA' | 'MANTENIMIENTO';
 }

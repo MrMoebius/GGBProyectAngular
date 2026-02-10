@@ -11,7 +11,7 @@ export class ProductoService {
   private endpoint = 'productos';
 
   getAll(): Observable<Producto[]> {
-    return this.api.get<Producto[]>(this.endpoint);
+    return this.api.getAll<Producto>(this.endpoint);
   }
 
   getById(id: number): Observable<Producto> {

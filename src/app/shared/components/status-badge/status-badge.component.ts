@@ -30,7 +30,7 @@ export class StatusBadgeComponent {
   private readonly greenStates = ['LIBRE', 'ACTIVO', 'DISPONIBLE', 'COMPLETADO', 'SERVIDA'];
   private readonly redStates = ['OCUPADA', 'BAJA', 'CANCELADA', 'DANADA'];
   private readonly yellowStates = ['RESERVADA', 'PENDIENTE', 'EN_USO', 'PREPARACION'];
-  private readonly grayStates = ['FUERA_DE_SERVICIO', 'INACTIVO'];
+  private readonly grayStates = ['MANTENIMIENTO', 'FUERA_DE_SERVICIO', 'INACTIVO'];
 
   get displayStatus(): string {
     return (this.status || '').replace(/_/g, ' ');

@@ -303,6 +303,7 @@ export class AdminSidebarComponent {
     { label: 'Empleados',       icon: 'fa-users-gear',   route: '/admin/empleados' },
     { label: 'Clientes',        icon: 'fa-people-group', route: '/admin/clientes' },
     { label: 'Comandas',        icon: 'fa-receipt',      route: '/admin/comandas' },
+    { label: 'Juegos',           icon: 'fa-puzzle-piece', route: '/admin/juegos' },
     { label: 'Copias Juegos',   icon: 'fa-dice',         route: '/admin/juegos-copia' },
     { label: 'Peticiones Pago', icon: 'fa-credit-card',  route: '/admin/peticiones-pago' },
     { label: 'Eventos',         icon: 'fa-calendar-days', route: '/admin/eventos' }

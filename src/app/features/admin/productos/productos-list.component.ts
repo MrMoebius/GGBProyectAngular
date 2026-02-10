@@ -469,7 +469,7 @@ export class ProductosListComponent implements OnInit {
   productoForm = this.fb.group({
     nombre: ['', Validators.required],
     descripcion: [''],
-    precio: [0, [Validators.required, Validators.min(0)]],
+    precio: [0.01, [Validators.required, Validators.min(0.01)]],
     categoria: ['COMIDA' as string],
     activo: [true]
   });

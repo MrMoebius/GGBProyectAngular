@@ -11,7 +11,7 @@ export class ComandaService {
   private endpoint = 'comandas';
 
   getAll(): Observable<Comanda[]> {
-    return this.api.get<Comanda[]>(this.endpoint);
+    return this.api.getAll<Comanda>(this.endpoint);
   }
 
   getById(id: number): Observable<Comanda> {

@@ -11,7 +11,7 @@ export class MesaService {
   private endpoint = 'mesas';
 
   getAll(): Observable<Mesa[]> {
-    return this.api.get<Mesa[]>(this.endpoint);
+    return this.api.getAll<Mesa>(this.endpoint);
   }
 
   getById(id: number): Observable<Mesa> {

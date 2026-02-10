@@ -4,6 +4,6 @@ export interface Empleado {
   email: string;
   telefono: string | null;
   idRol: number;
-  estado: 'ACTIVO' | 'INACTIVO' | 'BAJA';
+  estado: 'ACTIVO' | 'INACTIVO' | 'VACACIONES' | 'BAJA';
   fechaIngreso: string;
 }

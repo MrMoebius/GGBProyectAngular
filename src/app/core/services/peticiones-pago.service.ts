@@ -11,7 +11,7 @@ export class PeticionesPagoService {
   private endpoint = 'peticiones-pago';
 
   getAll(): Observable<PeticionesPago[]> {
-    return this.api.get<PeticionesPago[]>(this.endpoint);
+    return this.api.getAll<PeticionesPago>(this.endpoint);
   }
 
   getById(id: number): Observable<PeticionesPago> {

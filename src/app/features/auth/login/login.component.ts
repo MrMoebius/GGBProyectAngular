@@ -12,8 +12,7 @@ import { AuthService } from '../../../core/services/auth.service';
       <div class="login-card">
         <!-- Logo -->
         <div class="login-logo">
-          <span class="logo-giber">GIBER</span>
-          <span class="logo-bar">BAR</span>
+          <img src="assets/GGBarPhotoSlide/GiberGamesBarLogo.webp" alt="Giber Games Bar" class="login-logo-img">
         </div>
         <p class="login-subtitle">Inicia sesion en tu cuenta</p>
 
@@ -121,21 +120,9 @@ import { AuthService } from '../../../core/services/auth.service';
       margin-bottom: 0.5rem;
     }
 
-    .logo-giber {
-      font-size: 2rem;
-      font-weight: 800;
-      color: var(--text-white, #fff);
-      letter-spacing: 3px;
-      text-transform: uppercase;
-    }
-
-    .logo-bar {
-      font-size: 2rem;
-      font-weight: 800;
-      color: var(--neon-cyan, #00FFD1);
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      text-shadow: 0 0 10px var(--neon-cyan, #00FFD1), 0 0 20px rgba(0, 255, 209, 0.4);
+    .login-logo-img {
+      height: 60px;
+      object-fit: contain;
     }
 
     .login-subtitle {
