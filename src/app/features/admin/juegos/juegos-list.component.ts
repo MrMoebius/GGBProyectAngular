@@ -70,13 +70,19 @@ import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/
             @for (juego of paginatedJuegos(); track juego.id) {
               <tr>
                 <td class="cell-img">
-                  <img
-                    class="thumb"
-                    [src]="getImageSrc(juego.id)"
-                    [alt]="juego.nombre"
-                    (error)="onImgError($event, juego.id)"
-                    loading="lazy"
-                  />
+                  @if (!failedImages().has(juego.id)) {
+                    <img
+                      class="thumb"
+                      [src]="getImageSrc(juego.id)"
+                      [alt]="juego.nombre"
+                      (error)="onImgError(juego.id)"
+                      loading="lazy"
+                    />
+                  } @else {
+                    <div class="thumb-placeholder">
+                      <i class="fa-solid fa-image"></i>
+                    </div>
+                  }
                 </td>
                 <td>{{ juego.id }}</td>
                 <td class="cell-bold cell-name" [title]="juego.nombre">{{ juego.nombre }}</td>
@@ -508,6 +514,7 @@ export class JuegosListComponent implements OnInit {
 
   // Cache-buster para forzar recarga de imagenes tras upload
   imageVersion = signal(0);
+  failedImages = signal(new Set<number>());
 
   readonly pageSize = 25;
 
@@ -566,13 +573,8 @@ export class JuegosListComponent implements OnInit {
     return `/api/juegos/${id}/imagen?v=${this.imageVersion()}`;
   }
 
-  onImgError(event: Event, id: number): void {
-    const img = event.target as HTMLImageElement;
-    img.style.display = 'none';
-    const placeholder = document.createElement('div');
-    placeholder.className = 'thumb-placeholder';
-    placeholder.innerHTML = '<i class="fa-solid fa-image"></i>';
-    img.parentElement?.appendChild(placeholder);
+  onImgError(id: number): void {
+    this.failedImages.update(set => { const s = new Set(set); s.add(id); return s; });
   }
 
   triggerUpload(id: number): void {
@@ -590,6 +592,7 @@ export class JuegosListComponent implements OnInit {
     this.juegoService.uploadImagen(id, file).subscribe({
       next: () => {
         this.toastService.success('Imagen subida correctamente');
+        this.failedImages.update(set => { const s = new Set(set); s.delete(id); return s; });
         this.imageVersion.update(v => v + 1);
       },
       error: () => this.toastService.error('Error al subir la imagen')
