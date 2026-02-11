@@ -20,7 +20,7 @@ import { GGBEvent, EventSubscription } from '../../../core/models/evento.interfa
         </a>
 
         <!-- Hero banner -->
-        <div class="hero-banner" [style.background]="getHeroGradient(event()!.type)">
+        <div class="hero-banner" [style.background]="'url(' + eventService.getImageUrl(event()!.id) + ') center/cover no-repeat, ' + getHeroGradient(event()!.type)">
           <div class="hero-overlay">
             <span class="type-badge" [style.background-color]="getTypeColor(event()!.type)">
               <i [class]="getTypeIcon(event()!.type)"></i>
@@ -805,7 +805,7 @@ import { GGBEvent, EventSubscription } from '../../../core/models/evento.interfa
 })
 export class EventDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
-  private eventService = inject(EventService);
+  readonly eventService = inject(EventService);
   private authService = inject(AuthService);
   private toastService = inject(ToastService);
 

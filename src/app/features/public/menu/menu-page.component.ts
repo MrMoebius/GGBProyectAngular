@@ -101,67 +101,102 @@ interface CategoryTab {
           <div class="customizer-header">
             <div>
               <h2 class="customizer-title">{{ customizingProduct()!.nombre }}</h2>
-              <span class="customizer-base-price">Base: {{ customizingProduct()!.precio.toFixed(2) }} EUR</span>
+              <span class="customizer-base-price">{{ customizingProduct()!.precio.toFixed(2) }} EUR</span>
             </div>
             <button class="customizer-close" (click)="closeCustomizer()">
               <i class="fa-solid fa-xmark"></i>
             </button>
           </div>
 
-          <div class="customizer-body">
-            <div class="customizer-section">
-              <h3 class="section-label">
-                <i class="fa-solid fa-list-check"></i>
-                Ingredientes
-              </h3>
-              <p class="section-hint">Desmarca los que no quieras</p>
-              <ul class="ingredient-list">
-                @for (ing of currentIngredients(); track ing) {
-                  <li class="ingredient-item" [class.removed]="!ingredientStates()[ing]">
-                    <label class="check-label">
-                      <input
-                        type="checkbox"
-                        [checked]="ingredientStates()[ing]"
-                        (change)="toggleIngredient(ing)" />
-                      <span class="check-custom"></span>
-                      <span class="check-text">{{ ing }}</span>
-                    </label>
-                  </li>
-                }
-              </ul>
+          @if (isVariantProduct(customizingProduct()!)) {
+            <!-- Variant mode (Copazo) -->
+            <div class="customizer-body">
+              <div class="customizer-section">
+                <h3 class="section-label">
+                  <i class="fa-solid fa-wine-bottle"></i>
+                  Elige tu destilado
+                </h3>
+                <p class="section-hint">Selecciona uno</p>
+                <ul class="variant-list">
+                  @for (option of variantOptions(); track option) {
+                    <li
+                      class="variant-item"
+                      [class.selected]="selectedVariant() === option"
+                      (click)="selectedVariant.set(option)">
+                      <span class="radio-custom" [class.checked]="selectedVariant() === option"></span>
+                      <span class="radio-text">{{ option }}</span>
+                    </li>
+                  }
+                </ul>
+              </div>
+            </div>
+            <div class="customizer-footer">
+              <span class="customizer-total">{{ customizingProduct()!.precio.toFixed(2) }} EUR</span>
+              <button
+                class="btn-confirm"
+                [disabled]="!selectedVariant()"
+                (click)="confirmVariant()">
+                <i class="fa-solid fa-cart-plus"></i>
+                Anadir al pedido
+              </button>
+            </div>
+          } @else {
+            <!-- Hamburger mode -->
+            <div class="customizer-body">
+              <div class="customizer-section">
+                <h3 class="section-label">
+                  <i class="fa-solid fa-list-check"></i>
+                  Ingredientes
+                </h3>
+                <p class="section-hint">Desmarca los que no quieras</p>
+                <ul class="ingredient-list">
+                  @for (ing of currentIngredients(); track ing) {
+                    <li class="ingredient-item" [class.removed]="!ingredientStates()[ing]">
+                      <label class="check-label">
+                        <input
+                          type="checkbox"
+                          [checked]="ingredientStates()[ing]"
+                          (change)="toggleIngredient(ing)" />
+                        <span class="check-custom"></span>
+                        <span class="check-text">{{ ing }}</span>
+                      </label>
+                    </li>
+                  }
+                </ul>
+              </div>
+
+              <div class="customizer-section">
+                <h3 class="section-label">
+                  <i class="fa-solid fa-plus-circle"></i>
+                  Extras
+                </h3>
+                <p class="section-hint">Anade extras a tu hamburguesa</p>
+                <ul class="extras-list">
+                  @for (extra of extras(); track extra.id) {
+                    <li class="extra-item" [class.selected]="extraStates()[extra.id]">
+                      <label class="check-label">
+                        <input
+                          type="checkbox"
+                          [checked]="extraStates()[extra.id]"
+                          (change)="toggleExtra(extra.id)" />
+                        <span class="check-custom"></span>
+                        <span class="check-text">{{ extra.nombre.replace('Extra ', '') }}</span>
+                      </label>
+                      <span class="extra-price">+{{ extra.precio.toFixed(2) }} EUR</span>
+                    </li>
+                  }
+                </ul>
+              </div>
             </div>
 
-            <div class="customizer-section">
-              <h3 class="section-label">
-                <i class="fa-solid fa-plus-circle"></i>
-                Extras
-              </h3>
-              <p class="section-hint">Anade extras a tu hamburguesa</p>
-              <ul class="extras-list">
-                @for (extra of extras(); track extra.id) {
-                  <li class="extra-item" [class.selected]="extraStates()[extra.id]">
-                    <label class="check-label">
-                      <input
-                        type="checkbox"
-                        [checked]="extraStates()[extra.id]"
-                        (change)="toggleExtra(extra.id)" />
-                      <span class="check-custom"></span>
-                      <span class="check-text">{{ extra.nombre.replace('Extra ', '') }}</span>
-                    </label>
-                    <span class="extra-price">+{{ extra.precio.toFixed(2) }} EUR</span>
-                  </li>
-                }
-              </ul>
+            <div class="customizer-footer">
+              <span class="customizer-total">Total: {{ customizedPrice().toFixed(2) }} EUR</span>
+              <button class="btn-confirm" (click)="confirmCustomized()">
+                <i class="fa-solid fa-cart-plus"></i>
+                Anadir al pedido
+              </button>
             </div>
-          </div>
-
-          <div class="customizer-footer">
-            <span class="customizer-total">Total: {{ customizedPrice().toFixed(2) }} EUR</span>
-            <button class="btn-confirm" (click)="confirmCustomized()">
-              <i class="fa-solid fa-cart-plus"></i>
-              Anadir al pedido
-            </button>
-          </div>
+          }
         </div>
       </div>
     }
@@ -782,6 +817,70 @@ interface CategoryTab {
       background: var(--primary-hover);
     }
 
+    .btn-confirm:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* === Variant Radio List (Copazo) === */
+    .variant-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .variant-item {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.7rem 0.85rem;
+      border-radius: var(--radius-md, 0.5rem);
+      background: var(--secondary-bg, #F3F4F6);
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s;
+    }
+
+    .variant-item:hover {
+      background: rgba(255, 127, 80, 0.08);
+    }
+
+    .variant-item.selected {
+      background: rgba(255, 127, 80, 0.1);
+      box-shadow: inset 0 0 0 2px var(--primary-coral);
+    }
+
+    .radio-custom {
+      width: 20px;
+      height: 20px;
+      min-width: 20px;
+      border: 2px solid var(--text-muted);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .radio-custom.checked {
+      border-color: var(--primary-coral);
+    }
+
+    .radio-custom.checked::after {
+      content: '';
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--primary-coral);
+    }
+
+    .radio-text {
+      font-size: 0.9rem;
+      color: var(--text-main);
+    }
+
     /* === Responsive === */
     @media (max-width: 768px) {
       .menu-title {
@@ -840,6 +939,7 @@ export class MenuPageComponent implements OnInit {
   readonly customizingProduct = signal<Producto | null>(null);
   readonly ingredientStates = signal<Record<string, boolean>>({});
   readonly extraStates = signal<Record<number, boolean>>({});
+  readonly selectedVariant = signal<string>('');
 
   readonly categoryTabs: CategoryTab[] = [
     { key: 'TODOS',    label: 'Todos',    icon: '' },
@@ -915,12 +1015,39 @@ export class MenuPageComponent implements OnInit {
       && product.precio >= 10;
   }
 
+  isVariantProduct(product: Producto): boolean {
+    return product.categoria === 'ALCOHOL'
+      && !!product.descripcion
+      && product.descripcion.includes(',');
+  }
+
+  readonly variantOptions = computed(() => {
+    const product = this.customizingProduct();
+    if (!product?.descripcion) return [];
+    return product.descripcion.split(',').map(s => s.trim()).filter(s => s.length > 0);
+  });
+
   addToCart(product: Producto): void {
-    if (this.isCustomizable(product)) {
+    if (this.isVariantProduct(product)) {
+      this.openVariantSelector(product);
+    } else if (this.isCustomizable(product)) {
       this.openCustomizer(product);
     } else {
       this.cartService.addToCart(product);
     }
+  }
+
+  openVariantSelector(product: Producto): void {
+    this.customizingProduct.set(product);
+    this.selectedVariant.set('');
+  }
+
+  confirmVariant(): void {
+    const product = this.customizingProduct();
+    const variant = this.selectedVariant();
+    if (!product || !variant) return;
+    this.cartService.addVariantToCart(product, variant);
+    this.closeCustomizer();
   }
 
   openCustomizer(product: Producto): void {

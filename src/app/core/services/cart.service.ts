@@ -6,6 +6,7 @@ export interface CartItem {
   quantity: number;
   removedIngredients?: string[];
   extras?: Producto[];
+  selectedVariant?: string;
 }
 
 @Injectable({
@@ -57,6 +58,13 @@ export class CartService {
     this._items.update(items => [
       ...items,
       { product, quantity: 1, removedIngredients, extras }
+    ]);
+  }
+
+  addVariantToCart(product: Producto, variant: string): void {
+    this._items.update(items => [
+      ...items,
+      { product, quantity: 1, selectedVariant: variant }
     ]);
   }
 
