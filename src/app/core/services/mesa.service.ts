@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Mesa } from '../models/mesa.interface';
+import { Mesa, MesaLayout } from '../models/mesa.interface';
 import { ApiService } from '../services/api.service';
 
 @Injectable({
@@ -28,5 +28,9 @@ export class MesaService {
 
   delete(id: number): Observable<void> {
     return this.api.delete<void>(`${this.endpoint}/${id}`);
+  }
+
+  saveLayout(layouts: MesaLayout[]): Observable<any> {
+    return this.api.put(`${this.endpoint}/layout`, layouts);
   }
 }
