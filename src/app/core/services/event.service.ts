@@ -1,5 +1,7 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
+import { tap } from 'rxjs/operators';
 import { GGBEvent, EventSubscription } from '../models/evento.interface';
 import { LocalStorageService } from './local-storage.service';
 
@@ -224,6 +226,7 @@ const SEED_EVENTS: GGBEvent[] = [
 @Injectable({ providedIn: 'root' })
 export class EventService {
   private storage = inject(LocalStorageService);
+  private http = inject(HttpClient);
 
   private _events = signal<GGBEvent[]>(this.loadEvents());
   private _subscriptions = signal<EventSubscription[]>(this.loadSubscriptions());
@@ -428,6 +431,28 @@ export class EventService {
   getSubscriptionsByUser(userId: string): Observable<EventSubscription[]> {
     return of(
       this._subscriptions().filter(s => s.userId === userId && s.status !== 'CANCELLED')
+    );
+  }
+
+  // ── Image management ────────────────────────────────────
+
+  private _imageVersion = signal(Date.now());
+
+  getImageUrl(eventId: number): string {
+    return `/api/eventos/${eventId}/imagen?v=${this._imageVersion()}`;
+  }
+
+  uploadImage(eventId: number, file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post(`/api/eventos/${eventId}/imagen`, formData).pipe(
+      tap(() => this._imageVersion.set(Date.now()))
+    );
+  }
+
+  deleteImage(eventId: number): Observable<any> {
+    return this.http.delete(`/api/eventos/${eventId}/imagen`).pipe(
+      tap(() => this._imageVersion.set(Date.now()))
     );
   }
 

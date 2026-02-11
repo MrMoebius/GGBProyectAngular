@@ -184,6 +184,26 @@ import { ToastService } from '../../../core/services/toast.service';
               <input type="text" class="form-input" formControlName="tags" placeholder="estrategia, competitivo, premios" />
             </div>
           </div>
+
+          <!-- Image upload -->
+          <div class="form-group">
+            <label class="form-label">Imagen / Banner</label>
+            @if (imagePreview()) {
+              <div class="image-preview-wrapper">
+                <img [src]="imagePreview()" alt="Vista previa" class="image-preview" />
+                <button type="button" class="btn btn-danger btn-sm image-remove-btn" (click)="removeImage()">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+            } @else {
+              <label class="upload-dropzone">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+                <span>Haz click para subir una imagen</span>
+                <span class="upload-hint">JPEG, PNG o WebP (max 5MB)</span>
+                <input type="file" accept="image/jpeg,image/png,image/webp" (change)="onImageSelected($event)" hidden />
+              </label>
+            }
+          </div>
         </form>
       </app-entity-form-modal>
 
@@ -336,6 +356,55 @@ import { ToastService } from '../../../core/services/toast.service';
         grid-template-columns: 1fr;
       }
     }
+
+    /* === Image Upload === */
+    .upload-dropzone {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.375rem;
+      padding: 1.5rem;
+      border: 2px dashed var(--input-border, #D1D5DB);
+      border-radius: var(--radius-md, 0.5rem);
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    .upload-dropzone:hover {
+      border-color: var(--primary-coral);
+      background: rgba(255, 127, 80, 0.04);
+    }
+
+    .upload-dropzone i {
+      font-size: 1.5rem;
+      color: var(--primary-coral);
+    }
+
+    .upload-hint {
+      font-size: 0.75rem;
+      opacity: 0.7;
+    }
+
+    .image-preview-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+
+    .image-preview {
+      max-width: 100%;
+      max-height: 180px;
+      border-radius: var(--radius-md, 0.5rem);
+      object-fit: cover;
+    }
+
+    .image-remove-btn {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+    }
   `]
 })
 export class EventosListComponent implements OnInit {
@@ -350,6 +419,8 @@ export class EventosListComponent implements OnInit {
   isEditing = signal(false);
   currentId = signal<number | null>(null);
   deleteId = signal<number | null>(null);
+  imageFile = signal<File | null>(null);
+  imagePreview = signal<string | null>(null);
 
   filteredEventos = computed(() => {
     const term = this.searchTerm().toLowerCase();
@@ -403,6 +474,8 @@ export class EventosListComponent implements OnInit {
   openCreate(): void {
     this.isEditing.set(false);
     this.currentId.set(null);
+    this.imageFile.set(null);
+    this.imagePreview.set(null);
     this.eventoForm.reset({
       title: '',
       description: '',
@@ -421,6 +494,8 @@ export class EventosListComponent implements OnInit {
   openEdit(evento: GGBEvent): void {
     this.isEditing.set(true);
     this.currentId.set(evento.id);
+    this.imageFile.set(null);
+    this.imagePreview.set(this.eventService.getImageUrl(evento.id));
     this.eventoForm.patchValue({
       title: evento.title,
       description: evento.description,
@@ -482,7 +557,8 @@ export class EventosListComponent implements OnInit {
 
     if (this.isEditing() && this.currentId() !== null) {
       this.eventService.update(this.currentId()!, payload).subscribe({
-        next: () => {
+        next: (evento) => {
+          this.uploadImageIfNeeded(evento.id);
           this.toastService.success('Evento actualizado correctamente');
           this.loadEventos();
           this.showFormModal.set(false);
@@ -491,7 +567,8 @@ export class EventosListComponent implements OnInit {
       });
     } else {
       this.eventService.create(payload).subscribe({
-        next: () => {
+        next: (evento) => {
+          this.uploadImageIfNeeded(evento.id);
           this.toastService.success('Evento creado correctamente');
           this.loadEventos();
           this.showFormModal.set(false);
@@ -499,5 +576,28 @@ export class EventosListComponent implements OnInit {
         error: () => this.toastService.error('Error al crear el evento')
       });
     }
+  }
+
+  onImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    this.imageFile.set(file);
+    const reader = new FileReader();
+    reader.onload = () => this.imagePreview.set(reader.result as string);
+    reader.readAsDataURL(file);
+  }
+
+  removeImage(): void {
+    this.imageFile.set(null);
+    this.imagePreview.set(null);
+  }
+
+  private uploadImageIfNeeded(eventId: number): void {
+    const file = this.imageFile();
+    if (!file) return;
+    this.eventService.uploadImage(eventId, file).subscribe({
+      error: () => this.toastService.error('Error al subir la imagen')
+    });
   }
 }

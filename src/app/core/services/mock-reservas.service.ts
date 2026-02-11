@@ -41,12 +41,12 @@ export class MockReservasService {
     const newReserva: ReservasMesa = {
       id: Math.max(0, ...this._reservas().map(r => r.id)) + 1,
       idCliente: reserva.idCliente || 0,
-      idMesa: reserva.idMesa || 0,
+      idMesa: reserva.idMesa,
       fechaReserva: reserva.fechaReserva || '',
       horaInicio: reserva.horaInicio || '',
       horaFin: reserva.horaFin,
       numPersonas: reserva.numPersonas || 1,
-      estado: 'CONFIRMADA',
+      estado: reserva.idMesa ? 'CONFIRMADA' : 'PENDIENTE',
       notas: reserva.notas
     };
     this._reservas.update(list => {

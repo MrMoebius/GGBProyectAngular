@@ -2,9 +2,8 @@ import { Component, signal, computed, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MockReservasService } from '../../../core/services/mock-reservas.service';
 import { JuegoService } from '../../../core/services/juego.service';
+import { MesaService } from '../../../core/services/mesa.service';
 import { ToastService } from '../../../core/services/toast.service';
-import { TableMapComponent } from '../../../shared/components/table-map/table-map.component';
-import { Mesa } from '../../../core/models/mesa.interface';
 import { JuegoExtended } from '../../../core/models/juego-extended.interface';
 
 interface ContactInfo {
@@ -16,7 +15,7 @@ interface ContactInfo {
 @Component({
   selector: 'app-reservations-page',
   standalone: true,
-  imports: [FormsModule, TableMapComponent],
+  imports: [FormsModule],
   template: `
     <div class="reservations-wizard">
 
@@ -46,7 +45,7 @@ interface ContactInfo {
               </div>
               <span class="step-label">{{ step.label }}</span>
             </div>
-            @if (step.num < 4) {
+            @if (step.num < 3) {
               <div class="step-connector" [class.completed]="currentStep() > step.num"></div>
             }
           }
@@ -124,82 +123,48 @@ interface ContactInfo {
             <div class="step-actions">
               <button
                 class="btn-primary"
-                [disabled]="!step1Valid()"
-                (click)="goToStep(2)">
-                Siguiente
-                <i class="fa-solid fa-arrow-right"></i>
-              </button>
-            </div>
-          </div>
-        }
-
-        <!-- STEP 2: Table Selection -->
-        @if (currentStep() === 2) {
-          <div class="step-content step-animate">
-            <h2 class="step-title">
-              <i class="fa-solid fa-map-location-dot"></i>
-              Selecciona tu Mesa
-            </h2>
-
-            <p class="step-hint">
-              <i class="fa-solid fa-circle-info"></i>
-              Selecciona una mesa libre con capacidad para {{ partySize() }} {{ partySize() === 1 ? 'persona' : 'personas' }}.
-            </p>
-
-            <app-table-map
-              [clickable]="true"
-              (mesaSelected)="onMesaSelected($event)">
-            </app-table-map>
-
-            @if (selectedMesa()) {
-              <div class="selected-info-card">
-                <div class="info-card-icon">
-                  <i class="fa-solid fa-chair"></i>
-                </div>
-                <div class="info-card-details">
-                  <h4>{{ selectedMesa()!.nombreMesa }}</h4>
-                  <p>
-                    <i class="fa-solid fa-location-dot"></i>
-                    {{ selectedMesa()!.zona }}
-                  </p>
-                  <p>
-                    <i class="fa-solid fa-users"></i>
-                    Capacidad: {{ selectedMesa()!.capacidad }} personas
-                  </p>
-                </div>
-                @if (selectedMesa()!.capacidad < partySize()) {
-                  <div class="capacity-warning">
-                    <i class="fa-solid fa-triangle-exclamation"></i>
-                    Esta mesa tiene menos capacidad que el numero de personas indicado.
-                  </div>
+                [disabled]="!step1Valid() || checkingAvailability()"
+                (click)="checkAvailabilityAndProceed()">
+                @if (checkingAvailability()) {
+                  <i class="fa-solid fa-spinner fa-spin"></i>
+                  Comprobando disponibilidad...
+                } @else {
+                  Siguiente
+                  <i class="fa-solid fa-arrow-right"></i>
                 }
-              </div>
-            }
-
-            <!-- Navigation -->
-            <div class="step-actions">
-              <button class="btn-secondary" (click)="goToStep(1)">
-                <i class="fa-solid fa-arrow-left"></i>
-                Anterior
-              </button>
-              <button
-                class="btn-primary"
-                [disabled]="!selectedMesa()"
-                (click)="goToStep(3)">
-                Siguiente
-                <i class="fa-solid fa-arrow-right"></i>
               </button>
             </div>
           </div>
         }
 
-        <!-- STEP 3: Optional Game -->
-        @if (currentStep() === 3) {
+        <!-- STEP 2: Optional Game -->
+        @if (currentStep() === 2) {
           <div class="step-content step-animate">
             <h2 class="step-title">
               <i class="fa-solid fa-dice"></i>
               Reservar Juego (Opcional)
             </h2>
+
+            <!-- Availability banner -->
+            @if (availabilityChecked()) {
+              @if (hasAvailability()) {
+                <div class="availability-banner available">
+                  <i class="fa-solid fa-circle-check"></i>
+                  <div>
+                    <strong>Hay disponibilidad!</strong>
+                    <p>Tenemos {{ availableMesaCount() }} {{ availableMesaCount() === 1 ? 'mesa disponible' : 'mesas disponibles' }} para {{ partySize() }} personas.</p>
+                  </div>
+                </div>
+              } @else {
+                <div class="availability-banner pending">
+                  <i class="fa-solid fa-hat-wizard"></i>
+                  <div>
+                    <strong>Disponibilidad pendiente</strong>
+                    <p>No hay mesas libres en este momento para {{ partySize() }} personas. No te preocupes: tu reserva quedara en estado pendiente y cuando el Dungeon Master confirme la disponibilidad se te informara.</p>
+                  </div>
+                </div>
+              }
+            }
 
             <!-- Toggle -->
             <div class="game-toggle">
@@ -280,11 +245,11 @@ interface ContactInfo {
 
             <!-- Navigation -->
             <div class="step-actions">
-              <button class="btn-secondary" (click)="goToStep(2)">
+              <button class="btn-secondary" (click)="goToStep(1)">
                 <i class="fa-solid fa-arrow-left"></i>
                 Anterior
               </button>
-              <button class="btn-primary" (click)="goToStep(4)">
+              <button class="btn-primary" (click)="goToStep(3)">
                 Siguiente
                 <i class="fa-solid fa-arrow-right"></i>
               </button>
@@ -292,8 +257,8 @@ interface ContactInfo {
           </div>
         }
 
-        <!-- STEP 4: Confirmation -->
-        @if (currentStep() === 4 && !reservationConfirmed()) {
+        <!-- STEP 3: Confirmation -->
+        @if (currentStep() === 3 && !reservationConfirmed()) {
           <div class="step-content step-animate">
             <h2 class="step-title">
               <i class="fa-solid fa-clipboard-check"></i>
@@ -327,13 +292,6 @@ interface ContactInfo {
                     Personas
                   </span>
                   <span class="summary-value">{{ partySize() }}</span>
-                </div>
-                <div class="summary-row">
-                  <span class="summary-label">
-                    <i class="fa-solid fa-chair"></i>
-                    Mesa
-                  </span>
-                  <span class="summary-value">{{ selectedMesa()?.nombreMesa }} &mdash; {{ selectedMesa()?.zona }}</span>
                 </div>
                 @if (selectedGame()) {
                   <div class="summary-row">
@@ -426,7 +384,7 @@ interface ContactInfo {
 
             <!-- Navigation -->
             <div class="step-actions">
-              <button class="btn-secondary" (click)="goToStep(3)">
+              <button class="btn-secondary" (click)="goToStep(2)">
                 <i class="fa-solid fa-arrow-left"></i>
                 Anterior
               </button>
@@ -454,7 +412,11 @@ interface ContactInfo {
                 <i class="fa-solid fa-circle-check"></i>
               </div>
               <h2 class="success-title">Reserva Confirmada!</h2>
-              <p class="success-subtitle">Tu mesa te espera en Giber Games Bar</p>
+              @if (hasAvailability()) {
+                <p class="success-subtitle">Tu mesa te espera en Giber Games Bar</p>
+              } @else {
+                <p class="success-subtitle">Tu reserva esta pendiente. El Dungeon Master te avisara cuando confirme la disponibilidad.</p>
+              }
 
               <div class="confirmation-card">
                 <div class="confirmation-id">
@@ -469,10 +431,6 @@ interface ContactInfo {
                   <div class="confirmation-row">
                     <i class="fa-solid fa-clock"></i>
                     <span>{{ selectedTime() }}</span>
-                  </div>
-                  <div class="confirmation-row">
-                    <i class="fa-solid fa-chair"></i>
-                    <span>{{ selectedMesa()?.nombreMesa }} &mdash; {{ selectedMesa()?.zona }}</span>
                   </div>
                   <div class="confirmation-row">
                     <i class="fa-solid fa-users"></i>
@@ -1415,19 +1373,67 @@ interface ContactInfo {
         gap: 0.75rem;
       }
     }
+
+    /* === Availability Banners === */
+    .availability-banner {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 1rem 1.25rem;
+      border-radius: var(--radius-md, 0.5rem);
+      margin-bottom: 1.5rem;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .availability-banner > i {
+      font-size: 1.25rem;
+      margin-top: 0.1rem;
+      flex-shrink: 0;
+    }
+
+    .availability-banner strong {
+      display: block;
+      margin-bottom: 0.15rem;
+    }
+
+    .availability-banner p {
+      margin: 0;
+      font-size: 0.85rem;
+    }
+
+    .availability-banner.available {
+      background: rgba(16, 185, 129, 0.08);
+      border: 1px solid rgba(16, 185, 129, 0.25);
+      color: var(--text-main);
+    }
+
+    .availability-banner.available > i {
+      color: var(--success, #10B981);
+    }
+
+    .availability-banner.pending {
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      color: var(--text-main);
+    }
+
+    .availability-banner.pending > i {
+      color: #f59e0b;
+    }
   `]
 })
 export class ReservationsPageComponent {
   private reservasService = inject(MockReservasService);
   private juegosService = inject(JuegoService);
+  private mesaService = inject(MesaService);
   private toastService = inject(ToastService);
 
   // Progress steps
   readonly steps = [
     { num: 1, label: 'Fecha y Hora' },
-    { num: 2, label: 'Mesa' },
-    { num: 3, label: 'Juego' },
-    { num: 4, label: 'Confirmar' }
+    { num: 2, label: 'Juego' },
+    { num: 3, label: 'Confirmar' }
   ];
 
   // Current step
@@ -1451,10 +1457,13 @@ export class ReservationsPageComponent {
     this.selectedDate() !== '' && this.selectedTime() !== '' && this.partySize() >= 1
   );
 
-  // Step 2 signals
-  readonly selectedMesa = signal<Mesa | null>(null);
+  // Availability check signals
+  readonly checkingAvailability = signal(false);
+  readonly availabilityChecked = signal(false);
+  readonly hasAvailability = signal(false);
+  readonly availableMesaCount = signal(0);
 
-  // Step 3 signals
+  // Step 2 signals
   readonly wantGame = signal(false);
   readonly gameSearchTerm = signal('');
   readonly allGames = signal<JuegoExtended[]>([]);
@@ -1509,12 +1518,30 @@ export class ReservationsPageComponent {
     }
   }
 
-  // Step 2 handlers
-  onMesaSelected(mesa: Mesa): void {
-    this.selectedMesa.set(mesa);
+  // Availability check
+  checkAvailabilityAndProceed(): void {
+    this.checkingAvailability.set(true);
+    this.mesaService.getAll().subscribe({
+      next: (mesas) => {
+        const available = mesas.filter(
+          m => m.estado === 'LIBRE' && m.capacidad >= this.partySize()
+        );
+        this.hasAvailability.set(available.length > 0);
+        this.availableMesaCount.set(available.length);
+        this.availabilityChecked.set(true);
+        this.checkingAvailability.set(false);
+        this.goToStep(2);
+      },
+      error: () => {
+        this.hasAvailability.set(false);
+        this.availabilityChecked.set(true);
+        this.checkingAvailability.set(false);
+        this.goToStep(2);
+      }
+    });
   }
 
-  // Step 3 handlers
+  // Step 2 handlers
   onGameSearch(event: Event): void {
     const input = event.target as HTMLInputElement;
     this.gameSearchTerm.set(input.value);
@@ -1565,7 +1592,6 @@ export class ReservationsPageComponent {
 
     this.submitting.set(true);
 
-    const mesa = this.selectedMesa();
     const notes: string[] = [];
     if (this.reservationNotes().trim()) {
       notes.push(this.reservationNotes().trim());
@@ -1576,7 +1602,6 @@ export class ReservationsPageComponent {
     notes.push('Contacto: ' + this.contactInfo().nombre + ' / ' + this.contactInfo().telefono + ' / ' + this.contactInfo().email);
 
     this.reservasService.create({
-      idMesa: mesa?.id ?? 0,
       fechaReserva: this.selectedDate(),
       horaInicio: this.selectedTime(),
       numPersonas: this.partySize(),

@@ -63,6 +63,10 @@ type EventType = GGBEvent['type'];
       <div class="events-grid">
         @for (event of filteredEvents(); track event.id) {
           <a [routerLink]="['/public/eventos', event.id]" class="event-card card">
+            <!-- Card image -->
+            <div class="card-image" [style.background-image]="'url(' + eventService.getImageUrl(event.id) + ')'">
+              <div class="card-image-overlay"></div>
+            </div>
             <!-- Type badge -->
             <div class="card-top">
               <span class="type-badge" [style.background-color]="getTypeColor(event.type)">
@@ -322,6 +326,23 @@ type EventType = GGBEvent['type'];
       box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
     }
 
+    .card-image {
+      height: 160px;
+      background-size: cover;
+      background-position: center;
+      background-color: var(--secondary-bg);
+      border-radius: var(--radius-md, 0.5rem) var(--radius-md, 0.5rem) 0 0;
+      margin: -1.5rem -1.5rem 0 -1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card-image-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 40%, var(--card-bg, #fff) 100%);
+    }
+
     .card-top {
       display: flex;
       align-items: center;
@@ -579,7 +600,7 @@ type EventType = GGBEvent['type'];
   `]
 })
 export class EventsPageComponent implements OnInit {
-  private eventService = inject(EventService);
+  readonly eventService = inject(EventService);
 
   events = signal<GGBEvent[]>([]);
   activeTab = signal<TabFilter>('todos');
