@@ -7,6 +7,7 @@ import { Mesa } from '../../../core/models/mesa.interface';
 import { EntityFormModalComponent } from '../../../shared/components/entity-form-modal/entity-form-modal.component';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
 import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
+import { FloorPlanComponent } from './floor-plan.component';
 
 @Component({
   selector: 'app-mesas-list',
@@ -16,13 +17,32 @@ import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/
     ReactiveFormsModule,
     EntityFormModalComponent,
     StatusBadgeComponent,
-    ConfirmModalComponent
+    ConfirmModalComponent,
+    FloorPlanComponent
   ],
   template: `
     <div class="page-wrapper">
       <!-- Header -->
       <div class="page-header">
-        <h1 class="page-title">Mesas</h1>
+        <div class="header-left">
+          <h1 class="page-title">Mesas</h1>
+          <div class="view-toggle">
+            <button
+              class="toggle-btn"
+              [class.active]="viewMode() === 'list'"
+              (click)="viewMode.set('list')"
+            >
+              <i class="fa-solid fa-table-list"></i> Lista
+            </button>
+            <button
+              class="toggle-btn"
+              [class.active]="viewMode() === 'plan'"
+              (click)="viewMode.set('plan')"
+            >
+              <i class="fa-solid fa-map"></i> Plano
+            </button>
+          </div>
+        </div>
         <div class="page-actions">
           <input
             type="text"
@@ -37,7 +57,13 @@ import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/
         </div>
       </div>
 
-      <!-- Table -->
+      <!-- Floor Plan View -->
+      @if (viewMode() === 'plan') {
+        <app-floor-plan />
+      }
+
+      <!-- List View -->
+      @if (viewMode() === 'list') {
       <div class="card table-container">
         <table class="data-table">
           <thead>
@@ -84,6 +110,8 @@ import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/
           </tbody>
         </table>
       </div>
+
+      } <!-- end list view -->
 
       <!-- Form Modal -->
       <app-entity-form-modal
@@ -176,10 +204,51 @@ import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/
       gap: var(--spacing-md);
     }
 
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
     .page-title {
       font-size: 1.75rem;
       font-weight: 700;
       color: var(--text-main);
+      margin: 0;
+    }
+
+    .view-toggle {
+      display: flex;
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+    }
+
+    .toggle-btn {
+      padding: 0.375rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      border: none;
+      background: var(--card-bg);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+      transition: all 0.15s;
+    }
+
+    .toggle-btn:not(:last-child) {
+      border-right: 1px solid var(--card-border);
+    }
+
+    .toggle-btn:hover {
+      background: var(--table-row-hover);
+    }
+
+    .toggle-btn.active {
+      background: var(--primary-coral);
+      color: white;
     }
 
     .page-actions {
@@ -283,6 +352,7 @@ export class MesasListComponent implements OnInit {
   private toastService = inject(ToastService);
   private fb = inject(FormBuilder);
 
+  viewMode = signal<'list' | 'plan'>('list');
   mesas = signal<Mesa[]>([]);
   searchTerm = signal('');
   showFormModal = signal(false);
