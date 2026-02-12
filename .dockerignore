@@ -1,29 +1,6 @@
-# Dependencias (se reinstalan en Docker)
-node_modules/
-
-# Build output (se regenera en Docker)
-dist/
-
-# Angular cache
-.angular/
-
-# IDE
-.idea/
-.vscode/
-
-# Git
-.git/
-.gitignore
-
-# Tests
-coverage/
-
-# Documentacion
-*.md
-
-# Dev-only
-proxy.conf.json
-
-# OS
-Thumbs.db
-.DS_Store
+node_modules
+dist
+.angular
+.git
+.idea
+.vscode
