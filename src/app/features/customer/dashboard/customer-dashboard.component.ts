@@ -236,7 +236,7 @@ import { JuegoExtended } from '../../../core/models/juego-extended.interface';
     .welcome-title {
       font-size: 1.75rem;
       font-weight: 800;
-      color: var(--text-white, #fff);
+      color: var(--text-main);
       margin: 0 0 0.35rem;
     }
 
@@ -281,10 +281,12 @@ import { JuegoExtended } from '../../../core/models/juego-extended.interface';
       flex-shrink: 0;
     }
 
-    .icon-games { background-color: rgba(0, 255, 209, 0.12); color: var(--neon-cyan, #00FFD1); }
-    .icon-hours { background-color: rgba(255, 107, 107, 0.12); color: var(--primary-coral, #FF6B6B); }
-    .icon-genre { background-color: rgba(255, 107, 157, 0.12); color: var(--neon-pink, #FF6B9D); }
+    .icon-games { background-color: rgba(16, 185, 129, 0.12); color: #10B981; }
+    .icon-hours { background-color: rgba(255, 127, 80, 0.12); color: var(--primary-coral); }
+    .icon-genre { background-color: rgba(255, 107, 157, 0.12); color: #FF6B9D; }
     .icon-unique { background-color: rgba(139, 92, 246, 0.12); color: #A78BFA; }
+
+    :host-context([data-theme="dark"]) .icon-games { background-color: rgba(0, 255, 209, 0.12); color: var(--neon-cyan, #00FFD1); }
 
     .stat-info {
       display: flex;
@@ -294,7 +296,7 @@ import { JuegoExtended } from '../../../core/models/juego-extended.interface';
     .stat-value {
       font-size: 1.35rem;
       font-weight: 800;
-      color: var(--text-white, #fff);
+      color: var(--text-main);
       line-height: 1.2;
     }
 
@@ -334,12 +336,16 @@ import { JuegoExtended } from '../../../core/models/juego-extended.interface';
       gap: 0.5rem;
       font-size: 1rem;
       font-weight: 700;
-      color: var(--text-white, #fff);
+      color: var(--text-main);
       margin: 0;
     }
 
     .card-title i {
       font-size: 0.9rem;
+      color: var(--primary-coral);
+    }
+
+    :host-context([data-theme="dark"]) .card-title i {
       color: var(--neon-cyan, #00FFD1);
     }
 
@@ -382,7 +388,7 @@ import { JuegoExtended } from '../../../core/models/juego-extended.interface';
       align-items: center;
       justify-content: space-between;
       padding: 0.6rem 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      border-bottom: 1px solid var(--card-border);
     }
 
     .game-item:last-child { border-bottom: none; }
@@ -396,7 +402,7 @@ import { JuegoExtended } from '../../../core/models/juego-extended.interface';
     .game-name {
       font-size: 0.875rem;
       font-weight: 600;
-      color: var(--text-white, #fff);
+      color: var(--text-main);
     }
 
     .game-meta {
@@ -407,8 +413,12 @@ import { JuegoExtended } from '../../../core/models/juego-extended.interface';
     .game-duration {
       font-size: 0.8rem;
       font-weight: 600;
-      color: var(--neon-cyan, #00FFD1);
+      color: var(--primary-coral);
       white-space: nowrap;
+    }
+
+    :host-context([data-theme="dark"]) .game-duration {
+      color: var(--neon-cyan, #00FFD1);
     }
 
     /* ===== Reservation list ===== */
@@ -431,13 +441,18 @@ import { JuegoExtended } from '../../../core/models/juego-extended.interface';
       width: 36px;
       height: 36px;
       border-radius: var(--radius-sm, 6px);
-      background-color: rgba(0, 255, 209, 0.1);
-      color: var(--neon-cyan, #00FFD1);
+      background-color: rgba(255, 127, 80, 0.1);
+      color: var(--primary-coral);
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 0.85rem;
       flex-shrink: 0;
+    }
+
+    :host-context([data-theme="dark"]) .res-icon {
+      background-color: rgba(0, 255, 209, 0.1);
+      color: var(--neon-cyan, #00FFD1);
     }
 
     .res-info {
@@ -451,7 +466,7 @@ import { JuegoExtended } from '../../../core/models/juego-extended.interface';
     .res-date {
       font-size: 0.85rem;
       font-weight: 600;
-      color: var(--text-white, #fff);
+      color: var(--text-main);
     }
 
     .res-detail {
@@ -519,7 +534,7 @@ import { JuegoExtended } from '../../../core/models/juego-extended.interface';
     .event-title {
       font-size: 0.85rem;
       font-weight: 600;
-      color: var(--text-white, #fff);
+      color: var(--text-main);
     }
 
     .event-status {
@@ -555,7 +570,7 @@ import { JuegoExtended } from '../../../core/models/juego-extended.interface';
     .pick-name {
       font-size: 1.2rem;
       font-weight: 800;
-      color: var(--text-white, #fff);
+      color: var(--text-main);
       margin: 0 0 0.5rem;
     }
 
@@ -582,6 +597,10 @@ import { JuegoExtended } from '../../../core/models/juego-extended.interface';
 
     .pick-meta i {
       font-size: 0.7rem;
+      color: var(--primary-coral);
+    }
+
+    :host-context([data-theme="dark"]) .pick-meta i {
       color: var(--neon-cyan, #00FFD1);
     }
 
@@ -618,11 +637,15 @@ import { JuegoExtended } from '../../../core/models/juego-extended.interface';
       gap: 0.5rem;
       font-size: 1.15rem;
       font-weight: 700;
-      color: var(--text-white, #fff);
+      color: var(--text-main);
       margin: 0 0 1rem;
     }
 
     .section-heading i {
+      color: var(--primary-coral);
+    }
+
+    :host-context([data-theme="dark"]) .section-heading i {
       color: var(--neon-cyan, #00FFD1);
     }
 
@@ -645,6 +668,11 @@ import { JuegoExtended } from '../../../core/models/juego-extended.interface';
 
     .rec-card:hover {
       transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      border-color: var(--primary-coral);
+    }
+
+    :host-context([data-theme="dark"]) .rec-card:hover {
       box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
       border-color: rgba(0, 255, 209, 0.15);
     }
@@ -658,15 +686,20 @@ import { JuegoExtended } from '../../../core/models/juego-extended.interface';
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.03em;
+      background-color: rgba(255, 127, 80, 0.1);
+      color: var(--primary-coral);
+      margin-bottom: 0.75rem;
+    }
+
+    :host-context([data-theme="dark"]) .rec-genre {
       background-color: rgba(0, 255, 209, 0.1);
       color: var(--neon-cyan, #00FFD1);
-      margin-bottom: 0.75rem;
     }
 
     .rec-name {
       font-size: 1.05rem;
       font-weight: 700;
-      color: var(--text-white, #fff);
+      color: var(--text-main);
       margin: 0 0 0.5rem;
     }
 
