@@ -79,6 +79,12 @@ import { AuthService } from '../../../core/services/auth.service';
           </button>
         </form>
 
+        <!-- Enlace a registro para nuevos usuarios -->
+        <p class="register-link-text">
+          No tienes cuenta?
+          <a class="register-link" routerLink="/auth/registro">Crear cuenta</a>
+        </p>
+
         <!-- Back link -->
         <a class="back-link" routerLink="/public">
           <i class="fa-solid fa-arrow-left"></i>
@@ -246,6 +252,24 @@ import { AuthService } from '../../../core/services/auth.service';
       opacity: 0.5;
       cursor: not-allowed;
     }
+
+    /* ===== Enlace a registro ===== */
+    .register-link-text {
+      text-align: center;
+      color: var(--text-muted, #94a3b8);
+      font-size: 0.85rem;
+      margin-top: 1.25rem;
+      margin-bottom: 0;
+    }
+
+    .register-link {
+      color: var(--neon-cyan, #00FFD1);
+      text-decoration: none;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+
+    .register-link:hover { opacity: 0.8; }
 
     /* ===== Back link ===== */
     .back-link {
