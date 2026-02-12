@@ -36,6 +36,23 @@ export class AuthService {
     }
   }
 
+  /** Registro publico de cliente. Envia nombre y email al backend, que envia email de verificacion. */
+  registro(data: { nombre: string; email: string }): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/registro`, data);
+  }
+
+  /** Verifica el email del cliente con el token recibido por correo y establece su contraseña. */
+  verificarEmail(data: { token: string; password: string }): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/verificar-email`, data);
+  }
+
+  /** Reenvia el email de verificacion (util si el token expiro o no llego el correo). */
+  reenviarVerificacion(email: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/reenviar-verificacion`, null, {
+      params: { email }
+    });
+  }
+
   login(credentials: { email: string; password: string }): Observable<any> {
     this.logout();
     return this.http.post<any>(`${this.apiUrl}/login`, credentials).pipe(
