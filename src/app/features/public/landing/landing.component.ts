@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { JuegoService } from '../../../core/services/juego.service';
@@ -53,7 +53,7 @@ import { GameCardPublicComponent } from '../../../shared/components/game-card-pu
             </div>
             <div class="hero-stat-divider"></div>
             <div class="hero-stat">
-              <span class="hero-stat-number">{{ featuredGames().length > 0 ? '200+' : '...' }}</span>
+              <span class="hero-stat-number">{{ featuredGames().length > 0 ? '330+' : '...' }}</span>
               <span class="hero-stat-label">Juegos</span>
             </div>
             <div class="hero-stat-divider"></div>
@@ -147,20 +147,27 @@ import { GameCardPublicComponent } from '../../../shared/components/game-card-pu
         </a>
       </div>
       <div class="food-carousel">
-        @for (slide of foodSlides; track slide; let i = $index) {
-          <img
-            class="food-slide"
-            [src]="slide"
-            [class.active]="i === currentFoodSlide()"
-            alt="Nuestra carta"
-          />
-        }
+        <button class="food-arrow food-arrow-left" (click)="prevFoodSlide()">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <div class="food-viewport">
+          <div class="food-track" [style.transform]="foodTrackTransform()">
+            @for (slide of foodSlides; track slide; let i = $index) {
+              <div class="food-slide-item">
+                <img [src]="slide" alt="Nuestra carta" />
+              </div>
+            }
+          </div>
+        </div>
+        <button class="food-arrow food-arrow-right" (click)="nextFoodSlide()">
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
       </div>
       <div class="food-dots">
         @for (slide of foodSlides; track slide; let i = $index) {
           <button
             class="food-dot"
-            [class.active]="i === currentFoodSlide()"
+            [class.active]="i >= currentFoodSlide() && i < currentFoodSlide() + 3"
             (click)="goToFoodSlide(i)"
             [attr.aria-label]="'Imagen ' + (i + 1)"
           ></button>
@@ -448,7 +455,7 @@ import { GameCardPublicComponent } from '../../../shared/components/game-card-pu
     /* SECTION HEADER */
     .section-header {
       display: flex;
-      align-items: flex-end;
+      align-items: center;
       justify-content: space-between;
       margin-bottom: 2rem;
       gap: 1rem;
@@ -586,24 +593,62 @@ import { GameCardPublicComponent } from '../../../shared/components/game-card-pu
     .food-carousel {
       position: relative;
       width: 100%;
-      height: 400px;
       border-radius: var(--radius-lg);
+    }
+
+    .food-viewport {
       overflow: hidden;
-      background: var(--card-bg, #1E293B);
+      border-radius: var(--radius-lg);
     }
 
-    .food-slide {
-      position: absolute;
-      inset: 0;
+    .food-track {
+      display: flex;
+      transition: transform 0.5s ease-in-out;
+    }
+
+    .food-slide-item {
+      flex: 0 0 calc(100% / 3);
+      padding: 0 0.5rem;
+      box-sizing: border-box;
+    }
+
+    .food-slide-item img {
       width: 100%;
-      height: 80%;
+      height: 300px;
       object-fit: cover;
-      opacity: 0;
-      transition: opacity 1s ease-in-out;
+      border-radius: var(--radius-lg);
     }
 
-    .food-slide.active {
-      opacity: 1;
+    .food-arrow {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 2;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, transform 0.2s;
+    }
+
+    .food-arrow:hover {
+      background: rgba(0, 0, 0, 0.8);
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    .food-arrow-left {
+      left: -0.5rem;
+    }
+
+    .food-arrow-right {
+      right: -0.5rem;
     }
 
     .food-dots {
@@ -917,8 +962,12 @@ import { GameCardPublicComponent } from '../../../shared/components/game-card-pu
         display: none;
       }
 
-      .food-carousel {
-        height: 280px;
+      .food-slide-item {
+        flex: 0 0 100%;
+      }
+
+      .food-slide-item img {
+        height: 220px;
       }
 
       .section-header {
@@ -985,6 +1034,11 @@ export class LandingComponent implements OnInit, OnDestroy {
     'assets/GGBarFood/GGBarFood06.webp',
   ];
   currentFoodSlide = signal(0);
+  foodTrackTransform = computed(() => {
+    const slidePercent = 100 / this.foodSlides.length;
+    return `translateX(-${this.currentFoodSlide() * slidePercent}%)`;
+  });
+  private maxFoodSlide = this.foodSlides.length - 3;
   private foodInterval: ReturnType<typeof setInterval> | null = null;
 
   ngOnInit(): void {
@@ -1031,13 +1085,24 @@ export class LandingComponent implements OnInit, OnDestroy {
 
   // Food carousel methods
   goToFoodSlide(index: number): void {
-    this.currentFoodSlide.set(index);
+    const clamped = Math.min(index, this.maxFoodSlide);
+    this.currentFoodSlide.set(clamped);
+    this.restartFoodCarousel();
+  }
+
+  nextFoodSlide(): void {
+    this.currentFoodSlide.update(i => i < this.maxFoodSlide ? i + 1 : 0);
+    this.restartFoodCarousel();
+  }
+
+  prevFoodSlide(): void {
+    this.currentFoodSlide.update(i => i > 0 ? i - 1 : this.maxFoodSlide);
     this.restartFoodCarousel();
   }
 
   private startFoodCarousel(): void {
     this.foodInterval = setInterval(() => {
-      this.currentFoodSlide.update(i => (i + 1) % this.foodSlides.length);
+      this.currentFoodSlide.update(i => i < this.maxFoodSlide ? i + 1 : 0);
     }, 4000);
   }
 
