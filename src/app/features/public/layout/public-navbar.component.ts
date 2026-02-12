@@ -153,11 +153,15 @@ import { NotificationService } from '../../../core/services/notification.service
       left: 0;
       right: 0;
       height: var(--public-nav-height);
-      background: rgba(15, 23, 42, 0.92);
+      background: rgba(255, 255, 255, 0.85);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
       transition: background 0.35s ease, box-shadow 0.35s ease, backdrop-filter 0.35s ease;
       z-index: 1000;
+    }
+
+    :host-context([data-theme="dark"]) .navbar {
+      background: rgba(15, 23, 42, 0.92);
     }
 
     .navbar.scrolled {
@@ -191,11 +195,19 @@ import { NotificationService } from '../../../core/services/notification.service
       height: 42px;
       width: auto;
       object-fit: contain;
-      filter: drop-shadow(0 0 8px rgba(0, 255, 209, 0.3));
+      filter: drop-shadow(0 0 4px rgba(0, 0, 0, 0.15));
       transition: filter 0.3s;
     }
 
     .logo:hover .logo-img {
+      filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.25));
+    }
+
+    :host-context([data-theme="dark"]) .logo-img {
+      filter: drop-shadow(0 0 8px rgba(0, 255, 209, 0.3));
+    }
+
+    :host-context([data-theme="dark"]) .logo:hover .logo-img {
       filter: drop-shadow(0 0 14px rgba(0, 255, 209, 0.5));
     }
 
@@ -227,9 +239,22 @@ import { NotificationService } from '../../../core/services/notification.service
       background-color: rgba(255, 255, 255, 0.06);
     }
 
+    .navbar.scrolled .nav-link:hover {
+      background-color: var(--secondary-bg);
+    }
+
+    :host-context([data-theme="dark"]) .navbar.scrolled .nav-link:hover {
+      background-color: rgba(255, 255, 255, 0.06);
+    }
+
     .nav-link.active {
-      color: var(--neon-cyan);
+      color: var(--primary-coral);
       font-weight: 600;
+    }
+
+    :host-context([data-theme="dark"]) .nav-link.active {
+      color: var(--neon-cyan);
+      text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px rgba(0, 255, 209, 0.3);
     }
 
     .nav-link.active::after {
@@ -240,13 +265,13 @@ import { NotificationService } from '../../../core/services/notification.service
       transform: translateX(-50%);
       width: 60%;
       height: 2px;
-      background-color: var(--neon-cyan);
+      background-color: var(--primary-coral);
       border-radius: 1px;
-      box-shadow: 0 0 8px var(--neon-cyan);
     }
 
-    :host-context([data-theme="dark"]) .nav-link.active {
-      text-shadow: 0 0 10px var(--neon-cyan), 0 0 20px rgba(0, 255, 209, 0.3);
+    :host-context([data-theme="dark"]) .nav-link.active::after {
+      background-color: var(--neon-cyan);
+      box-shadow: 0 0 8px var(--neon-cyan);
     }
 
     /* ===== Actions (right side) ===== */
@@ -278,6 +303,14 @@ import { NotificationService } from '../../../core/services/notification.service
       color: var(--text-main);
       background-color: rgba(255, 255, 255, 0.08);
       transform: scale(1.08);
+    }
+
+    .navbar.scrolled .action-btn:hover {
+      background-color: var(--secondary-bg);
+    }
+
+    :host-context([data-theme="dark"]) .navbar.scrolled .action-btn:hover {
+      background-color: rgba(255, 255, 255, 0.08);
     }
 
     /* ===== Notification badge ===== */
@@ -390,16 +423,22 @@ import { NotificationService } from '../../../core/services/notification.service
 
     .mobile-link:hover {
       color: var(--text-main);
+      background-color: var(--secondary-bg);
+    }
+
+    :host-context([data-theme="dark"]) .mobile-link:hover {
       background-color: rgba(255, 255, 255, 0.06);
     }
 
     .mobile-link.active {
-      color: var(--neon-cyan);
+      color: var(--primary-coral);
       font-weight: 600;
-      background-color: rgba(0, 255, 209, 0.06);
+      background-color: rgba(255, 127, 80, 0.08);
     }
 
     :host-context([data-theme="dark"]) .mobile-link.active {
+      color: var(--neon-cyan);
+      background-color: rgba(0, 255, 209, 0.06);
       text-shadow: 0 0 8px var(--neon-cyan);
     }
 
