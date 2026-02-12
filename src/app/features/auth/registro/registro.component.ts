@@ -60,6 +60,25 @@ import { AuthService } from '../../../core/services/auth.service';
               }
             </div>
 
+            <!-- Campo telefono (opcional) -->
+            <div class="form-group">
+              <label for="telefono" class="form-label">Telefono</label>
+              <input
+                type="tel"
+                id="telefono"
+                formControlName="telefono"
+                class="form-input"
+                [class.input-error]="isFieldInvalid('telefono')"
+                placeholder="Ej: 612 345 678"
+              >
+              @if (isFieldInvalid('telefono')) {
+                <p class="field-error">
+                  <i class="fa-solid fa-circle-exclamation"></i>
+                  El telefono es obligatorio
+                </p>
+              }
+            </div>
+
             @if (errorMessage()) {
               <div class="error-banner">
                 <i class="fa-solid fa-triangle-exclamation"></i>
@@ -196,6 +215,12 @@ import { AuthService } from '../../../core/services/auth.service';
       box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
     }
 
+    .optional-label {
+      font-weight: 400;
+      font-size: 0.75rem;
+      opacity: 0.7;
+    }
+
     .field-error {
       display: flex;
       align-items: center;
@@ -317,7 +342,8 @@ export class RegistroComponent {
 
   registroForm = this.fb.group({
     nombre: ['', [Validators.required, Validators.maxLength(150)]],
-    email: ['', [Validators.required, Validators.email, Validators.maxLength(150)]]
+    email: ['', [Validators.required, Validators.email, Validators.maxLength(150)]],
+    telefono: ['', [Validators.required, Validators.maxLength(20)]]
   });
 
   errorMessage = signal('');
@@ -339,9 +365,9 @@ export class RegistroComponent {
     this.isLoading.set(true);
     this.errorMessage.set('');
 
-    const { nombre, email } = this.registroForm.value;
+    const { nombre, email, telefono } = this.registroForm.value;
 
-    this.authService.registro({ nombre: nombre!, email: email! }).subscribe({
+    this.authService.registro({ nombre: nombre!, email: email!, telefono: telefono! }).subscribe({
       next: (res) => {
         this.isLoading.set(false);
         this.registroExitoso.set(true);

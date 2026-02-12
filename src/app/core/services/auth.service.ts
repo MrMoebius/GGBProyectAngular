@@ -36,8 +36,8 @@ export class AuthService {
     }
   }
 
-  /** Registro publico de cliente. Envia nombre y email al backend, que envia email de verificacion. */
-  registro(data: { nombre: string; email: string }): Observable<any> {
+  /** Registro publico de cliente. Envia nombre, email y telefono al backend, que envia email de verificacion. */
+  registro(data: { nombre: string; email: string; telefono: string }): Observable<any> {
     return this.http.post<any>(`${this.apiUrl}/registro`, data);
   }
 
