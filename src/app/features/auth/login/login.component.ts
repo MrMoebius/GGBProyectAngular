@@ -14,12 +14,12 @@ import { AuthService } from '../../../core/services/auth.service';
         <div class="login-logo">
           <img src="assets/GGBarPhotoSlide/GiberGamesBarLogo.webp" alt="Giber Games Bar" class="login-logo-img">
         </div>
-        <p class="login-subtitle">Inicia sesion en tu cuenta</p>
+        <p class="login-subtitle">Inicia sesión en tu cuenta</p>
 
         <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
           <!-- Email Field -->
           <div class="form-group">
-            <label for="email" class="form-label">Correo Electronico</label>
+            <label for="email" class="form-label">Correo Electrónico</label>
             <input
               type="email"
               id="email"
@@ -31,26 +31,26 @@ import { AuthService } from '../../../core/services/auth.service';
             @if (isFieldInvalid('email')) {
               <p class="field-error">
                 <i class="fa-solid fa-circle-exclamation"></i>
-                Introduce un email valido
+                Introduce un email válido
               </p>
             }
           </div>
 
           <!-- Password Field -->
           <div class="form-group">
-            <label for="password" class="form-label">Contrasena</label>
+            <label for="password" class="form-label">Contraseña</label>
             <input
               type="password"
               id="password"
               formControlName="password"
               class="form-input"
               [class.input-error]="isFieldInvalid('password')"
-              placeholder="Tu contrasena"
+              placeholder="Tu contraseña"
             >
             @if (isFieldInvalid('password')) {
               <p class="field-error">
                 <i class="fa-solid fa-circle-exclamation"></i>
-                La contrasena es obligatoria
+                La contraseña es obligatoria
               </p>
             }
           </div>
@@ -81,7 +81,7 @@ import { AuthService } from '../../../core/services/auth.service';
 
         <!-- Enlace a registro para nuevos usuarios -->
         <p class="register-link-text">
-          No tienes cuenta?
+          ¿No tienes cuenta?
           <a class="register-link" routerLink="/auth/registro">Crear cuenta</a>
         </p>
 
@@ -101,17 +101,27 @@ import { AuthService } from '../../../core/services/auth.service';
       align-items: center;
       justify-content: center;
       padding: 2rem 1rem;
+      background: var(--content-bg, #F3F4F6);
+    }
+
+    :host-context([data-theme="dark"]) .login-page {
       background: linear-gradient(135deg, var(--hero-gradient-start, #0F172A), var(--hero-gradient-end, #1E293B));
     }
 
-    /* ===== Glass card ===== */
+    /* ===== Card ===== */
     .login-card {
       width: 100%;
       max-width: 420px;
-      background-color: rgba(30, 41, 59, 0.85);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background-color: var(--card-bg, #FFFFFF);
+      border: 1px solid var(--card-border, #E5E7EB);
       border-radius: var(--radius-lg, 16px);
       padding: 2.5rem 2rem;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    :host-context([data-theme="dark"]) .login-card {
+      background-color: rgba(30, 41, 59, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.08);
       box-shadow:
         0 8px 32px rgba(0, 0, 0, 0.4),
         0 0 60px rgba(0, 255, 209, 0.04),
@@ -133,7 +143,7 @@ import { AuthService } from '../../../core/services/auth.service';
 
     .login-subtitle {
       text-align: center;
-      color: var(--text-muted, #94a3b8);
+      color: var(--text-main);
       font-size: 0.9rem;
       margin: 0 0 2rem;
     }
@@ -154,7 +164,7 @@ import { AuthService } from '../../../core/services/auth.service';
     .form-label {
       font-size: 0.8125rem;
       font-weight: 600;
-      color: var(--text-muted, #94a3b8);
+      color: var(--text-main);
       letter-spacing: 0.02em;
     }
 
@@ -162,9 +172,9 @@ import { AuthService } from '../../../core/services/auth.service';
       width: 100%;
       padding: 0.75rem 1rem;
       font-size: 0.9rem;
-      color: var(--text-white, #fff);
-      background-color: var(--input-bg, rgba(255, 255, 255, 0.06));
-      border: 1px solid var(--input-border, rgba(255, 255, 255, 0.12));
+      color: var(--text-main, #1F2937);
+      background-color: var(--input-bg, #FFFFFF);
+      border: 1px solid var(--input-border, #D1D5DB);
       border-radius: var(--radius-md, 8px);
       outline: none;
       transition: border-color 0.25s, box-shadow 0.25s;
@@ -177,7 +187,12 @@ import { AuthService } from '../../../core/services/auth.service';
     }
 
     .form-input:focus {
-      border-color: var(--input-focus, var(--neon-cyan, #00FFD1));
+      border-color: var(--input-focus);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+    :host-context([data-theme="dark"]) .form-input:focus {
+      border-color: var(--neon-cyan, #00FFD1);
       box-shadow: 0 0 0 3px rgba(0, 255, 209, 0.12);
     }
 
@@ -256,17 +271,21 @@ import { AuthService } from '../../../core/services/auth.service';
     /* ===== Enlace a registro ===== */
     .register-link-text {
       text-align: center;
-      color: var(--text-muted, #94a3b8);
+      color: var(--text-main);
       font-size: 0.85rem;
       margin-top: 1.25rem;
       margin-bottom: 0;
     }
 
     .register-link {
-      color: var(--neon-cyan, #00FFD1);
+      color: var(--primary-coral);
       text-decoration: none;
       font-weight: 600;
       transition: opacity 0.2s;
+    }
+
+    :host-context([data-theme="dark"]) .register-link {
+      color: var(--neon-cyan, #00FFD1);
     }
 
     .register-link:hover { opacity: 0.8; }
@@ -278,13 +297,17 @@ import { AuthService } from '../../../core/services/auth.service';
       justify-content: center;
       gap: 0.5rem;
       margin-top: 1.5rem;
-      color: var(--text-muted, #94a3b8);
+      color: var(--text-main);
       font-size: 0.85rem;
       text-decoration: none;
       transition: color 0.2s;
     }
 
     .back-link:hover {
+      color: var(--primary-coral);
+    }
+
+    :host-context([data-theme="dark"]) .back-link:hover {
       color: var(--neon-cyan, #00FFD1);
     }
 
