@@ -1,32 +1,27 @@
 # ============================================
 # Stage 1: Build con Node
 # ============================================
-FROM node:20-alpine AS build
+FROM node:18-alpine AS build
 WORKDIR /app
 
-# Copiar package files primero (cache de dependencias)
+# Copiar package.json primero (cache de dependencias)
 COPY package.json package-lock.json ./
-
-# Instalar dependencias (determinista desde lockfile)
 RUN npm ci
 
 # Copiar codigo fuente y compilar
 COPY . .
-RUN npm run build
+RUN npx ng build --configuration production
 
 # ============================================
-# Stage 2: Runtime con nginx
+# Stage 2: Servir con Nginx
 # ============================================
-FROM nginx:1.27-alpine AS runtime
-
-# Borrar config por defecto de nginx
-RUN rm /etc/nginx/conf.d/default.conf
-
-# Copiar config custom de nginx
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+FROM nginx:alpine AS runtime
 
 # Copiar build de Angular
-COPY --from=build /app/dist/ggbproyecto-angular/ /usr/share/nginx/html/
+COPY --from=build /app/dist/ggbproyecto-angular /usr/share/nginx/html
+
+# Config de Nginx: proxy /api al backend + SPA fallback
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 
