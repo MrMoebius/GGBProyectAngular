@@ -1,4 +1,4 @@
-// Test commit - prueba de commit en rama rojas
+// Test commit - prueba de commit en rama rojass
 import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { ThemeService } from './core/services/theme.service';
