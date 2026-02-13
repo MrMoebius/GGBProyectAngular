@@ -7,6 +7,7 @@ import { Comanda } from '../../../core/models/comanda.interface';
 import { EntityFormModalComponent } from '../../../shared/components/entity-form-modal/entity-form-modal.component';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
 import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
+import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer-loader.component';
 
 @Component({
   selector: 'app-comandas-list',
@@ -16,9 +17,11 @@ import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/
     ReactiveFormsModule,
     EntityFormModalComponent,
     StatusBadgeComponent,
-    ConfirmModalComponent
+    ConfirmModalComponent,
+    BeerLoaderComponent
   ],
   template: `
+    <app-beer-loader [isLoading]="isLoading()" />
     <div class="page-wrapper">
       <!-- Header -->
       <div class="page-header">
@@ -319,14 +322,22 @@ export class ComandasListComponent implements OnInit {
     total: [0 as number, [Validators.required, Validators.min(0)]]
   });
 
+  isLoading = signal(true);
+
   ngOnInit(): void {
     this.loadComandas();
   }
 
   loadComandas(): void {
     this.comandaService.getAll().subscribe({
-      next: (data) => this.comandas.set(data),
-      error: () => this.toastService.error('Error al cargar comandas')
+      next: (data) => {
+        this.comandas.set(data);
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.toastService.error('Error al cargar comandas');
+        this.isLoading.set(false);
+      }
     });
   }
 

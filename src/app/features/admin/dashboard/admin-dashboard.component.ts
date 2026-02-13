@@ -7,12 +7,14 @@ import { ClienteService } from '../../../core/services/cliente.service';
 import { ComandaService } from '../../../core/services/comanda.service';
 import { JuegosCopiaService } from '../../../core/services/juegos-copia.service';
 import { PeticionesPagoService } from '../../../core/services/peticiones-pago.service';
+import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer-loader.component';
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [StatsCardComponent],
+  imports: [StatsCardComponent, BeerLoaderComponent],
   template: `
+    <app-beer-loader [isLoading]="isLoading()" />
     <div class="dashboard-wrapper">
       <h1 class="dashboard-title">Dashboard</h1>
 
@@ -119,6 +121,7 @@ export class AdminDashboardComponent implements OnInit {
   comandasCount = signal(0);
   juegosCopiaCount = signal(0);
   peticionesPagoCount = signal(0);
+  isLoading = signal(true);
 
   ngOnInit(): void {
     this.mesaService.getAll().subscribe({
@@ -152,8 +155,14 @@ export class AdminDashboardComponent implements OnInit {
     });
 
     this.peticionesPagoService.getAll().subscribe({
-      next: (data) => this.peticionesPagoCount.set(data.length),
-      error: () => this.peticionesPagoCount.set(0)
+      next: (data) => {
+        this.peticionesPagoCount.set(data.length);
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.peticionesPagoCount.set(0);
+        this.isLoading.set(false);
+      }
     });
   }
 }

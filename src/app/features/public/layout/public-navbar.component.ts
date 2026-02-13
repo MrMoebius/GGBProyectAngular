@@ -1,5 +1,5 @@
 import { Component, inject, signal, HostListener, computed } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { NgClass } from '@angular/common';
 import { ThemeService } from '../../../core/services/theme.service';
 import { AuthService } from '../../../core/services/auth.service';
@@ -57,9 +57,24 @@ import { NotificationService } from '../../../core/services/notification.service
 
           <!-- User avatar or Login button -->
           @if (authService.isAuthenticated()) {
-            <a class="user-avatar" routerLink="/customer/dashboard">
-              {{ userInitial() }}
-            </a>
+            <div class="user-menu-wrapper">
+              <button class="user-avatar" (click)="toggleUserMenu($event)">
+                {{ userInitial() }}
+              </button>
+              @if (userMenuOpen()) {
+                <div class="user-dropdown">
+                  <a class="user-dropdown-item" [routerLink]="profileRoute()" (click)="closeUserMenu()">
+                    <i [ngClass]="isAdmin() ? 'fa-solid fa-shield-halved' : 'fa-solid fa-user'"></i>
+                    {{ isAdmin() ? 'Panel de administración' : 'Ver perfil' }}
+                  </a>
+                  <div class="user-dropdown-divider"></div>
+                  <button class="user-dropdown-item logout-item" (click)="confirmLogout()">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                    Cerrar sesión
+                  </button>
+                </div>
+              }
+            </div>
           } @else {
             <a class="btn btn-primary btn-sm login-btn" routerLink="/auth/login">
               Entrar
@@ -102,12 +117,19 @@ import { NotificationService } from '../../../core/services/notification.service
             @if (authService.isAuthenticated()) {
               <a
                 class="mobile-link"
-                routerLink="/customer/dashboard"
+                [routerLink]="profileRoute()"
                 (click)="closeMobileMenu()"
               >
-                <i class="fa-solid fa-user"></i>
-                Mi cuenta
+                <i [ngClass]="isAdmin() ? 'fa-solid fa-shield-halved' : 'fa-solid fa-user'"></i>
+                {{ isAdmin() ? 'Panel de administración' : 'Ver perfil' }}
               </a>
+              <button
+                class="mobile-link mobile-logout"
+                (click)="closeMobileMenu(); confirmLogout()"
+              >
+                <i class="fa-solid fa-right-from-bracket"></i>
+                Cerrar sesión
+              </button>
             } @else {
               <a
                 class="mobile-link login-mobile"
@@ -133,6 +155,23 @@ import { NotificationService } from '../../../core/services/notification.service
         </div>
       }
     </nav>
+
+    <!-- Logout confirmation modal (fuera del nav para evitar stacking context) -->
+    @if (showLogoutConfirm()) {
+      <div class="modal-overlay" (click)="cancelLogout()">
+        <div class="modal-card" (click)="$event.stopPropagation()">
+          <div class="modal-icon">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </div>
+          <h3 class="modal-title">Cerrar sesión</h3>
+          <p class="modal-text">¿Estás seguro de que quieres salir de tu cuenta?</p>
+          <div class="modal-actions">
+            <button class="modal-btn modal-btn-cancel" (click)="cancelLogout()">Cancelar</button>
+            <button class="modal-btn modal-btn-confirm" (click)="doLogout()">Sí, salir</button>
+          </div>
+        </div>
+      </div>
+    }
   `,
   styles: [`
     /* ===== Host ===== */
@@ -153,7 +192,7 @@ import { NotificationService } from '../../../core/services/notification.service
       left: 0;
       right: 0;
       height: var(--public-nav-height);
-      background: rgba(255, 255, 255, 0.85);
+      background: rgba(240, 241, 243, 0.9);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
       transition: background 0.35s ease, box-shadow 0.35s ease, backdrop-filter 0.35s ease;
@@ -175,7 +214,7 @@ import { NotificationService } from '../../../core/services/notification.service
     .navbar-inner {
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      position: relative;
       max-width: var(--max-content-width);
       margin: 0 auto;
       height: 100%;
@@ -189,6 +228,7 @@ import { NotificationService } from '../../../core/services/notification.service
       gap: 0.25rem;
       text-decoration: none;
       flex-shrink: 0;
+      margin-right: auto;
     }
 
     .logo-img {
@@ -219,6 +259,9 @@ import { NotificationService } from '../../../core/services/notification.service
       list-style: none;
       margin: 0;
       padding: 0;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
     }
 
     .nav-link {
@@ -280,6 +323,7 @@ import { NotificationService } from '../../../core/services/notification.service
       align-items: center;
       gap: 0.5rem;
       flex-shrink: 0;
+      margin-left: auto;
     }
 
     .action-btn {
@@ -360,6 +404,201 @@ import { NotificationService } from '../../../core/services/notification.service
     .user-avatar:hover {
       transform: scale(1.1);
       box-shadow: 0 0 14px var(--neon-cyan), 0 0 28px rgba(0, 255, 209, 0.25);
+    }
+
+    /* ===== User dropdown menu ===== */
+    .user-menu-wrapper {
+      position: relative;
+    }
+
+    .user-dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      min-width: 180px;
+      background-color: var(--card-bg, #FFFFFF);
+      border: 1px solid var(--card-border, #E5E7EB);
+      border-radius: var(--radius-md, 8px);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      padding: 0.375rem 0;
+      animation: dropdownFade 0.15s ease-out;
+      z-index: 1001;
+    }
+
+    :host-context([data-theme="dark"]) .user-dropdown {
+      background-color: #1E293B;
+      border-color: rgba(255, 255, 255, 0.1);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    @keyframes dropdownFade {
+      from { opacity: 0; transform: translateY(-4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .user-dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 0.625rem;
+      width: 100%;
+      padding: 0.625rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-main);
+      background: none;
+      border: none;
+      text-decoration: none;
+      cursor: pointer;
+      transition: background-color 0.15s;
+    }
+
+    .user-dropdown-item:hover {
+      background-color: var(--secondary-bg, #F3F4F6);
+    }
+
+    :host-context([data-theme="dark"]) .user-dropdown-item:hover {
+      background-color: rgba(255, 255, 255, 0.06);
+    }
+
+    .user-dropdown-item i {
+      width: 16px;
+      text-align: center;
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+    }
+
+    .logout-item {
+      color: var(--danger, #EF4444);
+    }
+
+    .logout-item i {
+      color: var(--danger, #EF4444);
+    }
+
+    .user-dropdown-divider {
+      height: 1px;
+      background-color: var(--card-border, #E5E7EB);
+      margin: 0.25rem 0;
+    }
+
+    :host-context([data-theme="dark"]) .user-dropdown-divider {
+      background-color: rgba(255, 255, 255, 0.08);
+    }
+
+    /* ===== Logout confirm modal ===== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+      animation: fadeIn 0.15s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .modal-card {
+      width: 100%;
+      max-width: 360px;
+      background-color: var(--card-bg, #FFFFFF);
+      border: 1px solid var(--card-border, #E5E7EB);
+      border-radius: var(--radius-lg, 16px);
+      padding: 2rem;
+      text-align: center;
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+      animation: modalScale 0.2s ease-out;
+    }
+
+    :host-context([data-theme="dark"]) .modal-card {
+      background-color: #1E293B;
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    @keyframes modalScale {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .modal-icon {
+      font-size: 2.5rem;
+      color: var(--danger, #EF4444);
+      margin-bottom: 1rem;
+    }
+
+    .modal-title {
+      font-size: 1.125rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin: 0 0 0.5rem;
+    }
+
+    .modal-text {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin: 0 0 1.5rem;
+      line-height: 1.5;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .modal-btn {
+      flex: 1;
+      padding: 0.65rem 1rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      border: none;
+      border-radius: var(--radius-md, 8px);
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+    }
+
+    .modal-btn:active {
+      transform: scale(0.97);
+    }
+
+    .modal-btn-cancel {
+      background-color: var(--secondary-bg, #F3F4F6);
+      color: var(--text-main);
+    }
+
+    .modal-btn-cancel:hover {
+      background-color: var(--input-border, #D1D5DB);
+    }
+
+    :host-context([data-theme="dark"]) .modal-btn-cancel {
+      background-color: rgba(255, 255, 255, 0.08);
+    }
+
+    :host-context([data-theme="dark"]) .modal-btn-cancel:hover {
+      background-color: rgba(255, 255, 255, 0.14);
+    }
+
+    .modal-btn-confirm {
+      background-color: var(--danger, #EF4444);
+      color: #FFFFFF;
+    }
+
+    .modal-btn-confirm:hover {
+      background-color: #DC2626;
+    }
+
+    /* ===== Mobile logout ===== */
+    .mobile-logout {
+      width: 100%;
+      background: none;
+      border: none;
+      font-family: inherit;
+      color: var(--danger, #EF4444);
+      cursor: pointer;
     }
 
     /* ===== Login button ===== */
@@ -504,12 +743,25 @@ export class PublicNavbarComponent {
   protected readonly themeService = inject(ThemeService);
   protected readonly authService = inject(AuthService);
   protected readonly notificationService = inject(NotificationService);
+  private router = inject(Router);
 
   // ---------- State ----------
   isScrolled = signal(false);
   mobileMenuOpen = signal(false);
+  userMenuOpen = signal(false);
+  showLogoutConfirm = signal(false);
 
   // ---------- Computed ----------
+  isAdmin = computed(() => this.authService.currentRole() === 'ADMIN');
+
+  profileRoute = computed(() => {
+    switch (this.authService.currentRole()) {
+      case 'ADMIN': return '/admin/dashboard';
+      case 'EMPLEADO': return '/staff/sala';
+      default: return '/customer/dashboard';
+    }
+  });
+
   userInitial = computed(() => {
     const user = this.authService.currentUser();
     if (user && 'nombre' in user && user.nombre) {
@@ -543,5 +795,36 @@ export class PublicNavbarComponent {
 
   closeMobileMenu(): void {
     this.mobileMenuOpen.set(false);
+  }
+
+  // ---------- User menu ----------
+  toggleUserMenu(event: Event): void {
+    event.stopPropagation();
+    this.userMenuOpen.update(open => !open);
+  }
+
+  closeUserMenu(): void {
+    this.userMenuOpen.set(false);
+  }
+
+  @HostListener('document:click')
+  onDocumentClick(): void {
+    this.userMenuOpen.set(false);
+  }
+
+  // ---------- Logout ----------
+  confirmLogout(): void {
+    this.userMenuOpen.set(false);
+    this.showLogoutConfirm.set(true);
+  }
+
+  cancelLogout(): void {
+    this.showLogoutConfirm.set(false);
+  }
+
+  doLogout(): void {
+    this.showLogoutConfirm.set(false);
+    this.authService.logout();
+    this.router.navigate(['/public']);
   }
 }

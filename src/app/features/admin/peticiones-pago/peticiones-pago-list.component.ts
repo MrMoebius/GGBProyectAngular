@@ -7,6 +7,7 @@ import { PeticionesPago } from '../../../core/models/peticiones-pago.interface';
 import { EntityFormModalComponent } from '../../../shared/components/entity-form-modal/entity-form-modal.component';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
 import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
+import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer-loader.component';
 
 @Component({
   selector: 'app-peticiones-pago-list',
@@ -16,9 +17,11 @@ import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/
     ReactiveFormsModule,
     EntityFormModalComponent,
     StatusBadgeComponent,
-    ConfirmModalComponent
+    ConfirmModalComponent,
+    BeerLoaderComponent
   ],
   template: `
+    <app-beer-loader [isLoading]="isLoading()" />
     <div class="page-wrapper">
       <!-- Header -->
       <div class="page-header">
@@ -317,14 +320,22 @@ export class PeticionesPagoListComponent implements OnInit {
     atendida: [false]
   });
 
+  isLoading = signal(true);
+
   ngOnInit(): void {
     this.loadPeticiones();
   }
 
   loadPeticiones(): void {
     this.peticionService.getAll().subscribe({
-      next: (data) => this.peticiones.set(data),
-      error: () => this.toastService.error('Error al cargar las peticiones de pago')
+      next: (data) => {
+        this.peticiones.set(data);
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.toastService.error('Error al cargar las peticiones de pago');
+        this.isLoading.set(false);
+      }
     });
   }
 

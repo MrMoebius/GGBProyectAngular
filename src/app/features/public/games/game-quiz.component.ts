@@ -5,11 +5,12 @@ import { Subscription } from 'rxjs';
 import { RecommendationService, QuizAnswers } from '../../../core/services/recommendation.service';
 import { JuegoExtended } from '../../../core/models/juego-extended.interface';
 import { GameCardPublicComponent } from '../../../shared/components/game-card-public/game-card-public.component';
+import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer-loader.component';
 
 @Component({
   selector: 'app-game-quiz',
   standalone: true,
-  imports: [NgClass, RouterLink, GameCardPublicComponent],
+  imports: [NgClass, RouterLink, GameCardPublicComponent, BeerLoaderComponent],
   template: `
     <div class="quiz-container">
 
@@ -213,10 +214,7 @@ import { GameCardPublicComponent } from '../../../shared/components/game-card-pu
 
           <!-- Loading -->
           @if (loading()) {
-            <div class="loading-container">
-              <div class="spinner"></div>
-              <p>Buscando los mejores juegos para ti...</p>
-            </div>
+            <app-beer-loader [isLoading]="loading()" />
           }
 
           <!-- Results Grid -->

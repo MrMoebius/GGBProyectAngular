@@ -9,6 +9,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { JuegoExtended } from '../../../core/models/juego-extended.interface';
 import { GameRating } from '../../../core/models/game-rating.interface';
 import { GameCardPublicComponent } from '../../../shared/components/game-card-public/game-card-public.component';
+import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer-loader.component';
 
 interface GenreConfig {
   gradient: string;
@@ -46,7 +47,7 @@ const DEFAULT_GENRE: GenreConfig = {
 @Component({
   selector: 'app-game-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, GameCardPublicComponent],
+  imports: [CommonModule, FormsModule, RouterModule, GameCardPublicComponent, BeerLoaderComponent],
   template: `
     @if (game()) {
       <div class="game-detail-page">
@@ -288,10 +289,7 @@ const DEFAULT_GENRE: GenreConfig = {
 
       </div>
     } @else {
-      <div class="loading-container">
-        <i class="fa-solid fa-spinner fa-spin"></i>
-        <p>Cargando juego...</p>
-      </div>
+      <app-beer-loader [isLoading]="!game()" />
     }
   `,
   styles: [`

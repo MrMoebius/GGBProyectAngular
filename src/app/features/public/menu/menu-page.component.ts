@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ProductoService } from '../../../core/services/producto.service';
 import { CartService } from '../../../core/services/cart.service';
 import { Producto } from '../../../core/models/producto.interface';
+import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer-loader.component';
 
 type Categoria = 'TODOS' | 'COMIDA' | 'BEBIDA' | 'ALCOHOL' | 'POSTRE' | 'SERVICIO';
 
@@ -16,8 +17,9 @@ interface CategoryTab {
 @Component({
   selector: 'app-menu-page',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, BeerLoaderComponent],
   template: `
+    <app-beer-loader [isLoading]="isLoading()" />
     <!-- Page Header -->
     <section class="menu-header">
       <h1 class="menu-title">Nuestra Carta</h1>
@@ -932,6 +934,7 @@ export class MenuPageComponent implements OnInit {
   private productoService = inject(ProductoService);
   readonly cartService = inject(CartService);
 
+  readonly isLoading = signal(true);
   readonly selectedCategory = signal<Categoria>('TODOS');
   readonly searchTerm = signal('');
   readonly allProducts = signal<Producto[]>([]);
@@ -999,8 +1002,14 @@ export class MenuPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.productoService.getAll().subscribe({
-      next: (productos) => this.allProducts.set(productos),
-      error: (err) => console.error('Error loading products:', err),
+      next: (productos) => {
+        this.allProducts.set(productos);
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        console.error('Error loading products:', err);
+        this.isLoading.set(false);
+      },
     });
   }
 

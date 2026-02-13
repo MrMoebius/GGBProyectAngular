@@ -5,11 +5,12 @@ import { EventService } from '../../../core/services/event.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { GGBEvent, EventSubscription } from '../../../core/models/evento.interface';
+import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer-loader.component';
 
 @Component({
   selector: 'app-event-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, BeerLoaderComponent],
   template: `
     @if (event()) {
       <div class="detail-page">
@@ -229,10 +230,7 @@ import { GGBEvent, EventSubscription } from '../../../core/models/evento.interfa
 
       </div>
     } @else if (loading()) {
-      <div class="loading-state">
-        <i class="fa-solid fa-spinner fa-spin"></i>
-        <p>Cargando evento...</p>
-      </div>
+      <app-beer-loader [isLoading]="loading()" />
     } @else {
       <div class="not-found">
         <i class="fa-solid fa-calendar-xmark"></i>
