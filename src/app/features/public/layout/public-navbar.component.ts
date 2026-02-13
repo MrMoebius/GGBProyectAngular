@@ -214,7 +214,7 @@ import { NotificationService } from '../../../core/services/notification.service
     .navbar-inner {
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      position: relative;
       max-width: var(--max-content-width);
       margin: 0 auto;
       height: 100%;
@@ -228,6 +228,7 @@ import { NotificationService } from '../../../core/services/notification.service
       gap: 0.25rem;
       text-decoration: none;
       flex-shrink: 0;
+      margin-right: auto;
     }
 
     .logo-img {
@@ -258,6 +259,9 @@ import { NotificationService } from '../../../core/services/notification.service
       list-style: none;
       margin: 0;
       padding: 0;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
     }
 
     .nav-link {
@@ -319,6 +323,7 @@ import { NotificationService } from '../../../core/services/notification.service
       align-items: center;
       gap: 0.5rem;
       flex-shrink: 0;
+      margin-left: auto;
     }
 
     .action-btn {
