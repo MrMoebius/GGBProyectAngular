@@ -134,7 +134,7 @@ import { ClienteService } from '../../../core/services/cliente.service';
     .user-name {
       font-size: 0.9rem;
       font-weight: 700;
-      color: var(--text-white, #fff);
+      color: var(--text-main);
       margin: 0;
       white-space: nowrap;
       overflow: hidden;

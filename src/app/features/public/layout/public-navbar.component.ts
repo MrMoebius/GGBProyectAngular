@@ -192,7 +192,7 @@ import { NotificationService } from '../../../core/services/notification.service
       left: 0;
       right: 0;
       height: var(--public-nav-height);
-      background: rgba(255, 255, 255, 0.85);
+      background: rgba(240, 241, 243, 0.9);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
       transition: background 0.35s ease, box-shadow 0.35s ease, backdrop-filter 0.35s ease;

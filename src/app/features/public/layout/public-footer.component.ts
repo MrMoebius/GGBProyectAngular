@@ -28,7 +28,7 @@ import { NewsletterService } from '../../../core/services/newsletter.service';
                 <i class="fa-brands fa-instagram"></i>
               </a>
               <a href="https://x.com/giber_games" target="_blank" rel="noopener" class="social-link" aria-label="X (Twitter)">
-                <i class="fa-brands fa-x-twitter"></i>
+                <svg class="x-icon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
               </a>
               <a href="https://www.tiktok.com/@gibergamesbar" target="_blank" rel="noopener" class="social-link" aria-label="TikTok">
                 <i class="fa-brands fa-tiktok"></i>
@@ -222,6 +222,11 @@ import { NewsletterService } from '../../../core/services/newsletter.service';
       transform: translateY(-2px);
     }
 
+    .x-icon {
+      width: 1rem;
+      height: 1rem;
+    }
+
     /* ===== Column 2: Quick Links ===== */
     .footer-links {
       list-style: none;
@@ -378,13 +383,25 @@ import { NewsletterService } from '../../../core/services/newsletter.service';
 
     .admin-link {
       font-size: 0.8rem;
-      color: var(--text-muted);
+      color: #FFFFFF;
       text-decoration: none;
-      transition: color 0.2s;
+      padding: 0.4rem 1rem;
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-md, 8px);
+      transition: color 0.2s, background-color 0.2s, border-color 0.2s;
+      cursor: pointer;
     }
 
     .admin-link:hover {
       color: var(--primary-coral);
+      border-color: var(--primary-coral);
+      background-color: rgba(255, 127, 80, 0.08);
+    }
+
+    :host-context([data-theme="dark"]) .admin-link:hover {
+      color: var(--neon-cyan, #00FFD1);
+      border-color: var(--neon-cyan, #00FFD1);
+      background-color: rgba(0, 255, 209, 0.08);
     }
 
     /* ===== Responsive ===== */
