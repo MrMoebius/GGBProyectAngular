@@ -10,12 +10,14 @@ import { Mesa } from '../../../core/models/mesa.interface';
 import { GGBEvent } from '../../../core/models/evento.interface';
 import { GameCardPublicComponent } from '../../../shared/components/game-card-public/game-card-public.component';
 import { AuthService } from '../../../core/services/auth.service';
+import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer-loader.component';
 
 @Component({
   selector: 'app-landing',
   standalone: true,
-  imports: [CommonModule, RouterModule, GameCardPublicComponent],
+  imports: [CommonModule, RouterModule, GameCardPublicComponent, BeerLoaderComponent],
   template: `
+    <app-beer-loader [isLoading]="isLoading()" />
     <!-- HERO -->
     <section class="hero">
       <div class="hero-bg">
@@ -999,6 +1001,7 @@ export class LandingComponent implements OnInit, OnDestroy {
 
   isCliente = computed(() => this.authService.currentRole() === 'CLIENTE' || !this.authService.isAuthenticated());
 
+  isLoading = signal(true);
   featuredGames = signal<JuegoExtended[]>([]);
   dailyPick = signal<JuegoExtended | null>(null);
   mesas = signal<Mesa[]>([]);
@@ -1050,7 +1053,10 @@ export class LandingComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.startCarousel();
     this.startFoodCarousel();
-    this.mockJuegos.getFeatured().subscribe(games => this.featuredGames.set(games));
+    this.mockJuegos.getFeatured().subscribe(games => {
+      this.featuredGames.set(games);
+      this.isLoading.set(false);
+    });
     this.recommendation.getDailyPick().subscribe(game => this.dailyPick.set(game));
 
     this.mesaService.getAll().subscribe({

@@ -7,6 +7,7 @@ import { Juego } from '../../../core/models/juego.interface';
 import { EntityFormModalComponent } from '../../../shared/components/entity-form-modal/entity-form-modal.component';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
 import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
+import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer-loader.component';
 
 @Component({
   selector: 'app-juegos-list',
@@ -16,9 +17,11 @@ import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/
     ReactiveFormsModule,
     EntityFormModalComponent,
     StatusBadgeComponent,
-    ConfirmModalComponent
+    ConfirmModalComponent,
+    BeerLoaderComponent
   ],
   template: `
+    <app-beer-loader [isLoading]="isLoading()" />
     <div class="page-wrapper">
       <!-- Header -->
       <div class="page-header">
@@ -551,6 +554,8 @@ export class JuegosListComponent implements OnInit {
     observaciones: ['']
   });
 
+  isLoading = signal(true);
+
   ngOnInit(): void {
     this.loadJuegos();
   }
@@ -562,8 +567,14 @@ export class JuegosListComponent implements OnInit {
 
   loadJuegos(): void {
     this.juegoService.getJuegos().subscribe({
-      next: (data) => this.juegos.set(data),
-      error: () => this.toastService.error('Error al cargar juegos')
+      next: (data) => {
+        this.juegos.set(data);
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.toastService.error('Error al cargar juegos');
+        this.isLoading.set(false);
+      }
     });
   }
 

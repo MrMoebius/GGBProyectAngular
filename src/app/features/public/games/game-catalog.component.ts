@@ -6,12 +6,14 @@ import { JuegoService } from '../../../core/services/juego.service';
 import { JuegoExtended } from '../../../core/models/juego-extended.interface';
 import { GameCardPublicComponent } from '../../../shared/components/game-card-public/game-card-public.component';
 import { FavoritesService } from '../../../core/services/favorites.service';
+import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer-loader.component';
 
 @Component({
   selector: 'app-game-catalog',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, GameCardPublicComponent],
+  imports: [CommonModule, FormsModule, RouterLink, GameCardPublicComponent, BeerLoaderComponent],
   template: `
+    <app-beer-loader [isLoading]="isLoading()" />
     <!-- ============ PAGE WRAPPER ============ -->
     <div class="catalog-page">
 
@@ -1391,9 +1393,12 @@ export class GameCatalogComponent implements OnInit {
   });
 
   // ---------- Lifecycle ----------
+  isLoading = signal(true);
+
   ngOnInit(): void {
     this.juegosService.getAll().subscribe(games => {
       this.allGames.set(games);
+      this.isLoading.set(false);
     });
   }
 

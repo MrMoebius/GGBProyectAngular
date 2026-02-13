@@ -12,12 +12,14 @@ import { GameSession } from '../../../core/models/game-session.interface';
 import { ReservasMesa } from '../../../core/models/reservas-mesa.interface';
 import { EventSubscription, GGBEvent } from '../../../core/models/evento.interface';
 import { JuegoExtended } from '../../../core/models/juego-extended.interface';
+import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer-loader.component';
 
 @Component({
   selector: 'app-customer-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, BeerLoaderComponent],
   template: `
+    <app-beer-loader [isLoading]="isLoading()" />
     <div class="dashboard">
       <!-- Welcome -->
       <div class="welcome-section">
@@ -838,6 +840,7 @@ export class CustomerDashboardComponent implements OnInit {
   private recommendationService = inject(RecommendationService);
   private favoritesService = inject(FavoritesService);
 
+  isLoading = signal(true);
   userName = signal('Usuario');
   private imageVersion = signal(Date.now());
   hasProfilePhoto = signal(false);
@@ -906,6 +909,7 @@ export class CustomerDashboardComponent implements OnInit {
     const gameIds = this.gameHistory.getAll().map(s => s.gameId);
     this.recommendationService.getPersonalized(gameIds, 3).subscribe(games => {
       this.recommendations.set(games);
+      this.isLoading.set(false);
     });
   }
 

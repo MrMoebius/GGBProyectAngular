@@ -7,6 +7,7 @@ import { Empleado } from '../../../core/models/empleado.interface';
 import { EntityFormModalComponent } from '../../../shared/components/entity-form-modal/entity-form-modal.component';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
 import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
+import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer-loader.component';
 
 @Component({
   selector: 'app-empleados-list',
@@ -16,9 +17,11 @@ import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/
     ReactiveFormsModule,
     EntityFormModalComponent,
     StatusBadgeComponent,
-    ConfirmModalComponent
+    ConfirmModalComponent,
+    BeerLoaderComponent
   ],
   template: `
+    <app-beer-loader [isLoading]="isLoading()" />
     <div class="page-wrapper">
       <!-- Header -->
       <div class="page-header">
@@ -358,14 +361,22 @@ export class EmpleadosListComponent implements OnInit {
     fechaIngreso: ['']
   });
 
+  isLoading = signal(true);
+
   ngOnInit(): void {
     this.loadEmpleados();
   }
 
   loadEmpleados(): void {
     this.empleadoService.getAll().subscribe({
-      next: (data) => this.empleados.set(data),
-      error: () => this.toastService.error('Error al cargar empleados')
+      next: (data) => {
+        this.empleados.set(data);
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.toastService.error('Error al cargar empleados');
+        this.isLoading.set(false);
+      }
     });
   }
 
