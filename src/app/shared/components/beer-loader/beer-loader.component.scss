@@ -1,0 +1,94 @@
+:host {
+  display: block;
+}
+
+.loader-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+  width: 100%;
+  height: 100%;
+  min-height: 100vh;
+  background: #1a1118;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+}
+
+.mug-wrapper {
+  width: 220px;
+  height: 290px;
+  position: relative;
+  filter: drop-shadow(0 6px 28px rgba(232, 162, 45, 0.18));
+}
+
+.mug-svg { width: 100%; height: 100%; }
+
+/* Beer fill/empty animation */
+.beer-liquid {
+  animation: fillEmpty 3.2s ease-in-out infinite;
+}
+@keyframes fillEmpty {
+  0%   { clip-path: inset(100% 0 0 0); }
+  38%  { clip-path: inset(0% 0 0 0); }
+  62%  { clip-path: inset(0% 0 0 0); }
+  100% { clip-path: inset(100% 0 0 0); }
+}
+
+/* Foam */
+.foam-layer {
+  animation: foamShow 3.2s ease-in-out infinite;
+}
+@keyframes foamShow {
+  0%   { opacity: 0; transform: translateY(5px); }
+  33%  { opacity: 0; transform: translateY(5px); }
+  42%  { opacity: 1; transform: translateY(0); }
+  58%  { opacity: 1; transform: translateY(0); }
+  72%  { opacity: 0; transform: translateY(-3px); }
+  100% { opacity: 0; transform: translateY(5px); }
+}
+
+/* Bubbles */
+.bubble-group { animation: fillEmpty 3.2s ease-in-out infinite; }
+.bub { animation: bubUp 2s ease-in-out infinite; opacity: 0; }
+.bub:nth-child(1) { animation-delay: 0.0s; }
+.bub:nth-child(2) { animation-delay: 0.25s; }
+.bub:nth-child(3) { animation-delay: 0.5s; }
+.bub:nth-child(4) { animation-delay: 0.15s; }
+.bub:nth-child(5) { animation-delay: 0.4s; }
+.bub:nth-child(6) { animation-delay: 0.65s; }
+
+@keyframes bubUp {
+  0%   { opacity: 0; transform: translateY(0); }
+  12%  { opacity: 0.6; }
+  55%  { opacity: 0.25; transform: translateY(-45px); }
+  100% { opacity: 0; transform: translateY(-70px); }
+}
+
+/* Loading text */
+.loading-text {
+  color: #e8a22d;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  animation: pulse 3.2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%   { opacity: 0.3; }
+  38%  { opacity: 1; }
+  62%  { opacity: 1; }
+  100% { opacity: 0.3; }
+}
+.dots span { animation: dot 1.4s ease-in-out infinite; opacity: 0; }
+.dots span:nth-child(1) { animation-delay: 0s; }
+.dots span:nth-child(2) { animation-delay: 0.2s; }
+.dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes dot {
+  0%, 80%, 100% { opacity: 0; }
+  40% { opacity: 1; }
+}

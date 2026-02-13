@@ -1,0 +1,151 @@
+@if (isLoading) {
+<div class="loader-container">
+  <div class="mug-wrapper">
+    <svg class="mug-svg" viewBox="0 0 300 400" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="beer" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#f0b840"/>
+          <stop offset="50%" stop-color="#e8a22d"/>
+          <stop offset="100%" stop-color="#d4881e"/>
+        </linearGradient>
+        <clipPath id="interior">
+          <path d="M86,120 L80,330 Q80,345 95,345 L205,345 Q215,345 215,330 L210,120 Z"/>
+        </clipPath>
+      </defs>
+
+      <!-- HANDLE — LEFT side -->
+      <path d="M88,115 C74,110 42,125 38,168 C34,215 34,255 38,290 C42,322 74,332 88,326"
+            fill="none" stroke="#3b1a0a" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M88,130 C78,127 56,138 53,172 C50,210 50,255 53,282 C56,308 78,316 88,312"
+            fill="none" stroke="#5a3218" stroke-width="5" stroke-linecap="round"/>
+      <!-- White decorative curves inside handle -->
+      <path d="M84,152 C76,150 62,158 60,182 C58,208 58,240 60,262 C62,282 76,288 84,286"
+            fill="none" stroke="white" stroke-width="3" stroke-linecap="round" opacity="0.85"/>
+      <path d="M82,165 C76,163 66,170 64,190 C62,212 62,240 64,256 C66,272 76,277 82,275"
+            fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" opacity="0.6"/>
+      <path d="M80,178 C76,177 70,182 69,198 C68,215 68,237 69,250 C70,262 76,265 80,264"
+            fill="none" stroke="white" stroke-width="2" stroke-linecap="round" opacity="0.4"/>
+
+      <!-- MUG INTERIOR -->
+      <path d="M88,88 L80,332 Q80,348 96,348 L204,348 Q220,348 220,332 L212,88 Z"
+            fill="#2a1508"/>
+
+      <!-- BEER FILL (animated) -->
+      <g clip-path="url(#interior)" class="beer-liquid">
+        <rect x="78" y="120" width="138" height="228" fill="url(#beer)"/>
+        <rect x="118" y="120" width="6" height="50" rx="3" fill="#c88520" opacity="0.5"/>
+
+        <!-- MEEPLE -->
+        <g transform="translate(150, 210)">
+          <circle cx="0" cy="-38" r="14" fill="#3b1a0a" opacity="0.7"/>
+          <path d="
+            M 0,-24 C -5,-24 -7,-20 -10,-17 L -16,-12 C -22,-8 -32,-3 -37,2
+            C -40,5 -37,9 -32,8 L -18,2 C -13,0 -10,-4 -8,-6 L -8,5
+            C -10,14 -18,28 -26,46 C -28,50 -30,56 -28,58 C -25,62 -20,62 -16,58
+            L -5,36 L -2,24 L 2,24 L 5,36 L 16,58 C 20,62 25,62 28,58
+            C 30,56 28,50 26,46 C 18,28 10,14 8,5 L 8,-6 C 10,-4 13,0 18,2
+            L 32,8 C 37,9 40,5 37,2 C 32,-3 22,-8 16,-12 L 10,-17
+            C 7,-20 5,-24 0,-24 Z
+          " fill="#3b1a0a" opacity="0.7"/>
+        </g>
+
+        <rect x="86" y="125" width="8" height="200" rx="4" fill="rgba(255,220,120,0.12)"/>
+      </g>
+
+      <!-- BUBBLES -->
+      <g clip-path="url(#interior)" class="bubble-group">
+        <circle class="bub" cx="110" cy="300" r="2.5" fill="rgba(255,235,170,0.5)"/>
+        <circle class="bub" cx="140" cy="290" r="2" fill="rgba(255,235,170,0.4)"/>
+        <circle class="bub" cx="125" cy="310" r="3" fill="rgba(255,235,170,0.35)"/>
+        <circle class="bub" cx="170" cy="295" r="1.8" fill="rgba(255,235,170,0.45)"/>
+        <circle class="bub" cx="100" cy="285" r="2.2" fill="rgba(255,235,170,0.4)"/>
+        <circle class="bub" cx="155" cy="315" r="2.8" fill="rgba(255,235,170,0.3)"/>
+      </g>
+
+      <!-- DECORATIVE WHITE CURVES AT BOTTOM -->
+      <g opacity="0.9">
+        <path d="M92,318 Q120,306 150,318 Q180,330 208,318"
+              fill="none" stroke="white" stroke-width="3.5" stroke-linecap="round"/>
+        <path d="M88,330 Q122,318 150,330 Q178,342 212,330"
+              fill="none" stroke="white" stroke-width="3" stroke-linecap="round"/>
+        <path d="M90,340 Q124,330 150,340 Q176,350 210,340"
+              fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" opacity="0.6"/>
+      </g>
+
+      <!-- MUG BODY OUTLINE -->
+      <path d="M84,82 L76,334 Q76,354 96,354 L204,354 Q224,354 224,334 L216,82 Z"
+            fill="none" stroke="#3b1a0a" stroke-width="10" stroke-linejoin="round" stroke-linecap="round"/>
+
+      <!-- FOAM -->
+      <g class="foam-layer">
+        <defs>
+          <radialGradient id="bubbleShine" cx="0.35" cy="0.3" r="0.6">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="60%" stop-color="#fff8ec"/>
+            <stop offset="100%" stop-color="#f0e0c0"/>
+          </radialGradient>
+          <radialGradient id="bubbleShadow" cx="0.5" cy="0.7" r="0.5">
+            <stop offset="0%" stop-color="#e8d8b8" stop-opacity="0.4"/>
+            <stop offset="100%" stop-color="#d4c09a" stop-opacity="0.15"/>
+          </radialGradient>
+          <radialGradient id="bigBubble" cx="0.4" cy="0.35" r="0.55">
+            <stop offset="0%" stop-color="#ffffff"/>
+            <stop offset="40%" stop-color="#fffdf5"/>
+            <stop offset="100%" stop-color="#f5e8d2"/>
+          </radialGradient>
+        </defs>
+
+        <rect x="86" y="92" width="128" height="28" rx="6" fill="#f5eaD5" opacity="0.6"/>
+
+        <ellipse cx="110" cy="100" rx="22" ry="13" fill="#faf3e5" opacity="0.7"/>
+        <ellipse cx="150" cy="98" rx="26" ry="14" fill="#faf3e5" opacity="0.65"/>
+        <ellipse cx="190" cy="102" rx="18" ry="11" fill="#faf3e5" opacity="0.6"/>
+
+        <path d="M86,92 L214,92 L214,88 Q214,80 204,80 L96,80 Q86,80 86,88 Z" fill="#fff"/>
+
+        <circle cx="92"  cy="82" r="14" fill="url(#bigBubble)"/>
+        <circle cx="112" cy="76" r="17" fill="url(#bigBubble)"/>
+        <circle cx="136" cy="72" r="19" fill="url(#bigBubble)"/>
+        <circle cx="162" cy="70" r="20" fill="url(#bigBubble)"/>
+        <circle cx="186" cy="74" r="17" fill="url(#bigBubble)"/>
+        <circle cx="206" cy="80" r="13" fill="url(#bigBubble)"/>
+
+        <circle cx="100" cy="72" r="12" fill="url(#bubbleShine)"/>
+        <circle cx="124" cy="66" r="14" fill="url(#bubbleShine)"/>
+        <circle cx="148" cy="63" r="15" fill="url(#bubbleShine)"/>
+        <circle cx="172" cy="65" r="13" fill="url(#bubbleShine)"/>
+        <circle cx="194" cy="70" r="11" fill="url(#bubbleShine)"/>
+
+        <circle cx="112" cy="62" r="8" fill="#fff"/>
+        <circle cx="135" cy="57" r="9" fill="#fff"/>
+        <circle cx="155" cy="55" r="10" fill="#fff"/>
+        <circle cx="175" cy="58" r="8" fill="#fff"/>
+        <circle cx="145" cy="52" r="6" fill="#fff"/>
+
+        <circle cx="120" cy="58" r="3" fill="#fff"/>
+        <circle cx="142" cy="54" r="2.5" fill="#fff"/>
+        <circle cx="165" cy="56" r="3" fill="#fff"/>
+        <circle cx="108" cy="68" r="2" fill="#fff"/>
+        <circle cx="185" cy="66" r="2.5" fill="#fff"/>
+        <circle cx="152" cy="48" r="2" fill="#fff"/>
+
+        <circle cx="110" cy="100" r="6" fill="url(#bubbleShadow)"/>
+        <circle cx="130" cy="96" r="7" fill="url(#bubbleShadow)"/>
+        <circle cx="155" cy="98" r="6.5" fill="url(#bubbleShadow)"/>
+        <circle cx="178" cy="100" r="5.5" fill="url(#bubbleShadow)"/>
+        <circle cx="198" cy="102" r="4.5" fill="url(#bubbleShadow)"/>
+        <circle cx="95"  cy="98" r="5" fill="url(#bubbleShadow)"/>
+
+        <ellipse cx="216" cy="104" rx="5" ry="12" fill="#fff" opacity="0.7"/>
+        <ellipse cx="216" cy="108" rx="3" ry="6" fill="#f5eaD5" opacity="0.3"/>
+        <ellipse cx="84" cy="100" rx="4" ry="9" fill="#fff" opacity="0.5"/>
+      </g>
+
+    </svg>
+  </div>
+
+  <div class="loading-text">
+    Cargando<span class="dots"><span>.</span><span>.</span><span>.</span></span>
+  </div>
+</div>
+}
