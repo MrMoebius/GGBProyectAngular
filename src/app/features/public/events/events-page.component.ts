@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { EventService } from '../../../core/services/event.service';
 import { GGBEvent } from '../../../core/models/evento.interface';
+import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer-loader.component';
 
 type TabFilter = 'todos' | 'proximos' | 'este_mes' | 'pasados';
 type EventType = GGBEvent['type'];
@@ -10,8 +11,9 @@ type EventType = GGBEvent['type'];
 @Component({
   selector: 'app-events-page',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, BeerLoaderComponent],
   template: `
+    <app-beer-loader [isLoading]="isLoading()" />
     <div class="events-page">
 
       <!-- Header -->
@@ -653,9 +655,15 @@ export class EventsPageComponent implements OnInit {
     });
   });
 
+  isLoading = signal(true);
+
   ngOnInit(): void {
     this.eventService.getAll().subscribe({
-      next: (data) => this.events.set(data)
+      next: (data) => {
+        this.events.set(data);
+        this.isLoading.set(false);
+      },
+      error: () => this.isLoading.set(false)
     });
   }
 

@@ -5,6 +5,7 @@ import { JuegoService } from '../../../core/services/juego.service';
 import { MesaService } from '../../../core/services/mesa.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { JuegoExtended } from '../../../core/models/juego-extended.interface';
+import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer-loader.component';
 
 interface ContactInfo {
   nombre: string;
@@ -15,8 +16,9 @@ interface ContactInfo {
 @Component({
   selector: 'app-reservations-page',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, BeerLoaderComponent],
   template: `
+    <app-beer-loader [isLoading]="isLoading()" />
     <div class="reservations-wizard">
 
       <!-- Header -->
@@ -1490,9 +1492,14 @@ export class ReservationsPageComponent {
   readonly reservationConfirmed = signal(false);
   readonly confirmedReservationId = signal(0);
 
+  isLoading = signal(true);
+
   constructor() {
     // Pre-load games
-    this.juegosService.getAll().subscribe(games => this.allGames.set(games));
+    this.juegosService.getAll().subscribe(games => {
+      this.allGames.set(games);
+      this.isLoading.set(false);
+    });
   }
 
   // Navigation

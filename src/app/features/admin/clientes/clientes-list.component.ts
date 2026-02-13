@@ -7,6 +7,7 @@ import { Cliente } from '../../../core/models/cliente.interface';
 import { EntityFormModalComponent } from '../../../shared/components/entity-form-modal/entity-form-modal.component';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
 import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
+import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer-loader.component';
 
 @Component({
   selector: 'app-clientes-list',
@@ -16,9 +17,11 @@ import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/
     ReactiveFormsModule,
     EntityFormModalComponent,
     StatusBadgeComponent,
-    ConfirmModalComponent
+    ConfirmModalComponent,
+    BeerLoaderComponent
   ],
   template: `
+    <app-beer-loader [isLoading]="isLoading()" />
     <div class="page-wrapper">
       <!-- Header -->
       <div class="page-header">
@@ -314,14 +317,22 @@ export class ClientesListComponent implements OnInit {
     notas: ['']
   });
 
+  isLoading = signal(true);
+
   ngOnInit(): void {
     this.loadClientes();
   }
 
   loadClientes(): void {
     this.clienteService.getAll().subscribe({
-      next: (data) => this.clientes.set(data),
-      error: () => this.toastService.error('Error al cargar clientes')
+      next: (data) => {
+        this.clientes.set(data);
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.toastService.error('Error al cargar clientes');
+        this.isLoading.set(false);
+      }
     });
   }
 
