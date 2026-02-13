@@ -60,8 +60,9 @@ export class AuthService {
         console.log('AuthService: Respuesta cruda del backend:', response);
         const normalizedRole = this.normalizeRole(response.role);
 
-        // Construir objeto usuario básico con el email recibido
-        const usuarioBasico = { email: response.email, nombre: 'Usuario' } as any;
+        // Usar nombre e id del backend si vienen, o fallback a la parte local del email
+        const nombre = response.nombre || response.email?.split('@')[0] || 'Usuario';
+        const usuarioBasico = { id: response.clienteId, email: response.email, nombre } as any;
 
         const authResponse: AuthResponse = {
           token: response.accessToken,

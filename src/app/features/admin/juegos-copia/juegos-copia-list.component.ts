@@ -7,6 +7,7 @@ import { JuegosCopia } from '../../../core/models/juegos-copia.interface';
 import { EntityFormModalComponent } from '../../../shared/components/entity-form-modal/entity-form-modal.component';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
 import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
+import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer-loader.component';
 
 @Component({
   selector: 'app-juegos-copia-list',
@@ -16,9 +17,11 @@ import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/
     ReactiveFormsModule,
     EntityFormModalComponent,
     StatusBadgeComponent,
-    ConfirmModalComponent
+    ConfirmModalComponent,
+    BeerLoaderComponent
   ],
   template: `
+    <app-beer-loader [isLoading]="isLoading()" />
     <div class="page-wrapper">
       <!-- Header -->
       <div class="page-header">
@@ -312,6 +315,8 @@ export class JuegosCopiaListComponent implements OnInit {
     estado: ['DISPONIBLE']
   });
 
+  isLoading = signal(true);
+
   ngOnInit(): void {
     this.loadCopias();
   }
@@ -323,8 +328,14 @@ export class JuegosCopiaListComponent implements OnInit {
 
   loadCopias(): void {
     this.copiaService.getAll().subscribe({
-      next: (data) => this.copias.set(data),
-      error: () => this.toastService.error('Error al cargar las copias de juegos')
+      next: (data) => {
+        this.copias.set(data);
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.toastService.error('Error al cargar las copias de juegos');
+        this.isLoading.set(false);
+      }
     });
   }
 

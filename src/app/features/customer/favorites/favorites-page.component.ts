@@ -3,12 +3,14 @@ import { FavoritesService } from '../../../core/services/favorites.service';
 import { JuegoService } from '../../../core/services/juego.service';
 import { GameCardPublicComponent } from '../../../shared/components/game-card-public/game-card-public.component';
 import { JuegoExtended } from '../../../core/models/juego-extended.interface';
+import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer-loader.component';
 
 @Component({
   selector: 'app-favorites-page',
   standalone: true,
-  imports: [GameCardPublicComponent],
+  imports: [GameCardPublicComponent, BeerLoaderComponent],
   template: `
+    <app-beer-loader [isLoading]="isLoading()" />
     <div class="favorites-page">
       <!-- Header -->
       <div class="page-header">
@@ -154,9 +156,12 @@ export class FavoritesPageComponent implements OnInit {
     return this.allGames().filter(g => favIds.includes(g.id));
   });
 
+  isLoading = signal(true);
+
   ngOnInit(): void {
     this.juegosService.getAll().subscribe(games => {
       this.allGames.set(games);
+      this.isLoading.set(false);
     });
   }
 }

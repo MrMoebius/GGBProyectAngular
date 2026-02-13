@@ -7,6 +7,7 @@ import { Producto } from '../../../core/models/producto.interface';
 import { EntityFormModalComponent } from '../../../shared/components/entity-form-modal/entity-form-modal.component';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
 import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
+import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer-loader.component';
 
 @Component({
   selector: 'app-productos-list',
@@ -16,9 +17,11 @@ import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/
     ReactiveFormsModule,
     EntityFormModalComponent,
     StatusBadgeComponent,
-    ConfirmModalComponent
+    ConfirmModalComponent,
+    BeerLoaderComponent
   ],
   template: `
+    <app-beer-loader [isLoading]="isLoading()" />
     <div class="page-wrapper">
       <!-- Header -->
       <div class="page-header">
@@ -474,14 +477,22 @@ export class ProductosListComponent implements OnInit {
     activo: [true]
   });
 
+  isLoading = signal(true);
+
   ngOnInit(): void {
     this.loadProductos();
   }
 
   loadProductos(): void {
     this.productoService.getAll().subscribe({
-      next: (data) => this.productos.set(data),
-      error: () => this.toastService.error('Error al cargar los productos')
+      next: (data) => {
+        this.productos.set(data);
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.toastService.error('Error al cargar los productos');
+        this.isLoading.set(false);
+      }
     });
   }
 

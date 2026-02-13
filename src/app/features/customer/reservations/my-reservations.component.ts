@@ -2,12 +2,14 @@ import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { MockReservasService } from '../../../core/services/mock-reservas.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ReservasMesa } from '../../../core/models/reservas-mesa.interface';
+import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer-loader.component';
 
 @Component({
   selector: 'app-my-reservations',
   standalone: true,
-  imports: [],
+  imports: [BeerLoaderComponent],
   template: `
+    <app-beer-loader [isLoading]="isLoading()" />
     <div class="reservations-page">
       <!-- Header -->
       <div class="page-header">
@@ -549,6 +551,8 @@ export class MyReservationsComponent implements OnInit {
     this.allReservations().filter(r => r.estado === 'CANCELADA')
   );
 
+  isLoading = signal(true);
+
   ngOnInit(): void {
     this.loadReservations();
   }
@@ -556,6 +560,7 @@ export class MyReservationsComponent implements OnInit {
   private loadReservations(): void {
     this.reservasService.getByCliente(1).subscribe(reservas => {
       this.allReservations.set(reservas);
+      this.isLoading.set(false);
     });
   }
 

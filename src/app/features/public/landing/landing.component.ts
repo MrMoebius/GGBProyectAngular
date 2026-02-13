@@ -9,12 +9,15 @@ import { JuegoExtended } from '../../../core/models/juego-extended.interface';
 import { Mesa } from '../../../core/models/mesa.interface';
 import { GGBEvent } from '../../../core/models/evento.interface';
 import { GameCardPublicComponent } from '../../../shared/components/game-card-public/game-card-public.component';
+import { AuthService } from '../../../core/services/auth.service';
+import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer-loader.component';
 
 @Component({
   selector: 'app-landing',
   standalone: true,
-  imports: [CommonModule, RouterModule, GameCardPublicComponent],
+  imports: [CommonModule, RouterModule, GameCardPublicComponent, BeerLoaderComponent],
   template: `
+    <app-beer-loader [isLoading]="isLoading()" />
     <!-- HERO -->
     <section class="hero">
       <div class="hero-bg">
@@ -222,33 +225,35 @@ import { GameCardPublicComponent } from '../../../shared/components/game-card-pu
       </section>
     }
 
-    <!-- ESTADO DE LA SALA -->
-    <section class="section">
-      <div class="section-header">
-        <div>
-          <h2 class="section-title">Estado de la Sala</h2>
-          <p class="section-subtitle">Disponibilidad en tiempo real</p>
-        </div>
-        <a routerLink="/public/reservas" class="btn btn-ghost">
-          Reservar <i class="fa-solid fa-arrow-right"></i>
-        </a>
-      </div>
-      <div class="sala-grid">
-        @for (mesa of mesas(); track mesa.id) {
-          <div class="mesa-box" [class]="'mesa-' + mesa.estado.toLowerCase().replace('_', '-')">
-            <i class="fa-solid fa-chair"></i>
-            <span class="mesa-name">{{ mesa.nombreMesa }}</span>
-            <span class="mesa-cap"><i class="fa-solid fa-users"></i> {{ mesa.capacidad }}</span>
+    <!-- ESTADO DE LA SALA (oculto para clientes logueados) -->
+    @if (!isCliente()) {
+      <section class="section">
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">Estado de la Sala</h2>
+            <p class="section-subtitle">Disponibilidad en tiempo real</p>
           </div>
-        }
-      </div>
-      <div class="sala-legend">
-        <span class="legend-item"><span class="legend-dot libre"></span> Libre</span>
-        <span class="legend-item"><span class="legend-dot ocupada"></span> Ocupada</span>
-        <span class="legend-item"><span class="legend-dot reservada"></span> Reservada</span>
-        <span class="legend-item"><span class="legend-dot fuera"></span> Fuera de servicio</span>
-      </div>
-    </section>
+          <a routerLink="/public/reservas" class="btn btn-ghost">
+            Reservar <i class="fa-solid fa-arrow-right"></i>
+          </a>
+        </div>
+        <div class="sala-grid">
+          @for (mesa of mesas(); track mesa.id) {
+            <div class="mesa-box" [class]="'mesa-' + mesa.estado.toLowerCase().replace('_', '-')">
+              <i class="fa-solid fa-chair"></i>
+              <span class="mesa-name">{{ mesa.nombreMesa }}</span>
+              <span class="mesa-cap"><i class="fa-solid fa-users"></i> {{ mesa.capacidad }}</span>
+            </div>
+          }
+        </div>
+        <div class="sala-legend">
+          <span class="legend-item"><span class="legend-dot libre"></span> Libre</span>
+          <span class="legend-item"><span class="legend-dot ocupada"></span> Ocupada</span>
+          <span class="legend-item"><span class="legend-dot reservada"></span> Reservada</span>
+          <span class="legend-item"><span class="legend-dot fuera"></span> Fuera de servicio</span>
+        </div>
+      </section>
+    }
 
     <!-- SOBRE NOSOTROS CTA -->
     <section class="cta-section">
@@ -992,7 +997,11 @@ export class LandingComponent implements OnInit, OnDestroy {
   private recommendation = inject(RecommendationService);
   private mesaService = inject(MesaService);
   private eventService = inject(EventService);
+  private authService = inject(AuthService);
 
+  isCliente = computed(() => this.authService.currentRole() === 'CLIENTE' || !this.authService.isAuthenticated());
+
+  isLoading = signal(true);
   featuredGames = signal<JuegoExtended[]>([]);
   dailyPick = signal<JuegoExtended | null>(null);
   mesas = signal<Mesa[]>([]);
@@ -1044,7 +1053,10 @@ export class LandingComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.startCarousel();
     this.startFoodCarousel();
-    this.mockJuegos.getFeatured().subscribe(games => this.featuredGames.set(games));
+    this.mockJuegos.getFeatured().subscribe(games => {
+      this.featuredGames.set(games);
+      this.isLoading.set(false);
+    });
     this.recommendation.getDailyPick().subscribe(game => this.dailyPick.set(game));
 
     this.mesaService.getAll().subscribe({

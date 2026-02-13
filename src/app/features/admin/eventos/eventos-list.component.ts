@@ -7,6 +7,7 @@ import { EntityFormModalComponent } from '../../../shared/components/entity-form
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
 import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
 import { ToastService } from '../../../core/services/toast.service';
+import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer-loader.component';
 
 @Component({
   selector: 'app-eventos-list',
@@ -16,9 +17,11 @@ import { ToastService } from '../../../core/services/toast.service';
     ReactiveFormsModule,
     EntityFormModalComponent,
     StatusBadgeComponent,
-    ConfirmModalComponent
+    ConfirmModalComponent,
+    BeerLoaderComponent
   ],
   template: `
+    <app-beer-loader [isLoading]="isLoading()" />
     <div class="page-wrapper">
       <!-- Header -->
       <div class="page-header">
@@ -452,14 +455,22 @@ export class EventosListComponent implements OnInit {
     EVENTO_ESPECIAL: { label: 'Evento Especial', color: '#2563EB' }
   };
 
+  isLoading = signal(true);
+
   ngOnInit(): void {
     this.loadEventos();
   }
 
   loadEventos(): void {
     this.eventService.getAll().subscribe({
-      next: (data) => this.eventos.set(data),
-      error: () => this.toastService.error('Error al cargar los eventos')
+      next: (data) => {
+        this.eventos.set(data);
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.toastService.error('Error al cargar los eventos');
+        this.isLoading.set(false);
+      }
     });
   }
 

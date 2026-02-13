@@ -13,7 +13,7 @@
 
   --secondary-dark: #1F2937;
   --secondary-light: #374151;
-  --secondary-bg: #F3F4F6;
+  --secondary-bg: #EAECEF;
 
   /* Estados */
   --status-free: #10B981;
@@ -48,22 +48,22 @@
   --sidebar-width: 260px;
   --sidebar-collapsed-width: 68px;
 
-  --header-bg: #FFFFFF;
-  --header-border: #E5E7EB;
+  --header-bg: #F0F1F3;
+  --header-border: #DCDFE3;
 
-  --content-bg: #F3F4F6;
+  --content-bg: #E8EAED;
 
   /* Tablas */
-  --table-header-bg: #F9FAFB;
-  --table-border: #E5E7EB;
-  --table-row-hover: #F3F4F6;
+  --table-header-bg: #EDEEF1;
+  --table-border: #DCDFE3;
+  --table-row-hover: #EAECEF;
 
   /* Componentes */
-  --card-bg: #FFFFFF;
-  --card-border: #E5E7EB;
+  --card-bg: #F5F6F8;
+  --card-border: #DCDFE3;
   --modal-overlay: rgba(107, 114, 128, 0.75);
-  --input-bg: #FFFFFF;
-  --input-border: #D1D5DB;
+  --input-bg: #F5F6F8;
+  --input-border: #C9CDD3;
   --input-focus: #3B82F6;
 
   /* Semanticos */
