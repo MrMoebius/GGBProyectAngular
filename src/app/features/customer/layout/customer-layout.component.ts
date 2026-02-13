@@ -1,10 +1,11 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, computed, signal } from '@angular/core';
 import { RouterOutlet, RouterModule, Router } from '@angular/router';
 import { PublicNavbarComponent } from '../../public/layout/public-navbar.component';
 import { PublicFooterComponent } from '../../public/layout/public-footer.component';
 import { ToastComponent } from '../../../shared/components/toast/toast.component';
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
+import { ClienteService } from '../../../core/services/cliente.service';
 
 @Component({
   selector: 'app-customer-layout',
@@ -19,7 +20,11 @@ import { NotificationService } from '../../../core/services/notification.service
         <!-- User greeting -->
         <div class="user-greeting">
           <div class="user-avatar">
-            <span class="avatar-initial">{{ userInitial() }}</span>
+            @if (hasProfilePhoto()) {
+              <img class="avatar-img" [src]="profilePhotoUrl()" (error)="onImageError()" alt="Foto de perfil">
+            } @else {
+              <span class="avatar-initial">{{ userInitial() }}</span>
+            }
           </div>
           <div class="user-info">
             <p class="user-name">{{ userName() }}</p>
@@ -105,6 +110,14 @@ import { NotificationService } from '../../../core/services/notification.service
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .avatar-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
     }
 
     .avatar-initial {
@@ -282,7 +295,10 @@ import { NotificationService } from '../../../core/services/notification.service
 export class CustomerLayoutComponent {
   private authService = inject(AuthService);
   private notificationService = inject(NotificationService);
+  private clienteService = inject(ClienteService);
   private router = inject(Router);
+
+  hasProfilePhoto = signal(false);
 
   userInitial = computed(() => {
     const user = this.authService.currentUser();
@@ -308,6 +324,20 @@ export class CustomerLayoutComponent {
     return user?.email ?? '';
   });
 
+  profilePhotoUrl = computed(() => {
+    const user = this.authService.currentUser();
+    const id = (user as any)?.id;
+    if (!id) return '';
+    return this.clienteService.getFotoPerfilUrl(id) + '?v=' + Date.now();
+  });
+
+  constructor() {
+    const user = this.authService.currentUser();
+    if ((user as any)?.id) {
+      this.hasProfilePhoto.set(true);
+    }
+  }
+
   navLinks = [
     { path: '/customer/dashboard', label: 'Dashboard', icon: 'fa-house', badge: null as (() => number) | null },
     { path: '/customer/favoritos', label: 'Favoritos', icon: 'fa-heart', badge: null },
@@ -315,6 +345,10 @@ export class CustomerLayoutComponent {
     { path: '/customer/reservas', label: 'Mis Reservas', icon: 'fa-calendar-check', badge: null },
     { path: '/customer/notificaciones', label: 'Notificaciones', icon: 'fa-bell', badge: () => this.notificationService.unreadCount() },
   ];
+
+  onImageError(): void {
+    this.hasProfilePhoto.set(false);
+  }
 
   onLogout(): void {
     this.authService.logout();

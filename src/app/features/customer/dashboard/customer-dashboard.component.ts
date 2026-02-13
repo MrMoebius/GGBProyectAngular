@@ -1,6 +1,7 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
+import { ClienteService } from '../../../core/services/cliente.service';
 import { GameHistoryService } from '../../../core/services/game-history.service';
 import { MockReservasService } from '../../../core/services/mock-reservas.service';
 import { EventService } from '../../../core/services/event.service';
@@ -20,6 +21,17 @@ import { JuegoExtended } from '../../../core/models/juego-extended.interface';
     <div class="dashboard">
       <!-- Welcome -->
       <div class="welcome-section">
+        <div class="welcome-avatar" (click)="fileInput.click()" title="Cambiar foto de perfil">
+          @if (hasProfilePhoto()) {
+            <img class="welcome-avatar-img" [src]="profilePhotoUrl()" (error)="onImageError()" alt="Foto de perfil">
+          } @else {
+            <span class="welcome-avatar-initial">{{ userInitial() }}</span>
+          }
+          <div class="welcome-avatar-overlay">
+            <i class="fa-solid fa-camera"></i>
+          </div>
+        </div>
+        <input #fileInput type="file" accept="image/jpeg,image/png,image/webp" hidden (change)="onFileSelected($event)">
         <h1 class="welcome-title">Bienvenido, {{ userName() }}!</h1>
         <p class="welcome-sub">Aqui tienes un resumen de tu actividad en Giber Games Bar</p>
       </div>
@@ -231,6 +243,57 @@ import { JuegoExtended } from '../../../core/models/juego-extended.interface';
     /* ===== Welcome ===== */
     .welcome-section {
       margin-bottom: 2rem;
+      text-align: center;
+    }
+
+    .welcome-avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--neon-cyan, #00FFD1), var(--neon-pink, #FF6B9D));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+      position: relative;
+      cursor: pointer;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0, 255, 209, 0.2), 0 4px 20px rgba(255, 107, 157, 0.2);
+    }
+
+    .welcome-avatar-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 50%;
+    }
+
+    .welcome-avatar-initial {
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: #0F172A;
+      text-transform: uppercase;
+    }
+
+    .welcome-avatar-overlay {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background-color: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .welcome-avatar-overlay i {
+      color: #fff;
+      font-size: 1.5rem;
+    }
+
+    .welcome-avatar:hover .welcome-avatar-overlay {
+      opacity: 1;
     }
 
     .welcome-title {
@@ -768,6 +831,7 @@ import { JuegoExtended } from '../../../core/models/juego-extended.interface';
 })
 export class CustomerDashboardComponent implements OnInit {
   authService = inject(AuthService);
+  private clienteService = inject(ClienteService);
   private gameHistory = inject(GameHistoryService);
   private reservasService = inject(MockReservasService);
   private eventService = inject(EventService);
@@ -775,6 +839,27 @@ export class CustomerDashboardComponent implements OnInit {
   private favoritesService = inject(FavoritesService);
 
   userName = signal('Usuario');
+  private imageVersion = signal(Date.now());
+  hasProfilePhoto = signal(false);
+
+  userInitial = computed(() => {
+    const user = this.authService.currentUser();
+    if (user && 'nombre' in user && (user as any).nombre) {
+      return (user as any).nombre.charAt(0).toUpperCase();
+    }
+    if (user && 'email' in user && user.email) {
+      return user.email.charAt(0).toUpperCase();
+    }
+    return 'U';
+  });
+
+  profilePhotoUrl = computed(() => {
+    const user = this.authService.currentUser();
+    const id = (user as any)?.id;
+    if (!id) return '';
+    return this.clienteService.getFotoPerfilUrl(id) + '?v=' + this.imageVersion();
+  });
+
   stats = signal<{ totalGames: number; totalHours: number; favoriteGenre: string; uniqueGames: number }>({
     totalGames: 0, totalHours: 0, favoriteGenre: '-', uniqueGames: 0
   });
@@ -785,12 +870,15 @@ export class CustomerDashboardComponent implements OnInit {
   recommendations = signal<JuegoExtended[]>([]);
 
   ngOnInit(): void {
-    // User name
+    // User name & profile photo
     const user = this.authService.currentUser();
     if (user && 'nombre' in user && (user as any).nombre) {
       this.userName.set((user as any).nombre);
     } else if (user?.email) {
       this.userName.set(user.email.split('@')[0]);
+    }
+    if ((user as any)?.id) {
+      this.hasProfilePhoto.set(true);
     }
 
     // Stats
@@ -819,6 +907,24 @@ export class CustomerDashboardComponent implements OnInit {
     this.recommendationService.getPersonalized(gameIds, 3).subscribe(games => {
       this.recommendations.set(games);
     });
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    this.clienteService.uploadFotoPerfil(file).subscribe({
+      next: () => {
+        this.imageVersion.set(Date.now());
+        this.hasProfilePhoto.set(true);
+      },
+      error: (err) => console.error('Error al subir foto de perfil:', err)
+    });
+  }
+
+  onImageError(): void {
+    this.hasProfilePhoto.set(false);
   }
 
   formatDuration(minutes: number): string {

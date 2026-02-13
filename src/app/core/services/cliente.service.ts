@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Cliente } from '../models/cliente.interface';
 import { ApiService } from '../services/api.service';
@@ -8,6 +9,7 @@ import { ApiService } from '../services/api.service';
 })
 export class ClienteService {
   private api = inject(ApiService);
+  private http = inject(HttpClient);
   private endpoint = 'clientes';
 
   getAll(): Observable<Cliente[]> {
@@ -28,5 +30,15 @@ export class ClienteService {
 
   delete(id: number): Observable<void> {
     return this.api.delete<void>(`${this.endpoint}/${id}`);
+  }
+
+  uploadFotoPerfil(file: File): Observable<any> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post('/api/clientes/me/imagen', formData);
+  }
+
+  getFotoPerfilUrl(id: number): string {
+    return `/api/clientes/${id}/imagen`;
   }
 }
