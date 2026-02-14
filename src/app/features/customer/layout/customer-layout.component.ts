@@ -344,6 +344,7 @@ export class CustomerLayoutComponent {
     { path: '/customer/historial', label: 'Historial', icon: 'fa-clock-rotate-left', badge: null },
     { path: '/customer/reservas', label: 'Mis Reservas', icon: 'fa-calendar-check', badge: null },
     { path: '/customer/notificaciones', label: 'Notificaciones', icon: 'fa-bell', badge: () => this.notificationService.unreadCount() },
+    { path: '/customer/facturas', label: 'Mis Facturas', icon: 'fa-file-invoice', badge: null },
   ];
 
   onImageError(): void {

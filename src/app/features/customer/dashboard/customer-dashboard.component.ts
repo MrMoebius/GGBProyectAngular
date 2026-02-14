@@ -40,7 +40,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
 
       <!-- Stats cards -->
       <div class="stats-grid">
-        <div class="stat-card">
+        <a class="stat-card clickable" routerLink="/customer/historial">
           <div class="stat-icon icon-games">
             <i class="fa-solid fa-dice"></i>
           </div>
@@ -48,8 +48,8 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
             <span class="stat-value">{{ stats().totalGames }}</span>
             <span class="stat-label">Partidas jugadas</span>
           </div>
-        </div>
-        <div class="stat-card">
+        </a>
+        <a class="stat-card clickable" routerLink="/customer/historial">
           <div class="stat-icon icon-hours">
             <i class="fa-solid fa-clock"></i>
           </div>
@@ -57,8 +57,8 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
             <span class="stat-value">{{ stats().totalHours }}h</span>
             <span class="stat-label">Horas totales</span>
           </div>
-        </div>
-        <div class="stat-card">
+        </a>
+        <a class="stat-card clickable" routerLink="/public/juegos">
           <div class="stat-icon icon-genre">
             <i class="fa-solid fa-trophy"></i>
           </div>
@@ -66,8 +66,8 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
             <span class="stat-value">{{ stats().favoriteGenre }}</span>
             <span class="stat-label">Genero favorito</span>
           </div>
-        </div>
-        <div class="stat-card">
+        </a>
+        <a class="stat-card clickable" routerLink="/customer/historial">
           <div class="stat-icon icon-unique">
             <i class="fa-solid fa-gamepad"></i>
           </div>
@@ -75,7 +75,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
             <span class="stat-value">{{ stats().uniqueGames }}</span>
             <span class="stat-label">Juegos distintos</span>
           </div>
-        </div>
+        </a>
       </div>
 
       <!-- Content grid -->
@@ -333,6 +333,12 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
     .stat-card:hover {
       transform: translateY(-2px);
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    .clickable {
+      text-decoration: none;
+      cursor: pointer;
+      color: inherit;
     }
 
     .stat-icon {

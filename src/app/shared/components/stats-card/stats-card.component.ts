@@ -1,34 +1,65 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-stats-card',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   template: `
-    <div class="stats-card">
-      <div class="stats-card-body">
-        <div class="icon-circle" [ngStyle]="{ 'background-color': color + '1A', 'color': color }">
-          <i class="fa-solid" [ngClass]="icon"></i>
+    @if (link) {
+      <a class="stats-card clickable" [routerLink]="link">
+        <div class="stats-card-body">
+          <div class="icon-circle" [ngStyle]="{ 'background-color': color + '1A', 'color': color }">
+            <i class="fa-solid" [ngClass]="icon"></i>
+          </div>
+          <div class="stats-info">
+            <span class="stats-value">{{ value }}</span>
+            <span class="stats-label">{{ label }}</span>
+          </div>
         </div>
-        <div class="stats-info">
-          <span class="stats-value">{{ value }}</span>
-          <span class="stats-label">{{ label }}</span>
+        <div *ngIf="subtitle" class="stats-subtitle">
+          {{ subtitle }}
+        </div>
+      </a>
+    } @else {
+      <div class="stats-card">
+        <div class="stats-card-body">
+          <div class="icon-circle" [ngStyle]="{ 'background-color': color + '1A', 'color': color }">
+            <i class="fa-solid" [ngClass]="icon"></i>
+          </div>
+          <div class="stats-info">
+            <span class="stats-value">{{ value }}</span>
+            <span class="stats-label">{{ label }}</span>
+          </div>
+        </div>
+        <div *ngIf="subtitle" class="stats-subtitle">
+          {{ subtitle }}
         </div>
       </div>
-      <div *ngIf="subtitle" class="stats-subtitle">
-        {{ subtitle }}
-      </div>
-    </div>
+    }
   `,
   styles: [`
     .stats-card {
+      display: block;
       background-color: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: var(--radius-md);
       padding: 1.25rem;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-      transition: background-color 0.3s, border-color 0.3s;
+      transition: background-color 0.3s, border-color 0.3s, transform 0.2s, box-shadow 0.2s;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .clickable {
+      cursor: pointer;
+    }
+
+    .clickable:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+      border-color: var(--primary-coral);
     }
 
     .stats-card-body {
@@ -83,4 +114,5 @@ export class StatsCardComponent {
   @Input({ required: true }) value!: string | number;
   @Input({ required: true }) color!: string;
   @Input() subtitle: string = '';
+  @Input() link: string = '';
 }

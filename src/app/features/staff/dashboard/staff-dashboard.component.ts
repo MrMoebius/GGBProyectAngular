@@ -4,8 +4,9 @@ import { MesaService } from '../../../core/services/mesa.service';
 import { ProductoService } from '../../../core/services/producto.service';
 import { ClienteService } from '../../../core/services/cliente.service';
 import { ComandaService } from '../../../core/services/comanda.service';
-import { JuegosCopiaService } from '../../../core/services/juegos-copia.service';
 import { PeticionesPagoService } from '../../../core/services/peticiones-pago.service';
+import { SesionMesaService } from '../../../core/services/sesion-mesa.service';
+import { FacturaService } from '../../../core/services/factura.service';
 import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer-loader.component';
 
 @Component({
@@ -18,42 +19,13 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       <h1 class="dashboard-title">Dashboard</h1>
 
       <div class="stats-grid">
-        <app-stats-card
-          icon="fa-chair"
-          label="Mesas"
-          [value]="mesasCount()"
-          color="var(--success)"
-        />
-        <app-stats-card
-          icon="fa-utensils"
-          label="Productos"
-          [value]="productosCount()"
-          color="var(--primary-coral)"
-        />
-        <app-stats-card
-          icon="fa-people-group"
-          label="Clientes"
-          [value]="clientesCount()"
-          color="var(--warning)"
-        />
-        <app-stats-card
-          icon="fa-receipt"
-          label="Comandas"
-          [value]="comandasCount()"
-          color="var(--danger)"
-        />
-        <app-stats-card
-          icon="fa-dice"
-          label="Copias Juegos"
-          [value]="juegosCopiaCount()"
-          color="var(--success)"
-        />
-        <app-stats-card
-          icon="fa-credit-card"
-          label="Peticiones Pago"
-          [value]="peticionesPagoCount()"
-          color="var(--info)"
-        />
+        <app-stats-card icon="fa-door-open" label="Sesiones Activas" [value]="sesionesActivasCount()" color="var(--success)" link="/staff/sesiones-mesa" />
+        <app-stats-card icon="fa-receipt" label="Comandas" [value]="comandasCount()" color="var(--danger)" link="/staff/comandas" />
+        <app-stats-card icon="fa-file-invoice" label="Facturas" [value]="facturasCount()" color="var(--warning)" link="/staff/facturas" />
+        <app-stats-card icon="fa-credit-card" label="Peticiones Pago" [value]="peticionesPagoCount()" color="var(--info)" link="/staff/peticiones-pago" />
+        <app-stats-card icon="fa-chair" label="Mesas" [value]="mesasCount()" color="var(--success)" link="/staff/mesas" />
+        <app-stats-card icon="fa-utensils" label="Productos" [value]="productosCount()" color="var(--primary-coral)" link="/staff/productos" />
+        <app-stats-card icon="fa-people-group" label="Clientes" [value]="clientesCount()" color="var(--warning)" link="/staff/clientes" />
       </div>
     </div>
   `,
@@ -71,8 +43,14 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
 
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: var(--spacing-lg);
+    }
+
+    @media (max-width: 1200px) {
+      .stats-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
     }
 
     @media (max-width: 768px) {
@@ -97,52 +75,29 @@ export class StaffDashboardComponent implements OnInit {
   private productoService = inject(ProductoService);
   private clienteService = inject(ClienteService);
   private comandaService = inject(ComandaService);
-  private juegosCopiaService = inject(JuegosCopiaService);
   private peticionesPagoService = inject(PeticionesPagoService);
+  private sesionMesaService = inject(SesionMesaService);
+  private facturaService = inject(FacturaService);
 
   mesasCount = signal(0);
   productosCount = signal(0);
   clientesCount = signal(0);
   comandasCount = signal(0);
-  juegosCopiaCount = signal(0);
   peticionesPagoCount = signal(0);
+  sesionesActivasCount = signal(0);
+  facturasCount = signal(0);
   isLoading = signal(true);
 
   ngOnInit(): void {
-    this.mesaService.getAll().subscribe({
-      next: (data) => this.mesasCount.set(data.length),
-      error: () => this.mesasCount.set(0)
-    });
-
-    this.productoService.getAll().subscribe({
-      next: (data) => this.productosCount.set(data.length),
-      error: () => this.productosCount.set(0)
-    });
-
-    this.clienteService.getAll().subscribe({
-      next: (data) => this.clientesCount.set(data.length),
-      error: () => this.clientesCount.set(0)
-    });
-
-    this.comandaService.getAll().subscribe({
-      next: (data) => this.comandasCount.set(data.length),
-      error: () => this.comandasCount.set(0)
-    });
-
-    this.juegosCopiaService.getAll().subscribe({
-      next: (data) => this.juegosCopiaCount.set(data.length),
-      error: () => this.juegosCopiaCount.set(0)
-    });
-
-    this.peticionesPagoService.getAll().subscribe({
-      next: (data) => {
-        this.peticionesPagoCount.set(data.length);
-        this.isLoading.set(false);
-      },
-      error: () => {
-        this.peticionesPagoCount.set(0);
-        this.isLoading.set(false);
-      }
+    this.mesaService.getAll().subscribe({ next: (d) => this.mesasCount.set(d.length), error: () => {} });
+    this.productoService.getAll().subscribe({ next: (d) => this.productosCount.set(d.length), error: () => {} });
+    this.clienteService.getAll().subscribe({ next: (d) => this.clientesCount.set(d.length), error: () => {} });
+    this.comandaService.getAll().subscribe({ next: (d) => this.comandasCount.set(d.length), error: () => {} });
+    this.peticionesPagoService.getAll().subscribe({ next: (d) => this.peticionesPagoCount.set(d.length), error: () => {} });
+    this.sesionMesaService.getAll().subscribe({ next: (d) => this.sesionesActivasCount.set(d.filter(s => s.estado === 'ACTIVA').length), error: () => {} });
+    this.facturaService.getAll().subscribe({
+      next: (d) => { this.facturasCount.set(d.length); this.isLoading.set(false); },
+      error: () => { this.isLoading.set(false); }
     });
   }
 }

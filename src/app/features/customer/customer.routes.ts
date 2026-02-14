@@ -10,6 +10,7 @@ export const CUSTOMER_ROUTES: Routes = [
       { path: 'historial', loadComponent: () => import('./history/game-history-page.component').then(m => m.GameHistoryPageComponent) },
       { path: 'reservas', loadComponent: () => import('./reservations/my-reservations.component').then(m => m.MyReservationsComponent) },
       { path: 'notificaciones', loadComponent: () => import('./notifications/notifications-page.component').then(m => m.NotificationsPageComponent) },
+      { path: 'facturas', loadComponent: () => import('./facturas/mis-facturas.component').then(m => m.MisFacturasComponent) },
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' }
     ]
   }
