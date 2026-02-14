@@ -304,8 +304,12 @@ export class AdminSidebarComponent {
     { label: 'Clientes',        icon: 'fa-people-group', route: '/admin/clientes' },
     { label: 'Comandas',        icon: 'fa-receipt',      route: '/admin/comandas' },
     { label: 'Juegos',           icon: 'fa-puzzle-piece', route: '/admin/juegos' },
-    { label: 'Copias Juegos',   icon: 'fa-dice',         route: '/admin/juegos-copia' },
     { label: 'Peticiones Pago', icon: 'fa-credit-card',  route: '/admin/peticiones-pago' },
-    { label: 'Eventos',         icon: 'fa-calendar-days', route: '/admin/eventos' }
+    { label: 'Eventos',         icon: 'fa-calendar-days', route: '/admin/eventos' },
+    { label: 'Sesiones Mesa',   icon: 'fa-door-open',    route: '/admin/sesiones-mesa' },
+    { label: 'Pagos Mesa',      icon: 'fa-money-bill',   route: '/admin/pagos-mesa' },
+    { label: 'Lineas Comanda',  icon: 'fa-list-ol',      route: '/admin/lineas-comanda' },
+    { label: 'Ludoteca',        icon: 'fa-children',     route: '/admin/ludoteca-sesiones' },
+    { label: 'Facturas',        icon: 'fa-file-invoice', route: '/admin/facturas' }
   ];
 }

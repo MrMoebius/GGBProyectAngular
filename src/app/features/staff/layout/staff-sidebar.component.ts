@@ -297,8 +297,12 @@ export class StaffSidebarComponent {
     { label: 'Clientes',        icon: 'fa-people-group', route: '/staff/clientes' },
     { label: 'Comandas',        icon: 'fa-receipt',      route: '/staff/comandas' },
     { label: 'Juegos',          icon: 'fa-puzzle-piece', route: '/staff/juegos' },
-    { label: 'Copias Juegos',   icon: 'fa-dice',         route: '/staff/juegos-copia' },
     { label: 'Peticiones Pago', icon: 'fa-credit-card',  route: '/staff/peticiones-pago' },
-    { label: 'Eventos',         icon: 'fa-calendar-days', route: '/staff/eventos' }
+    { label: 'Eventos',         icon: 'fa-calendar-days', route: '/staff/eventos' },
+    { label: 'Sesiones Mesa',   icon: 'fa-door-open',    route: '/staff/sesiones-mesa' },
+    { label: 'Pagos Mesa',      icon: 'fa-money-bill',   route: '/staff/pagos-mesa' },
+    { label: 'Lineas Comanda',  icon: 'fa-list-ol',      route: '/staff/lineas-comanda' },
+    { label: 'Ludoteca',        icon: 'fa-children',     route: '/staff/ludoteca-sesiones' },
+    { label: 'Facturas',        icon: 'fa-file-invoice', route: '/staff/facturas' }
   ];
 }

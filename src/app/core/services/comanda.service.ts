@@ -29,4 +29,24 @@ export class ComandaService {
   delete(id: number): Observable<void> {
     return this.api.delete<void>(`${this.endpoint}/${id}`);
   }
+
+  confirmar(id: number): Observable<Comanda> {
+    return this.api.post<Comanda>(`${this.endpoint}/${id}/confirmar`, {});
+  }
+
+  preparar(id: number): Observable<Comanda> {
+    return this.api.post<Comanda>(`${this.endpoint}/${id}/preparar`, {});
+  }
+
+  servir(id: number): Observable<Comanda> {
+    return this.api.post<Comanda>(`${this.endpoint}/${id}/servir`, {});
+  }
+
+  cancelar(id: number): Observable<Comanda> {
+    return this.api.post<Comanda>(`${this.endpoint}/${id}/cancelar`, {});
+  }
+
+  createByCliente(comanda: Partial<Comanda>): Observable<Comanda> {
+    return this.api.post<Comanda>(`${this.endpoint}/cliente`, comanda);
+  }
 }
