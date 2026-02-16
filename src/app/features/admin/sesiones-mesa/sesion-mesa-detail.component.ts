@@ -1,7 +1,7 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, FormBuilder, Validators } from '@angular/forms';
 import { forkJoin } from 'rxjs';
 import { SesionMesaService } from '../../../core/services/sesion-mesa.service';
 import { MesaService } from '../../../core/services/mesa.service';
@@ -27,7 +27,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
 @Component({
   selector: 'app-sesion-mesa-detail',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, StatusBadgeComponent, ConfirmModalComponent, BeerLoaderComponent],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, StatusBadgeComponent, ConfirmModalComponent, BeerLoaderComponent],
   template: `
     <app-beer-loader [isLoading]="isLoading()" />
     @if (!isLoading() && sesion()) {
@@ -186,17 +186,17 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
           </div>
 
           @if (sesion()!.estado === 'ACTIVA') {
-            <form class="pago-form" [formGroup]="pagoForm" (ngSubmit)="registrarPago()">
-              <input type="number" class="form-input pago-input" formControlName="importe" placeholder="Importe" min="0" step="0.01" />
-              <select class="form-input pago-select" formControlName="metodoPago">
+            <div class="pago-form">
+              <span class="pago-pendiente">{{ formatCurrency(pendiente()) }}</span>
+              <select class="form-input pago-select" [(ngModel)]="pagoMetodo">
                 <option value="EFECTIVO">Efectivo</option>
                 <option value="TARJETA">Tarjeta</option>
                 <option value="BIZUM">Bizum</option>
               </select>
-              <button type="submit" class="btn btn-primary btn-sm" [disabled]="pagoForm.invalid">
+              <button class="btn btn-primary btn-sm" [disabled]="pendiente() <= 0" (click)="registrarPago()">
                 <i class="fa-solid fa-money-bill"></i> Pagar
               </button>
-            </form>
+            </div>
           }
         </div>
 
@@ -331,7 +331,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
     .pago-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8125rem; }
     .pago-amount { font-weight: 600; font-variant-numeric: tabular-nums; min-width: 70px; }
     .pago-form { display: flex; align-items: center; gap: 0.5rem; }
-    .pago-input { width: 90px; }
+    .pago-pendiente { font-weight: 700; font-size: 0.9375rem; color: var(--text-main); font-variant-numeric: tabular-nums; min-width: 80px; }
     .pago-select { width: 110px; }
     .text-muted { color: var(--text-muted); font-size: 0.8125rem; margin: 0; }
 
@@ -440,10 +440,7 @@ export class SesionMesaDetailComponent implements OnInit {
 
   pendiente = computed(() => Math.max(0, this.totalGeneral() - this.totalPagado()));
 
-  pagoForm = this.fb.group({
-    importe: [0 as number, [Validators.required, Validators.min(0.01)]],
-    metodoPago: ['EFECTIVO']
-  });
+  pagoMetodo = 'EFECTIVO';
 
   ludotecaForm = this.fb.group({
     numAdultos: [0],
@@ -608,7 +605,15 @@ export class SesionMesaDetailComponent implements OnInit {
       precioUnitarioHistorico: producto.precio
     }).subscribe({
       next: () => { this.toastService.success(`${producto.nombre} añadido`); this.refreshData(); },
-      error: (err) => this.toastService.error(err?.error?.message || 'Error al añadir producto')
+      error: (err) => {
+        const fields = err?.error?.fields;
+        if (fields) {
+          const msgs = Object.entries(fields).map(([k, v]) => `${k}: ${v}`).join(', ');
+          this.toastService.error(msgs);
+        } else {
+          this.toastService.error(err?.error?.message || 'Error al añadir producto');
+        }
+      }
     });
   }
 
@@ -621,16 +626,15 @@ export class SesionMesaDetailComponent implements OnInit {
 
   // PAGOS
   registrarPago(): void {
-    if (this.pagoForm.invalid) return;
-    const raw = this.pagoForm.getRawValue();
+    const importe = this.pendiente();
+    if (importe <= 0) return;
     this.pagosService.create({
       idSesion: this.sesionId,
-      importe: raw.importe,
-      metodoPago: raw.metodoPago
+      importe,
+      metodoPago: this.pagoMetodo
     } as any).subscribe({
       next: () => {
         this.toastService.success('Pago registrado');
-        this.pagoForm.patchValue({ importe: 0 });
         this.refreshData();
       },
       error: (err) => this.toastService.error(err?.error?.message || 'Error al registrar pago')
