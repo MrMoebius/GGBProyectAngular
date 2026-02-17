@@ -67,58 +67,57 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
         </div>
       </div>
 
-      <!-- Table -->
-      <div class="card table-container">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Mesa</th>
-              <th>Cliente</th>
-              <th>Comensales</th>
-              <th>Ludoteca</th>
-              <th>Estado</th>
-              <th>Apertura</th>
-              <th>Cierre</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (s of filteredSesiones(); track s.id) {
-              <tr class="clickable-row" (click)="navigateToDetail(s.id)">
-                <td>{{ s.id }}</td>
-                <td>{{ getMesaNombre(s.idMesa) }}</td>
-                <td>{{ getClienteNombre(s.idCliente) }}</td>
-                <td>{{ s.numComensales ?? '-' }}</td>
-                <td>
-                  <span class="bool-badge" [class.bool-si]="s.usaLudoteca" [class.bool-no]="!s.usaLudoteca">
-                    {{ s.usaLudoteca ? 'Si' : 'No' }}
-                  </span>
-                </td>
-                <td><app-status-badge [status]="s.estado" /></td>
-                <td>{{ formatDateTime(s.fechaHoraApertura) }}</td>
-                <td>{{ s.fechaHoraCierre ? formatDateTime(s.fechaHoraCierre) : '-' }}</td>
-                <td class="actions-cell" (click)="$event.stopPropagation()">
-                  <button class="btn btn-ghost btn-sm" (click)="navigateToDetail(s.id)" title="Ver detalle">
-                    <i class="fa-solid fa-eye"></i>
-                  </button>
-                  @if (s.estado === 'ACTIVA') {
-                    <button class="btn btn-danger btn-sm" (click)="openCerrar(s.id)" title="Cerrar sesion">
-                      <i class="fa-solid fa-door-closed"></i>
-                    </button>
-                  }
-                </td>
-              </tr>
-            } @empty {
-              <tr>
-                <td colspan="9" class="empty-state">
-                  <i class="fa-solid fa-door-open empty-icon"></i>
-                  <p>No se encontraron sesiones</p>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
+      <!-- Grid -->
+      <div class="sesiones-grid">
+        @for (s of filteredSesiones(); track s.id) {
+          <div class="sesion-card" (click)="navigateToDetail(s.id)">
+            <div class="card-top">
+              <span class="card-mesa">{{ getMesaNombre(s.idMesa) }}</span>
+              <app-status-badge [status]="s.estado" />
+            </div>
+            <div class="card-body">
+              <div class="card-field">
+                <i class="fa-solid fa-users"></i>
+                <span>{{ s.numComensales ?? '-' }} comensales</span>
+              </div>
+              @if (getClienteNombre(s.idCliente) !== '-') {
+                <div class="card-field">
+                  <i class="fa-solid fa-user"></i>
+                  <span>{{ getClienteNombre(s.idCliente) }}</span>
+                </div>
+              }
+              <div class="card-field">
+                <i class="fa-solid fa-clock"></i>
+                <span>{{ formatDateTime(s.fechaHoraApertura) }}</span>
+              </div>
+              @if (s.usaLudoteca) {
+                <div class="card-field ludo-tag">
+                  <i class="fa-solid fa-puzzle-piece"></i>
+                  <span>Ludoteca</span>
+                </div>
+              }
+            </div>
+            <div class="card-bottom" (click)="$event.stopPropagation()">
+              @if (s.estado === 'ACTIVA') {
+                <button class="btn btn-ghost btn-sm" (click)="navigateToDetail(s.id)" title="Ver detalle">
+                  <i class="fa-solid fa-eye"></i> Detalle
+                </button>
+                <button class="btn btn-danger btn-sm" (click)="openCerrar(s.id)" title="Cerrar sesion">
+                  <i class="fa-solid fa-door-closed"></i> Cerrar
+                </button>
+              } @else {
+                <button class="btn btn-ghost btn-sm" (click)="navigateToDetail(s.id)" title="Ver detalle">
+                  <i class="fa-solid fa-eye"></i> Ver detalle
+                </button>
+              }
+            </div>
+          </div>
+        } @empty {
+          <div class="empty-state-full">
+            <i class="fa-solid fa-door-open empty-icon"></i>
+            <p>No se encontraron sesiones</p>
+          </div>
+        }
       </div>
 
       <!-- Modal Abrir Sesion -->
@@ -164,21 +163,12 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
             </select>
           </div>
 
-          <div class="form-row">
-            <div class="form-group form-col">
-              <label class="form-label">Comensales *</label>
-              <input type="number" class="form-input" formControlName="numComensales" min="1" placeholder="Numero de personas" />
-              @if (abrirForm.get('numComensales')?.invalid && abrirForm.get('numComensales')?.touched) {
-                <span class="form-error">Minimo 1 comensal</span>
-              }
-            </div>
-            <div class="form-group form-col">
-              <label class="form-label">&nbsp;</label>
-              <label class="check-label">
-                <input type="checkbox" formControlName="usaLudoteca" />
-                <span>Usa ludoteca</span>
-              </label>
-            </div>
+          <div class="form-group">
+            <label class="form-label">Comensales *</label>
+            <input type="number" class="form-input" formControlName="numComensales" min="1" placeholder="Numero de personas" />
+            @if (abrirForm.get('numComensales')?.invalid && abrirForm.get('numComensales')?.touched) {
+              <span class="form-error">Minimo 1 comensal</span>
+            }
           </div>
         </form>
       </app-entity-form-modal>
@@ -209,25 +199,18 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
     .filter-pill:hover { border-color: var(--primary-coral); color: var(--primary-coral); }
     .filter-pill.active { background-color: var(--primary-coral); border-color: var(--primary-coral); color: var(--text-white); }
 
-    .table-container { overflow-x: auto; }
-    .data-table { width: 100%; border-collapse: collapse; }
-    .data-table thead { background-color: var(--table-header-bg); }
-    .data-table th { padding: 0.75rem 1rem; text-align: left; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--table-border); white-space: nowrap; }
-    .data-table td { padding: 0.75rem 1rem; font-size: 0.875rem; color: var(--text-main); border-bottom: 1px solid var(--table-border); }
-    .data-table tbody tr:hover { background-color: var(--table-row-hover); }
-    .clickable-row { cursor: pointer; }
-    .actions-cell { display: flex; gap: 0.5rem; white-space: nowrap; }
-    .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); }
-    .empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; opacity: 0.5; }
-
-    .bool-badge { display: inline-flex; align-items: center; padding: 0.125rem 0.625rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; border: 1px solid transparent; }
-    .bool-si { background-color: var(--success-bg); color: var(--success-text); border-color: var(--success); }
-    .bool-no { background-color: var(--secondary-bg); color: var(--text-muted); border-color: var(--input-border); }
-
-    .form-row { display: flex; gap: var(--spacing-md); }
-    .form-col { flex: 1; }
-    .check-label { display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.875rem; color: var(--text-main); font-weight: 500; height: 42px; }
-    .check-label input[type="checkbox"] { width: 1rem; height: 1rem; cursor: pointer; accent-color: var(--primary-coral); }
+    .sesiones-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+    .sesion-card { background-color: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius-md, 8px); padding: 1rem 1.25rem; cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; gap: 0.75rem; }
+    .sesion-card:hover { border-color: var(--primary-coral); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .card-top { display: flex; align-items: center; justify-content: space-between; }
+    .card-mesa { font-weight: 700; font-size: 1rem; color: var(--text-main); }
+    .card-body { display: flex; flex-direction: column; gap: 0.375rem; }
+    .card-field { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8125rem; color: var(--text-muted); }
+    .card-field i { width: 14px; text-align: center; font-size: 0.75rem; }
+    .ludo-tag { color: var(--success); font-weight: 600; }
+    .card-bottom { display: flex; gap: 0.5rem; border-top: 1px solid var(--card-border); padding-top: 0.75rem; }
+    .empty-state-full { grid-column: 1 / -1; text-align: center; padding: 3rem 1rem; color: var(--text-muted); }
+    .empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; opacity: 0.5; display: block; }
 
     @media (max-width: 768px) {
       .page-wrapper { padding: var(--spacing-md); }
@@ -252,7 +235,7 @@ export class SesionesMesaListComponent implements OnInit {
   clientes = signal<Cliente[]>([]);
   reservasPendientes = signal<ReservasMesa[]>([]);
   searchTerm = signal('');
-  estadoFilter = signal('');
+  estadoFilter = signal('ACTIVA');
   showAbrirModal = signal(false);
   showCerrarModal = signal(false);
   cerrarId = signal<number | null>(null);
@@ -284,15 +267,14 @@ export class SesionesMesaListComponent implements OnInit {
       });
     }
 
-    return list;
+    return list.sort((a, b) => new Date(b.fechaHoraApertura).getTime() - new Date(a.fechaHoraApertura).getTime());
   });
 
   abrirForm = this.fb.group({
     idReserva: [null as number | null],
     idMesa: [null as number | null, Validators.required],
     idCliente: [null as number | null],
-    numComensales: [1, [Validators.required, Validators.min(1)]],
-    usaLudoteca: [false]
+    numComensales: [1, [Validators.required, Validators.min(1)]]
   });
 
   ngOnInit(): void {
@@ -336,7 +318,7 @@ export class SesionesMesaListComponent implements OnInit {
   }
 
   openAbrir(): void {
-    this.abrirForm.reset({ idReserva: null, idMesa: null, idCliente: null, numComensales: 1, usaLudoteca: false });
+    this.abrirForm.reset({ idReserva: null, idMesa: null, idCliente: null, numComensales: 1 });
     this.showAbrirModal.set(true);
   }
 

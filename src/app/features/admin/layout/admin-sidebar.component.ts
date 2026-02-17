@@ -297,19 +297,21 @@ export class AdminSidebarComponent {
   @Output() toggleCollapse = new EventEmitter<void>();
 
   navItems: NavItem[] = [
-    { label: 'Dashboard',       icon: 'fa-gauge-high',   route: '/admin/dashboard' },
-    { label: 'Mesas',           icon: 'fa-chair',        route: '/admin/mesas' },
-    { label: 'Productos',       icon: 'fa-utensils',     route: '/admin/productos' },
-    { label: 'Empleados',       icon: 'fa-users-gear',   route: '/admin/empleados' },
-    { label: 'Clientes',        icon: 'fa-people-group', route: '/admin/clientes' },
-    { label: 'Comandas',        icon: 'fa-receipt',      route: '/admin/comandas' },
-    { label: 'Juegos',           icon: 'fa-puzzle-piece', route: '/admin/juegos' },
-    { label: 'Peticiones Pago', icon: 'fa-credit-card',  route: '/admin/peticiones-pago' },
+    { label: 'Dashboard',       icon: 'fa-gauge-high',    route: '/admin/dashboard' },
+    // TPV
+    { label: 'Sesiones Mesa',   icon: 'fa-door-open',     route: '/admin/sesiones-mesa' },
+    { label: 'Pagos Mesa',      icon: 'fa-money-bill',    route: '/admin/pagos-mesa' },
+    { label: 'Peticiones Pago', icon: 'fa-credit-card',   route: '/admin/peticiones-pago' },
+    { label: 'Facturas',        icon: 'fa-file-invoice',  route: '/admin/facturas' },
+    // Catalogo
+    { label: 'Productos',       icon: 'fa-utensils',      route: '/admin/productos' },
+    { label: 'Mesas',           icon: 'fa-chair',         route: '/admin/mesas' },
+    { label: 'Juegos',          icon: 'fa-puzzle-piece',  route: '/admin/juegos' },
+    { label: 'Ludoteca',        icon: 'fa-children',      route: '/admin/ludoteca-sesiones' },
+    // Personas
+    { label: 'Empleados',       icon: 'fa-users-gear',    route: '/admin/empleados' },
+    { label: 'Clientes',        icon: 'fa-people-group',  route: '/admin/clientes' },
+    // Otros
     { label: 'Eventos',         icon: 'fa-calendar-days', route: '/admin/eventos' },
-    { label: 'Sesiones Mesa',   icon: 'fa-door-open',    route: '/admin/sesiones-mesa' },
-    { label: 'Pagos Mesa',      icon: 'fa-money-bill',   route: '/admin/pagos-mesa' },
-    { label: 'Lineas Comanda',  icon: 'fa-list-ol',      route: '/admin/lineas-comanda' },
-    { label: 'Ludoteca',        icon: 'fa-children',     route: '/admin/ludoteca-sesiones' },
-    { label: 'Facturas',        icon: 'fa-file-invoice', route: '/admin/facturas' }
   ];
 }
