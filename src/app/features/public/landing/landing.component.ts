@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, OnDestroy, signal, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { JuegoService } from '../../../core/services/juego.service';
@@ -89,13 +89,20 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
           <h2 class="section-title">Juegos Destacados</h2>
           <p class="section-subtitle">Los favoritos de nuestros jugadores</p>
         </div>
-        <a routerLink="/public/juegos" class="btn btn-ghost">
-          Ver todos <i class="fa-solid fa-arrow-right"></i>
-        </a>
+        <div class="section-header-actions">
+          <button class="btn btn-ghost" (click)="startRoulette()" [disabled]="rouletteActive()">
+            <i class="fa-solid fa-shuffle"></i> Modo Ruleta
+          </button>
+          <a routerLink="/public/juegos" class="btn btn-ghost">
+            Ver todos <i class="fa-solid fa-arrow-right"></i>
+          </a>
+        </div>
       </div>
-      <div class="games-scroll">
-        @for (game of featuredGames(); track game.id) {
-          <app-game-card-public [game]="game" />
+      <div class="games-scroll" #gamesScroll>
+        @for (game of featuredGames(); track game.id; let i = $index) {
+          <div class="roulette-card-wrapper" [class.roulette-highlight]="rouletteActive() && rouletteIndex() === i">
+            <app-game-card-public [game]="game" />
+          </div>
         }
       </div>
     </section>
@@ -193,30 +200,37 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
           </div>
           <div class="grid-3">
             @for (event of upcomingEvents(); track event.id) {
-              <a [routerLink]="['/public/eventos', event.id]" class="event-card card">
-                <div class="event-card-header">
-                  <span class="event-type-badge" [class]="'type-' + event.type.toLowerCase()">
-                    @switch (event.type) {
-                      @case ('TORNEO') { <i class="fa-solid fa-trophy"></i> Torneo }
-                      @case ('NOCHE_TEMATICA') { <i class="fa-solid fa-moon"></i> Noche Tematica }
-                      @case ('TALLER') { <i class="fa-solid fa-palette"></i> Taller }
-                      @case ('EVENTO_ESPECIAL') { <i class="fa-solid fa-star"></i> Especial }
-                    }
-                  </span>
-                  <span class="event-date">
-                    <i class="fa-solid fa-calendar"></i> {{ formatDate(event.date) }}
-                  </span>
-                </div>
-                <h3 class="event-card-title">{{ event.title }}</h3>
-                <p class="event-card-desc">{{ event.description | slice:0:100 }}...</p>
-                <div class="event-card-footer">
-                  <div class="event-capacity">
-                    <div class="capacity-bar">
-                      <div class="capacity-fill" [style.width.%]="(event.currentAttendees / event.capacity) * 100"></div>
-                    </div>
-                    <span class="capacity-text">{{ event.currentAttendees }}/{{ event.capacity }} plazas</span>
+              <img class="event-img-probe" [src]="eventService.getImageUrl(event.id)" (load)="onEventImageLoad(event.id)" (error)="$event" />
+              <a [routerLink]="['/public/eventos', event.id]"
+                 class="event-card card"
+                 [class.event-card-with-bg]="eventHasImage(event.id)"
+                 [style.background-image]="eventHasImage(event.id) ? 'url(' + eventService.getImageUrl(event.id) + ')' : ''">
+                @if (eventHasImage(event.id)) { <div class="event-card-overlay"></div> }
+                <div class="event-card-content">
+                  <div class="event-card-header">
+                    <span class="event-type-badge" [class]="'type-' + event.type.toLowerCase()">
+                      @switch (event.type) {
+                        @case ('TORNEO') { <i class="fa-solid fa-trophy"></i> Torneo }
+                        @case ('NOCHE_TEMATICA') { <i class="fa-solid fa-moon"></i> Noche Tematica }
+                        @case ('TALLER') { <i class="fa-solid fa-palette"></i> Taller }
+                        @case ('EVENTO_ESPECIAL') { <i class="fa-solid fa-star"></i> Especial }
+                      }
+                    </span>
+                    <span class="event-date">
+                      <i class="fa-solid fa-calendar"></i> {{ formatDate(event.date) }}
+                    </span>
                   </div>
-                  <span class="event-time"><i class="fa-solid fa-clock"></i> {{ event.time }}</span>
+                  <h3 class="event-card-title">{{ event.title }}</h3>
+                  <p class="event-card-desc">{{ event.description | slice:0:100 }}...</p>
+                  <div class="event-card-footer">
+                    <div class="event-capacity">
+                      <div class="capacity-bar">
+                        <div class="capacity-fill" [style.width.%]="(event.currentAttendees / event.capacity) * 100"></div>
+                      </div>
+                      <span class="capacity-text">{{ event.currentAttendees }}/{{ event.capacity }} plazas</span>
+                    </div>
+                    <span class="event-time"><i class="fa-solid fa-clock"></i> {{ event.time }}</span>
+                  </div>
                 </div>
               </a>
             }
@@ -466,6 +480,12 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       gap: 1rem;
     }
 
+    .section-header-actions {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
     /* GAMES SCROLL */
     .games-scroll {
       display: flex;
@@ -479,6 +499,27 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       min-width: 280px;
       max-width: 280px;
       scroll-snap-align: start;
+    }
+
+    .roulette-card-wrapper {
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      border-radius: var(--radius-lg);
+    }
+
+    .roulette-highlight {
+      transform: scale(1.05);
+      box-shadow: 0 0 20px rgba(0, 255, 209, 0.5), 0 0 40px rgba(0, 255, 209, 0.25);
+      outline: 2px solid var(--neon-cyan);
+      outline-offset: 2px;
+    }
+
+    @keyframes rouletteGlow {
+      0%, 100% { box-shadow: 0 0 20px rgba(0, 255, 209, 0.5), 0 0 40px rgba(0, 255, 209, 0.25); }
+      50% { box-shadow: 0 0 30px rgba(0, 255, 209, 0.7), 0 0 60px rgba(0, 255, 209, 0.4); }
+    }
+
+    .roulette-winner {
+      animation: rouletteGlow 1s ease-in-out infinite;
     }
 
     .games-scroll::-webkit-scrollbar {
@@ -496,6 +537,10 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
 
     /* DAILY PICK */
     .daily-section {
+      background: var(--secondary-bg);
+    }
+
+    :host-context([data-theme="dark"]) .daily-section {
       background: linear-gradient(135deg, var(--hero-gradient-start), var(--hero-gradient-end));
     }
 
@@ -511,24 +556,34 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       align-items: center;
       gap: 0.5rem;
       padding: 0.375rem 1rem;
-      background: rgba(255, 209, 102, 0.15);
-      color: #FFD166;
-      border: 1px solid rgba(255, 209, 102, 0.3);
+      background: rgba(217, 119, 6, 0.12);
+      color: #D97706;
+      border: 1px solid rgba(217, 119, 6, 0.25);
       border-radius: 9999px;
       font-size: 0.8125rem;
       font-weight: 600;
       margin-bottom: 1rem;
     }
 
+    :host-context([data-theme="dark"]) .daily-badge {
+      background: rgba(255, 209, 102, 0.15);
+      color: #FFD166;
+      border-color: rgba(255, 209, 102, 0.3);
+    }
+
     .daily-title {
       font-size: 2rem;
       font-weight: 700;
-      color: #FFFFFF;
+      color: var(--text-main);
       margin-bottom: 0.75rem;
     }
 
+    :host-context([data-theme="dark"]) .daily-title {
+      color: #FFFFFF;
+    }
+
     .daily-desc {
-      color: #94A3B8;
+      color: var(--text-muted);
       font-size: 1rem;
       line-height: 1.6;
       margin-bottom: 1.25rem;
@@ -537,13 +592,17 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
     .daily-meta {
       display: flex;
       gap: 1.5rem;
-      color: #94A3B8;
+      color: var(--text-muted);
       font-size: 0.875rem;
       margin-bottom: 1.5rem;
     }
 
     .daily-meta i {
       margin-right: 0.375rem;
+      color: var(--primary-coral);
+    }
+
+    :host-context([data-theme="dark"]) .daily-meta i {
       color: var(--neon-cyan);
     }
 
@@ -551,6 +610,16 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       display: flex;
       gap: 1rem;
       flex-wrap: wrap;
+    }
+
+    :host-context([data-theme="dark"]) .daily-actions .btn-outline {
+      color: #FFFFFF;
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    :host-context([data-theme="dark"]) .daily-actions .btn-outline:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.6);
     }
 
     .daily-visual {
@@ -562,25 +631,40 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
     .daily-card-large {
       width: 250px;
       height: 300px;
-      background: linear-gradient(135deg, rgba(0, 255, 209, 0.1), rgba(255, 107, 157, 0.1));
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: linear-gradient(135deg, rgba(255, 107, 157, 0.08), rgba(255, 107, 107, 0.08));
+      border: 1px solid var(--card-border);
       border-radius: var(--radius-lg);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       gap: 1rem;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    :host-context([data-theme="dark"]) .daily-card-large {
+      background: linear-gradient(135deg, rgba(0, 255, 209, 0.1), rgba(255, 107, 157, 0.1));
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .daily-card-large:hover {
+      transform: scale(1.05);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
     }
 
     .daily-card-large i {
       font-size: 4rem;
-      color: var(--neon-cyan);
+      color: var(--primary-coral);
       opacity: 0.6;
+    }
+
+    :host-context([data-theme="dark"]) .daily-card-large i {
+      color: var(--neon-cyan);
     }
 
     .daily-genre {
       font-size: 0.875rem;
-      color: #94A3B8;
+      color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.1em;
     }
@@ -590,8 +674,19 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       height: 300px;
       object-fit: cover;
       border-radius: var(--radius-lg);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--card-border);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    :host-context([data-theme="dark"]) .daily-img {
+      border-color: rgba(255, 255, 255, 0.1);
       box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .daily-img:hover {
+      transform: scale(1.05);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
     }
 
     /* FOOD CAROUSEL */
@@ -704,6 +799,56 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
     .event-card:hover {
       transform: translateY(-4px);
       box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .event-img-probe {
+      display: none;
+    }
+
+    .event-card-with-bg {
+      position: relative;
+      background-size: cover;
+      background-position: center;
+      overflow: hidden;
+    }
+
+    .event-card-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.6) 0%, rgba(15, 23, 42, 0.85) 100%);
+      z-index: 0;
+    }
+
+    .event-card-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .event-card-with-bg .event-card-title {
+      color: #FFFFFF;
+    }
+
+    .event-card-with-bg .event-card-desc {
+      color: #CBD5E1;
+    }
+
+    .event-card-with-bg .event-date {
+      color: #CBD5E1;
+    }
+
+    .event-card-with-bg .capacity-text {
+      color: #CBD5E1;
+    }
+
+    .event-card-with-bg .event-time {
+      color: #CBD5E1;
+    }
+
+    .event-card-with-bg .capacity-bar {
+      background: rgba(255, 255, 255, 0.2);
     }
 
     .event-card-header {
@@ -878,6 +1023,10 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
 
     /* CTA SECTION */
     .cta-section {
+      background: var(--secondary-bg);
+    }
+
+    :host-context([data-theme="dark"]) .cta-section {
       background: linear-gradient(135deg, var(--hero-gradient-start), var(--hero-gradient-end));
     }
 
@@ -888,12 +1037,16 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
     .cta-title {
       font-size: 2.25rem;
       font-weight: 700;
-      color: #FFFFFF;
+      color: var(--text-main);
       margin-bottom: 1rem;
     }
 
+    :host-context([data-theme="dark"]) .cta-title {
+      color: #FFFFFF;
+    }
+
     .cta-text {
-      color: #94A3B8;
+      color: var(--text-muted);
       font-size: 1.125rem;
       max-width: 600px;
       margin: 0 auto 2rem;
@@ -912,11 +1065,19 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      color: #CBD5E1;
+      color: var(--text-muted);
       font-size: 0.9375rem;
     }
 
+    :host-context([data-theme="dark"]) .cta-info-item {
+      color: #CBD5E1;
+    }
+
     .cta-info-item i {
+      color: var(--primary-coral);
+    }
+
+    :host-context([data-theme="dark"]) .cta-info-item i {
       color: var(--neon-cyan);
     }
 
@@ -927,12 +1088,12 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       flex-wrap: wrap;
     }
 
-    .cta-actions .btn-outline {
+    :host-context([data-theme="dark"]) .cta-actions .btn-outline {
       color: #FFFFFF;
       border-color: rgba(255, 255, 255, 0.3);
     }
 
-    .cta-actions .btn-outline:hover {
+    :host-context([data-theme="dark"]) .cta-actions .btn-outline:hover {
       background-color: rgba(255, 255, 255, 0.1);
       border-color: rgba(255, 255, 255, 0.6);
       color: #FFFFFF;
@@ -996,17 +1157,23 @@ export class LandingComponent implements OnInit, OnDestroy {
   private mockJuegos = inject(JuegoService);
   private recommendation = inject(RecommendationService);
   private mesaService = inject(MesaService);
-  private eventService = inject(EventService);
+  protected eventService = inject(EventService);
   private authService = inject(AuthService);
 
   isCliente = computed(() => this.authService.currentRole() === 'CLIENTE' || !this.authService.isAuthenticated());
 
+  @ViewChild('gamesScroll') gamesScrollRef!: ElementRef<HTMLElement>;
+
   isLoading = signal(true);
+  rouletteActive = signal(false);
+  rouletteIndex = signal(-1);
+  private rouletteTimers: ReturnType<typeof setTimeout>[] = [];
   featuredGames = signal<JuegoExtended[]>([]);
   dailyPick = signal<JuegoExtended | null>(null);
   mesas = signal<Mesa[]>([]);
   upcomingEvents = signal<GGBEvent[]>([]);
   mesaStats = signal<{ total: number; libres: number }>({ total: 0, libres: 0 });
+  private loadedEventImages = signal<Set<number>>(new Set());
 
   // Carousel
   readonly heroSlides = [
@@ -1078,6 +1245,18 @@ export class LandingComponent implements OnInit, OnDestroy {
     return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
   }
 
+  onEventImageLoad(eventId: number): void {
+    this.loadedEventImages.update(set => {
+      const copy = new Set(set);
+      copy.add(eventId);
+      return copy;
+    });
+  }
+
+  eventHasImage(eventId: number): boolean {
+    return this.loadedEventImages().has(eventId);
+  }
+
   // Carousel methods
   goToSlide(index: number): void {
     this.currentSlide.set(index);
@@ -1123,8 +1302,56 @@ export class LandingComponent implements OnInit, OnDestroy {
     this.startFoodCarousel();
   }
 
+  startRoulette(): void {
+    if (this.rouletteActive()) return;
+    const total = this.featuredGames().length;
+    if (total === 0) return;
+
+    this.rouletteActive.set(true);
+    this.rouletteTimers.forEach(t => clearTimeout(t));
+    this.rouletteTimers = [];
+
+    const target = Math.floor(Math.random() * total);
+    const totalSteps = 30 + total + (target >= 0 ? target : 0);
+    let currentDelay = 50;
+    let accumulated = 0;
+
+    for (let step = 0; step < totalSteps; step++) {
+      const idx = step % total;
+      const timer = setTimeout(() => {
+        this.rouletteIndex.set(idx);
+        if (step === totalSteps - 1) {
+          this.scrollToRouletteWinner(idx);
+          setTimeout(() => {
+            const el = this.gamesScrollRef?.nativeElement?.children[idx] as HTMLElement;
+            if (el) el.classList.add('roulette-winner');
+            setTimeout(() => {
+              if (el) el.classList.remove('roulette-winner');
+              this.rouletteActive.set(false);
+              this.rouletteIndex.set(-1);
+            }, 3000);
+          }, 100);
+        }
+      }, accumulated);
+      this.rouletteTimers.push(timer);
+      const progress = step / totalSteps;
+      currentDelay = 50 + (progress * progress) * 250;
+      accumulated += currentDelay;
+    }
+  }
+
+  private scrollToRouletteWinner(index: number): void {
+    const container = this.gamesScrollRef?.nativeElement;
+    if (!container) return;
+    const card = container.children[index] as HTMLElement;
+    if (!card) return;
+    const offset = card.offsetLeft - (container.clientWidth / 2) + (card.clientWidth / 2);
+    container.scrollTo({ left: offset, behavior: 'smooth' });
+  }
+
   ngOnDestroy(): void {
     if (this.slideInterval) clearInterval(this.slideInterval);
     if (this.foodInterval) clearInterval(this.foodInterval);
+    this.rouletteTimers.forEach(t => clearTimeout(t));
   }
 }
