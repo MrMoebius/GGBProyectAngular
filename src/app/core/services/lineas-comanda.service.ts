@@ -29,4 +29,16 @@ export class LineasComandaService {
   delete(id: number): Observable<void> {
     return this.api.delete<void>(`${this.endpoint}/${id}`);
   }
+
+  getByComanda(idComanda: number): Observable<LineasComanda[]> {
+    return this.api.get<LineasComanda[]>(`${this.endpoint}/comanda/${idComanda}`);
+  }
+
+  createByCliente(linea: Partial<LineasComanda>): Observable<LineasComanda> {
+    return this.api.post<LineasComanda>(`${this.endpoint}/cliente`, linea);
+  }
+
+  deleteByCliente(id: number): Observable<void> {
+    return this.api.delete<void>(`${this.endpoint}/${id}/cliente`);
+  }
 }

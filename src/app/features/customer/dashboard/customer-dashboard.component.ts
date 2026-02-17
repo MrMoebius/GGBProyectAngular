@@ -7,6 +7,8 @@ import { MockReservasService } from '../../../core/services/mock-reservas.servic
 import { EventService } from '../../../core/services/event.service';
 import { RecommendationService } from '../../../core/services/recommendation.service';
 import { FavoritesService } from '../../../core/services/favorites.service';
+import { SesionMesaService } from '../../../core/services/sesion-mesa.service';
+import { SesionMesa } from '../../../core/models/sesion-mesa.interface';
 import { RouterModule } from '@angular/router';
 import { GameSession } from '../../../core/models/game-session.interface';
 import { ReservasMesa } from '../../../core/models/reservas-mesa.interface';
@@ -37,6 +39,22 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
         <h1 class="welcome-title">Bienvenido, {{ userName() }}!</h1>
         <p class="welcome-sub">Aqui tienes un resumen de tu actividad en Giber Games Bar</p>
       </div>
+
+      <!-- Sesion Activa Banner -->
+      @if (sesionActiva()) {
+        <a class="active-session-banner" routerLink="/customer/mi-sesion">
+          <div class="session-banner-left">
+            <i class="fa-solid fa-utensils session-banner-icon"></i>
+            <div>
+              <h3 class="session-banner-title">Sesion Activa - Mesa {{ sesionActiva()!.idMesa }}</h3>
+              <p class="session-banner-sub">{{ sesionActiva()!.numComensales }} comensales</p>
+            </div>
+          </div>
+          <span class="session-banner-action">
+            <i class="fa-solid fa-receipt"></i> Gestionar Pedidos
+          </span>
+        </a>
+      }
 
       <!-- Stats cards -->
       <div class="stats-grid">
@@ -835,6 +853,61 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
         gap: 0.5rem;
       }
     }
+
+    /* Active Session Banner */
+    .active-session-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.25rem;
+      background: linear-gradient(135deg, rgba(0, 255, 209, 0.08), rgba(0, 255, 209, 0.02));
+      border: 1px solid rgba(0, 255, 209, 0.25);
+      border-radius: var(--radius-lg, 16px);
+      margin-bottom: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .active-session-banner:hover {
+      border-color: rgba(0, 255, 209, 0.5);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(0, 255, 209, 0.1);
+    }
+    .session-banner-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .session-banner-icon {
+      font-size: 1.5rem;
+      color: var(--neon-cyan, #00FFD1);
+    }
+    .session-banner-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin: 0;
+    }
+    .session-banner-sub {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      margin: 0.125rem 0 0;
+    }
+    .session-banner-action {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-md, 8px);
+      background-color: var(--neon-cyan, #00FFD1);
+      color: #0F172A;
+      font-size: 0.8125rem;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    @media (max-width: 640px) {
+      .active-session-banner { flex-direction: column; gap: 0.75rem; align-items: flex-start; }
+    }
   `]
 })
 export class CustomerDashboardComponent implements OnInit {
@@ -845,9 +918,11 @@ export class CustomerDashboardComponent implements OnInit {
   private eventService = inject(EventService);
   private recommendationService = inject(RecommendationService);
   private favoritesService = inject(FavoritesService);
+  private sesionMesaService = inject(SesionMesaService);
 
   isLoading = signal(true);
   userName = signal('Usuario');
+  sesionActiva = signal<SesionMesa | null>(null);
   private imageVersion = signal(Date.now());
   hasProfilePhoto = signal(false);
 
@@ -916,6 +991,12 @@ export class CustomerDashboardComponent implements OnInit {
     this.recommendationService.getPersonalized(gameIds, 3).subscribe(games => {
       this.recommendations.set(games);
       this.isLoading.set(false);
+    });
+
+    // Active session
+    this.sesionMesaService.getMiSesion().subscribe({
+      next: (sesion) => this.sesionActiva.set(sesion),
+      error: () => {}
     });
   }
 

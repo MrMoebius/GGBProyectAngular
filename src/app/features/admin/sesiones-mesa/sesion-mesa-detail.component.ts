@@ -2,7 +2,7 @@ import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ReactiveFormsModule, FormsModule, FormBuilder, Validators } from '@angular/forms';
-import { forkJoin } from 'rxjs';
+import { forkJoin, from, concatMap } from 'rxjs';
 import { SesionMesaService } from '../../../core/services/sesion-mesa.service';
 import { MesaService } from '../../../core/services/mesa.service';
 import { ClienteService } from '../../../core/services/cliente.service';
@@ -56,6 +56,44 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
         }
       </div>
 
+      <!-- LUDOTECA -->
+      @if (sesion()!.estado === 'ACTIVA') {
+        <div class="ludoteca-bar">
+          @if (ludotecaYaAplicada()) {
+            <span class="ludo-applied"><i class="fa-solid fa-puzzle-piece"></i> Ludoteca aplicada</span>
+          } @else {
+            <label class="check-label" (click)="$event.stopPropagation()">
+              <input type="checkbox" [checked]="showLudoteca()" (change)="showLudoteca.set(!showLudoteca())" />
+              <span><i class="fa-solid fa-puzzle-piece"></i> Uso ludoteca</span>
+            </label>
+
+            @if (showLudoteca()) {
+              <div class="ludo-selector">
+                <span class="ludo-info">Comensales: {{ sesion()!.numComensales }} — Asignados: {{ ludoTotalAsignados() }}</span>
+                <div class="ludo-rows">
+                  @for (lp of ludotecaProductos(); track lp.id) {
+                    <div class="ludo-row">
+                      <span class="ludo-name">{{ lp.nombre }}</span>
+                      <span class="ludo-price">{{ formatCurrency(lp.precio) }}</span>
+                      <div class="ludo-counter">
+                        <button class="btn-counter" (click)="decrementLudo(lp.id)" [disabled]="getLudoCount(lp.id) <= 0">-</button>
+                        <span class="ludo-count">{{ getLudoCount(lp.id) }}</span>
+                        <button class="btn-counter" (click)="incrementLudo(lp.id)" [disabled]="ludoTotalAsignados() >= sesion()!.numComensales!">+</button>
+                      </div>
+                    </div>
+                  }
+                </div>
+                <button class="btn btn-primary btn-sm"
+                  [disabled]="ludoTotalAsignados() !== sesion()!.numComensales || ludotecaAplicando()"
+                  (click)="aplicarLudoteca()">
+                  <i class="fa-solid fa-check"></i> Aplicar ({{ ludoTotalAsignados() }}/{{ sesion()!.numComensales }})
+                </button>
+              </div>
+            }
+          }
+        </div>
+      }
+
       <!-- CUERPO PRINCIPAL -->
       <div class="tpv-body">
         <!-- COLUMNA IZQUIERDA: COMANDAS -->
@@ -82,7 +120,12 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
                   @for (linea of getLineasForComanda(cmd.id); track linea.id) {
                     <div class="linea-item">
                       <span class="linea-qty">{{ linea.cantidad }}x</span>
-                      <span class="linea-name">{{ getProductoNombre(linea.idProducto) }}</span>
+                      <span class="linea-name">
+                        {{ getProductoNombre(linea.idProducto) }}
+                        @if (linea.notasChef) {
+                          <small class="linea-notes">{{ linea.notasChef }}</small>
+                        }
+                      </span>
                       <span class="linea-price">{{ formatCurrency(linea.precioUnitarioHistorico * linea.cantidad) }}</span>
                       @if (sesion()!.estado === 'ACTIVA' && (cmd.estado === 'PENDIENTE')) {
                         <button class="btn-icon-sm" (click)="eliminarLinea(linea.id, cmd.id); $event.stopPropagation()">
@@ -200,35 +243,6 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
           }
         </div>
 
-        <!-- LUDOTECA -->
-        @if (sesion()!.usaLudoteca && ludoteca()) {
-          <div class="footer-section">
-            <h3 class="footer-title">Ludoteca</h3>
-            <form class="ludoteca-form" [formGroup]="ludotecaForm" (ngSubmit)="actualizarLudoteca()">
-              <div class="ludoteca-fields">
-                <div class="ludo-field">
-                  <label>Adultos</label>
-                  <input type="number" class="form-input" formControlName="numAdultos" min="0" />
-                </div>
-                <div class="ludo-field">
-                  <label>6-13</label>
-                  <input type="number" class="form-input" formControlName="numNinos613" min="0" />
-                </div>
-                <div class="ludo-field">
-                  <label>0-5</label>
-                  <input type="number" class="form-input" formControlName="numNinos05" min="0" />
-                </div>
-              </div>
-              <div class="ludo-footer">
-                <span class="ludo-total">Importe: {{ formatCurrency(ludoteca()!.importeTotal) }}</span>
-                @if (sesion()!.estado === 'ACTIVA') {
-                  <button type="submit" class="btn btn-sm btn-primary">Actualizar</button>
-                }
-              </div>
-            </form>
-          </div>
-        }
-
         <!-- RESUMEN -->
         <div class="footer-section resumen-section">
           <h3 class="footer-title">Resumen</h3>
@@ -237,12 +251,6 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
               <span>Comandas</span>
               <span>{{ formatCurrency(totalComandas()) }}</span>
             </div>
-            @if (sesion()!.usaLudoteca && ludoteca()) {
-              <div class="resumen-line">
-                <span>Ludoteca</span>
-                <span>{{ formatCurrency(ludoteca()!.importeTotal) }}</span>
-              </div>
-            }
             <div class="resumen-line resumen-total">
               <span>TOTAL</span>
               <span>{{ formatCurrency(totalGeneral()) }}</span>
@@ -267,6 +275,89 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
         (onConfirm)="cerrarSesion()"
         (onCancel)="showCerrarModal.set(false)"
       />
+
+      <!-- Customizer Modal -->
+      @if (customizingProduct()) {
+        <div class="customizer-overlay" (click)="closeCustomizer()">
+          <div class="customizer-modal" (click)="$event.stopPropagation()">
+            <div class="customizer-header">
+              <div>
+                <h2 class="customizer-title">{{ customizingProduct()!.nombre }}</h2>
+                <span class="customizer-base-price">{{ formatCurrency(customizingProduct()!.precio) }}</span>
+              </div>
+              <button class="customizer-close" (click)="closeCustomizer()">
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+
+            @if (isVariantProduct(customizingProduct()!)) {
+              <!-- Modo variante (Copazo) -->
+              <div class="customizer-body">
+                <div class="customizer-section">
+                  <h3 class="cust-section-label"><i class="fa-solid fa-wine-bottle"></i> Elige destilado</h3>
+                  <ul class="variant-list">
+                    @for (option of variantOptions(); track option) {
+                      <li class="variant-item" [class.selected]="selectedVariant() === option" (click)="selectedVariant.set(option)">
+                        <span class="radio-custom" [class.checked]="selectedVariant() === option"></span>
+                        <span>{{ option }}</span>
+                      </li>
+                    }
+                  </ul>
+                </div>
+              </div>
+              <div class="customizer-footer">
+                <span class="customizer-total">{{ formatCurrency(customizingProduct()!.precio) }}</span>
+                <button class="btn btn-primary btn-sm" [disabled]="!selectedVariant()" (click)="confirmVariant()">
+                  <i class="fa-solid fa-plus"></i> Anadir a comanda
+                </button>
+              </div>
+            } @else {
+              <!-- Modo hamburguesa -->
+              <div class="customizer-body">
+                <div class="customizer-section">
+                  <h3 class="cust-section-label"><i class="fa-solid fa-list-check"></i> Ingredientes</h3>
+                  <p class="cust-section-hint">Desmarca los que no quiera el cliente</p>
+                  <ul class="ingredient-list">
+                    @for (ing of currentIngredients(); track ing) {
+                      <li class="ingredient-item" [class.removed]="!ingredientStates()[ing]">
+                        <label class="cust-check-label">
+                          <input type="checkbox" [checked]="ingredientStates()[ing]" (change)="toggleIngredient(ing)" />
+                          <span class="cust-check-custom"></span>
+                          <span class="cust-check-text">{{ ing }}</span>
+                        </label>
+                      </li>
+                    }
+                  </ul>
+                </div>
+
+                @if (extras().length > 0) {
+                  <div class="customizer-section">
+                    <h3 class="cust-section-label"><i class="fa-solid fa-circle-plus"></i> Extras</h3>
+                    <ul class="extras-list">
+                      @for (extra of extras(); track extra.id) {
+                        <li class="extra-item" [class.selected]="extraStates()[extra.id]">
+                          <label class="cust-check-label">
+                            <input type="checkbox" [checked]="extraStates()[extra.id]" (change)="toggleExtra(extra.id)" />
+                            <span class="cust-check-custom"></span>
+                            <span class="cust-check-text">{{ extra.nombre.replace('Extra ', '') }}</span>
+                          </label>
+                          <span class="extra-price">+{{ formatCurrency(extra.precio) }}</span>
+                        </li>
+                      }
+                    </ul>
+                  </div>
+                }
+              </div>
+              <div class="customizer-footer">
+                <span class="customizer-total">Total: {{ formatCurrency(customizedPrice()) }}</span>
+                <button class="btn btn-primary btn-sm" (click)="confirmCustomized()">
+                  <i class="fa-solid fa-plus"></i> Anadir a comanda
+                </button>
+              </div>
+            }
+          </div>
+        </div>
+      }
     </div>
     }
   `,
@@ -305,6 +396,23 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
     .comanda-total { font-weight: 700; font-size: 0.875rem; color: var(--text-main); font-variant-numeric: tabular-nums; }
     .comanda-actions { display: flex; gap: 0.375rem; }
 
+    /* LUDOTECA BAR */
+    .ludoteca-bar { background-color: var(--card-bg); border: 1px solid var(--table-border); border-radius: var(--radius-md, 8px); padding: 0.75rem 1.25rem; display: flex; align-items: flex-start; gap: 1.25rem; flex-wrap: wrap; }
+    .check-label { display: inline-flex; align-items: center; gap: 0.5rem; cursor: pointer; font-size: 0.875rem; color: var(--text-main); font-weight: 600; white-space: nowrap; }
+    .check-label input[type="checkbox"] { width: 1rem; height: 1rem; cursor: pointer; accent-color: var(--primary-coral); }
+    .ludo-selector { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+    .ludo-info { font-size: 0.8125rem; color: var(--text-muted); font-weight: 500; }
+    .ludo-rows { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .ludo-row { display: flex; align-items: center; gap: 0.5rem; background-color: var(--bg-main); border: 1px solid var(--table-border); border-radius: var(--radius-md, 8px); padding: 0.375rem 0.75rem; }
+    .ludo-name { font-size: 0.75rem; font-weight: 500; color: var(--text-main); max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .ludo-price { font-size: 0.75rem; font-weight: 700; color: var(--primary-coral); }
+    .ludo-counter { display: flex; align-items: center; gap: 0.25rem; }
+    .btn-counter { width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--input-border); background-color: var(--card-bg); color: var(--text-main); font-size: 0.875rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+    .btn-counter:hover:not(:disabled) { border-color: var(--primary-coral); color: var(--primary-coral); }
+    .btn-counter:disabled { opacity: 0.3; cursor: not-allowed; }
+    .ludo-count { font-size: 0.875rem; font-weight: 700; min-width: 1.25rem; text-align: center; color: var(--text-main); }
+    .ludo-applied { font-size: 0.875rem; font-weight: 600; color: var(--success); display: flex; align-items: center; gap: 0.5rem; }
+
     /* PRODUCTOS */
     .productos-search { margin-bottom: 0.5rem; }
     .category-filters { display: flex; flex-wrap: wrap; gap: 0.375rem; margin-bottom: 0.75rem; }
@@ -322,7 +430,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
     .empty-productos { color: var(--text-muted); font-size: 0.875rem; grid-column: 1 / -1; text-align: center; padding: 2rem 0; }
 
     /* FOOTER */
-    .tpv-footer { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--spacing-lg); }
+    .tpv-footer { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-lg); }
     .footer-section { background-color: var(--card-bg); border: 1px solid var(--table-border); border-radius: var(--radius-md, 8px); padding: 1rem 1.25rem; }
     .footer-title { font-size: 0.875rem; font-weight: 700; color: var(--text-main); margin: 0 0 0.75rem 0; text-transform: uppercase; letter-spacing: 0.03em; }
 
@@ -334,15 +442,6 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
     .pago-pendiente { font-weight: 700; font-size: 0.9375rem; color: var(--text-main); font-variant-numeric: tabular-nums; min-width: 80px; }
     .pago-select { width: 110px; }
     .text-muted { color: var(--text-muted); font-size: 0.8125rem; margin: 0; }
-
-    /* LUDOTECA */
-    .ludoteca-form { display: flex; flex-direction: column; gap: 0.5rem; }
-    .ludoteca-fields { display: flex; gap: 0.75rem; }
-    .ludo-field { display: flex; flex-direction: column; gap: 0.25rem; flex: 1; }
-    .ludo-field label { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); }
-    .ludo-field input { width: 100%; }
-    .ludo-footer { display: flex; align-items: center; justify-content: space-between; }
-    .ludo-total { font-weight: 700; font-size: 0.875rem; color: var(--text-main); }
 
     /* RESUMEN */
     .resumen-section { background-color: var(--card-bg); }
@@ -361,6 +460,46 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
     .btn-warning:hover { opacity: 0.9; }
     .btn-outline-danger { background: transparent; color: var(--danger); border: 1px solid var(--danger); }
     .btn-outline-danger:hover { background-color: var(--danger); color: #fff; }
+
+    /* LINEA NOTES */
+    .linea-notes { display: block; font-size: 0.6875rem; color: var(--text-muted); font-style: italic; line-height: 1.3; margin-top: 1px; }
+
+    /* CUSTOMIZER MODAL */
+    .customizer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 2000; display: flex; align-items: center; justify-content: center; padding: 1rem; animation: custFadeIn 0.2s ease-out; }
+    @keyframes custFadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .customizer-modal { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius-lg, 1rem); width: 100%; max-width: 460px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; animation: custScaleIn 0.2s ease-out; }
+    @keyframes custScaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .customizer-header { display: flex; align-items: flex-start; justify-content: space-between; padding: 1rem 1.25rem; border-bottom: 1px solid var(--card-border); }
+    .customizer-title { font-size: 1.125rem; font-weight: 700; color: var(--text-main); margin: 0 0 0.125rem 0; }
+    .customizer-base-price { font-size: 0.8125rem; color: var(--text-muted); }
+    .customizer-close { background: none; border: none; color: var(--text-muted); font-size: 1.125rem; cursor: pointer; padding: 0.25rem; }
+    .customizer-close:hover { color: var(--text-main); }
+    .customizer-body { flex: 1; overflow-y: auto; padding: 1rem 1.25rem; }
+    .customizer-section { margin-bottom: 1.25rem; }
+    .customizer-section:last-child { margin-bottom: 0; }
+    .cust-section-label { font-size: 0.875rem; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 0.5rem; margin: 0 0 0.25rem 0; }
+    .cust-section-label i { color: var(--primary-coral); font-size: 0.8125rem; }
+    .cust-section-hint { font-size: 0.75rem; color: var(--text-muted); margin: 0 0 0.625rem 0; }
+    .ingredient-list, .extras-list, .variant-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.375rem; }
+    .ingredient-item, .extra-item { display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 0.625rem; border-radius: var(--radius-md, 8px); background: var(--secondary-bg); transition: background 0.2s, opacity 0.2s; }
+    .ingredient-item.removed { opacity: 0.45; }
+    .ingredient-item.removed .cust-check-text { text-decoration: line-through; }
+    .extra-item.selected { background: rgba(239, 68, 68, 0.08); }
+    .extra-price { font-size: 0.8125rem; font-weight: 600; color: var(--primary-coral); white-space: nowrap; }
+    .cust-check-label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; flex: 1; }
+    .cust-check-label input[type="checkbox"] { display: none; }
+    .cust-check-custom { width: 18px; height: 18px; min-width: 18px; border: 2px solid var(--text-muted); border-radius: 4px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+    .cust-check-label input:checked + .cust-check-custom { background: var(--primary-coral); border-color: var(--primary-coral); }
+    .cust-check-label input:checked + .cust-check-custom::after { content: ''; width: 5px; height: 9px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); margin-top: -2px; }
+    .cust-check-text { font-size: 0.8125rem; color: var(--text-main); text-transform: capitalize; }
+    .variant-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.625rem; border-radius: var(--radius-md, 8px); background: var(--secondary-bg); cursor: pointer; transition: background 0.2s, box-shadow 0.2s; }
+    .variant-item:hover { background: rgba(255,127,80,0.08); }
+    .variant-item.selected { background: rgba(255,127,80,0.1); box-shadow: inset 0 0 0 2px var(--primary-coral); }
+    .radio-custom { width: 18px; height: 18px; min-width: 18px; border: 2px solid var(--text-muted); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+    .radio-custom.checked { border-color: var(--primary-coral); }
+    .radio-custom.checked::after { content: ''; width: 9px; height: 9px; border-radius: 50%; background: var(--primary-coral); }
+    .customizer-footer { display: flex; align-items: center; justify-content: space-between; padding: 0.75rem 1.25rem; border-top: 1px solid var(--card-border); }
+    .customizer-total { font-size: 1rem; font-weight: 700; color: var(--text-main); }
 
     @media (max-width: 1024px) {
       .tpv-body { grid-template-columns: 1fr; }
@@ -414,7 +553,7 @@ export class SesionMesaDetailComponent implements OnInit {
   filteredProductos = computed(() => {
     const term = this.productoSearch().toLowerCase();
     const cat = this.categoriaFilter();
-    let list = this.productos().filter(p => p.activo);
+    let list = this.productos().filter(p => p.activo && !p.nombre.toLowerCase().startsWith('extra '));
     if (cat) list = list.filter(p => p.categoria === cat);
     if (term) list = list.filter(p => p.nombre.toLowerCase().includes(term));
     return list;
@@ -432,20 +571,59 @@ export class SesionMesaDetailComponent implements OnInit {
       .reduce((sum, p) => sum + (p.importe || 0), 0);
   });
 
-  totalGeneral = computed(() => {
-    let total = this.totalComandas();
-    if (this.ludoteca()?.importeTotal) total += this.ludoteca()!.importeTotal;
-    return total;
-  });
+  totalGeneral = computed(() => this.totalComandas());
 
   pendiente = computed(() => Math.max(0, this.totalGeneral() - this.totalPagado()));
 
   pagoMetodo = 'EFECTIVO';
 
-  ludotecaForm = this.fb.group({
-    numAdultos: [0],
-    numNinos613: [0],
-    numNinos05: [0]
+  // Ludoteca
+  showLudoteca = signal(false);
+  ludoCounts = signal<Record<number, number>>({});
+  ludotecaAplicando = signal(false);
+
+  ludotecaProductos = computed(() =>
+    this.productos().filter(p => p.nombre.toLowerCase().includes('ludoteca'))
+  );
+
+  ludoTotalAsignados = computed(() =>
+    Object.values(this.ludoCounts()).reduce((sum, n) => sum + n, 0)
+  );
+
+  ludotecaYaAplicada = computed(() => {
+    const ludoIds = new Set(this.ludotecaProductos().map(p => p.id));
+    return this.allLineas().some(l => ludoIds.has(l.idProducto));
+  });
+
+  // Customizer (hamburguesas / copazos)
+  customizingProduct = signal<Producto | null>(null);
+  ingredientStates = signal<Record<string, boolean>>({});
+  extraStates = signal<Record<number, boolean>>({});
+  selectedVariant = signal<string>('');
+
+  extras = computed(() =>
+    this.productos().filter(p => p.activo && p.nombre.toLowerCase().startsWith('extra '))
+  );
+
+  currentIngredients = computed(() => {
+    const product = this.customizingProduct();
+    if (!product?.descripcion) return [];
+    return product.descripcion.split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+  });
+
+  variantOptions = computed(() => {
+    const product = this.customizingProduct();
+    if (!product?.descripcion) return [];
+    return product.descripcion.split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+  });
+
+  customizedPrice = computed(() => {
+    const product = this.customizingProduct();
+    if (!product) return 0;
+    const extrasTotal = this.extras()
+      .filter(e => this.extraStates()[e.id])
+      .reduce((sum, e) => sum + e.precio, 0);
+    return product.precio + extrasTotal;
   });
 
   private sesionId!: number;
@@ -509,13 +687,6 @@ export class SesionMesaDetailComponent implements OnInit {
         this.pagos.set(pagos.filter(p => p.idSesion === this.sesionId));
         const ludo = ludotecas.find(l => l.idSesion === this.sesionId);
         this.ludoteca.set(ludo || null);
-        if (ludo) {
-          this.ludotecaForm.patchValue({
-            numAdultos: ludo.numAdultos,
-            numNinos613: ludo.numNinos613,
-            numNinos05: ludo.numNinos05
-          });
-        }
         this.isLoading.set(false);
       },
       error: () => {
@@ -574,7 +745,80 @@ export class SesionMesaDetailComponent implements OnInit {
   }
 
   // LINEAS
+  isCustomizable(product: Producto): boolean {
+    return product.categoria === 'COMIDA'
+      && !!product.descripcion
+      && product.descripcion.includes(',')
+      && product.precio >= 10;
+  }
+
+  isVariantProduct(product: Producto): boolean {
+    return product.categoria === 'ALCOHOL'
+      && !!product.descripcion
+      && product.descripcion.includes(',');
+  }
+
   addProductoToComanda(producto: Producto): void {
+    if (this.isVariantProduct(producto)) {
+      this.openVariantSelector(producto);
+      return;
+    }
+    if (this.isCustomizable(producto)) {
+      this.openCustomizer(producto);
+      return;
+    }
+    this.addSimpleProducto(producto);
+  }
+
+  private openCustomizer(product: Producto): void {
+    this.customizingProduct.set(product);
+    const ingredients = product.descripcion!.split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0);
+    const ingStates: Record<string, boolean> = {};
+    ingredients.forEach(ing => ingStates[ing] = true);
+    this.ingredientStates.set(ingStates);
+    const extStates: Record<number, boolean> = {};
+    this.extras().forEach(e => extStates[e.id] = false);
+    this.extraStates.set(extStates);
+  }
+
+  private openVariantSelector(product: Producto): void {
+    this.customizingProduct.set(product);
+    this.selectedVariant.set('');
+  }
+
+  closeCustomizer(): void {
+    this.customizingProduct.set(null);
+  }
+
+  toggleIngredient(ingredient: string): void {
+    this.ingredientStates.update(s => ({ ...s, [ingredient]: !s[ingredient] }));
+  }
+
+  toggleExtra(extraId: number): void {
+    this.extraStates.update(s => ({ ...s, [extraId]: !s[extraId] }));
+  }
+
+  confirmCustomized(): void {
+    const product = this.customizingProduct();
+    if (!product) return;
+    const removed = Object.entries(this.ingredientStates())
+      .filter(([_, included]) => !included)
+      .map(([name]) => name);
+    const selectedExtras = this.extras().filter(e => this.extraStates()[e.id]);
+    const notes = removed.length > 0 ? 'Sin: ' + removed.join(', ') : '';
+    this.closeCustomizer();
+    this.addCustomProducto(product, notes, selectedExtras);
+  }
+
+  confirmVariant(): void {
+    const product = this.customizingProduct();
+    const variant = this.selectedVariant();
+    if (!product || !variant) return;
+    this.closeCustomizer();
+    this.addCustomProducto(product, variant, []);
+  }
+
+  private addSimpleProducto(producto: Producto): void {
     let targetComandaId = this.selectedComandaId();
     const pendientes = this.comandas().filter(c => c.estado === 'PENDIENTE');
 
@@ -595,6 +839,62 @@ export class SesionMesaDetailComponent implements OnInit {
     }
 
     this.addLineaToComanda(targetComandaId!, producto);
+  }
+
+  private addCustomProducto(product: Producto, notasChef: string, extras: Producto[]): void {
+    let targetComandaId = this.selectedComandaId();
+    const pendientes = this.comandas().filter(c => c.estado === 'PENDIENTE');
+
+    if (!targetComandaId || !pendientes.find(c => c.id === targetComandaId)) {
+      if (pendientes.length > 0) {
+        targetComandaId = pendientes[pendientes.length - 1].id;
+        this.selectedComandaId.set(targetComandaId);
+      } else {
+        this.comandaService.create({ idSesion: this.sesionId, estado: 'PENDIENTE', total: 0 } as any).subscribe({
+          next: (cmd) => {
+            this.selectedComandaId.set(cmd.id);
+            this.addCustomLineas(cmd.id, product, notasChef, extras);
+          },
+          error: (err) => this.toastService.error(err?.error?.message || 'Error al crear comanda')
+        });
+        return;
+      }
+    }
+
+    this.addCustomLineas(targetComandaId!, product, notasChef, extras);
+  }
+
+  private addCustomLineas(comandaId: number, product: Producto, notasChef: string, extras: Producto[]): void {
+    this.lineasService.create({
+      idComanda: comandaId,
+      idProducto: product.id,
+      cantidad: 1,
+      precioUnitarioHistorico: product.precio,
+      notasChef: notasChef || undefined
+    } as any).subscribe({
+      next: () => {
+        if (extras.length === 0) {
+          this.toastService.success(`${product.nombre} añadido`);
+          this.refreshData();
+          return;
+        }
+        from(extras).pipe(
+          concatMap(extra => this.lineasService.create({
+            idComanda: comandaId,
+            idProducto: extra.id,
+            cantidad: 1,
+            precioUnitarioHistorico: extra.precio
+          }))
+        ).subscribe({
+          complete: () => {
+            this.toastService.success(`${product.nombre} + extras añadido`);
+            this.refreshData();
+          },
+          error: (err) => this.toastService.error(err?.error?.message || 'Error al añadir extras')
+        });
+      },
+      error: (err) => this.toastService.error(err?.error?.message || 'Error al añadir producto')
+    });
   }
 
   private addLineaToComanda(comandaId: number, producto: Producto): void {
@@ -631,29 +931,105 @@ export class SesionMesaDetailComponent implements OnInit {
     this.pagosService.create({
       idSesion: this.sesionId,
       importe,
-      metodoPago: this.pagoMetodo
+      metodoPago: this.pagoMetodo,
+      estado: 'PAGADO',
+      fechaHora: new Date().toISOString()
     } as any).subscribe({
       next: () => {
         this.toastService.success('Pago registrado');
-        this.refreshData();
+        const todasResueltas = this.comandas().every(c =>
+          c.estado === 'SERVIDA' || c.estado === 'CANCELADA' || c.estado === 'PAGADA'
+        );
+        if (todasResueltas && this.comandas().length > 0) {
+          this.sesionService.cerrar(this.sesionId).subscribe({
+            next: () => {
+              this.toastService.success('Sesion cerrada y factura generada');
+              this.goBack();
+            },
+            error: (err) => {
+              const msg = err?.error?.message || err?.error || 'No se pudo cerrar automaticamente';
+              this.toastService.show('Pago OK. ' + msg, 'info');
+              this.refreshData();
+            }
+          });
+        } else {
+          this.refreshData();
+        }
       },
       error: (err) => this.toastService.error(err?.error?.message || 'Error al registrar pago')
     });
   }
 
   // LUDOTECA
-  actualizarLudoteca(): void {
-    const ludo = this.ludoteca();
-    if (!ludo) return;
-    const raw = this.ludotecaForm.getRawValue();
-    this.ludotecaService.update(ludo.id, {
-      idSesion: this.sesionId,
-      numAdultos: raw.numAdultos!,
-      numNinos613: raw.numNinos613!,
-      numNinos05: raw.numNinos05!
-    } as any).subscribe({
-      next: () => { this.toastService.success('Ludoteca actualizada'); this.refreshData(); },
-      error: (err) => this.toastService.error(err?.error?.message || 'Error al actualizar ludoteca')
+  getLudoCount(productId: number): number {
+    return this.ludoCounts()[productId] || 0;
+  }
+
+  incrementLudo(productId: number): void {
+    this.ludoCounts.update(c => ({ ...c, [productId]: (c[productId] || 0) + 1 }));
+  }
+
+  decrementLudo(productId: number): void {
+    this.ludoCounts.update(c => ({ ...c, [productId]: Math.max(0, (c[productId] || 0) - 1) }));
+  }
+
+  aplicarLudoteca(): void {
+    if (this.ludotecaAplicando() || this.ludotecaYaAplicada()) return;
+    const counts = this.ludoCounts();
+    const entries = Object.entries(counts).filter(([_, qty]) => qty > 0);
+    if (entries.length === 0) return;
+    this.ludotecaAplicando.set(true);
+
+    const pendientes = this.comandas().filter(c => c.estado === 'PENDIENTE');
+    if (pendientes.length > 0) {
+      this.addLudotecaLineas(pendientes[pendientes.length - 1].id, entries);
+    } else {
+      this.comandaService.create({ idSesion: this.sesionId, estado: 'PENDIENTE', total: 0 } as any).subscribe({
+        next: (cmd) => {
+          this.selectedComandaId.set(cmd.id);
+          this.addLudotecaLineas(cmd.id, entries);
+        },
+        error: (err) => this.toastService.error(err?.error?.message || 'Error al crear comanda')
+      });
+    }
+  }
+
+  private addLudotecaLineas(comandaId: number, entries: [string, number][]): void {
+    from(entries).pipe(
+      concatMap(([prodId, qty]) => {
+        const producto = this.productos().find(p => p.id === +prodId);
+        return this.lineasService.create({
+          idComanda: comandaId,
+          idProducto: +prodId,
+          cantidad: qty,
+          precioUnitarioHistorico: producto?.precio ?? 0
+        });
+      })
+    ).subscribe({
+      complete: () => {
+        const current = this.sesion()!;
+        this.sesionService.update(this.sesionId, { ...current, usaLudoteca: true }).subscribe({
+          next: (updated) => {
+            this.sesion.set(updated);
+            this.ludotecaAplicando.set(false);
+            this.toastService.success('Accesos de ludoteca añadidos');
+            this.showLudoteca.set(false);
+            this.ludoCounts.set({});
+            this.refreshData();
+          },
+          error: () => {
+            this.ludotecaAplicando.set(false);
+            this.toastService.success('Accesos de ludoteca añadidos');
+            this.showLudoteca.set(false);
+            this.ludoCounts.set({});
+            this.refreshData();
+          }
+        });
+      },
+      error: (err) => {
+        this.ludotecaAplicando.set(false);
+        this.toastService.error(err?.error?.message || 'Error al añadir ludoteca');
+      }
     });
   }
 

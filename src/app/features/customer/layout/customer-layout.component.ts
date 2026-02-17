@@ -340,6 +340,7 @@ export class CustomerLayoutComponent {
 
   navLinks = [
     { path: '/customer/dashboard', label: 'Dashboard', icon: 'fa-house', badge: null as (() => number) | null },
+    { path: '/customer/mi-sesion', label: 'Mi Sesion', icon: 'fa-utensils', badge: null },
     { path: '/customer/favoritos', label: 'Favoritos', icon: 'fa-heart', badge: null },
     { path: '/customer/historial', label: 'Historial', icon: 'fa-clock-rotate-left', badge: null },
     { path: '/customer/reservas', label: 'Mis Reservas', icon: 'fa-calendar-check', badge: null },
