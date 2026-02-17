@@ -25,4 +25,8 @@ export class FacturaService {
   getMisFacturas(): Observable<Factura[]> {
     return this.api.get<Factura[]>(`${this.endpoint}/mis-facturas`);
   }
+
+  enviarEmail(id: number): Observable<void> {
+    return this.api.post<void>(`${this.endpoint}/${id}/enviar-email`, {});
+  }
 }
