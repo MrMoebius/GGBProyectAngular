@@ -1,6 +1,6 @@
 // MOCK: Replace with real ReservasService when /api/reservas 401 bug is fixed
 import { Injectable, inject, signal } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { LocalStorageService } from './local-storage.service';
 import { ReservasMesa } from '../models/reservas-mesa.interface';
 
@@ -18,11 +18,26 @@ export class MockReservasService {
 
   private loadReservas(): ReservasMesa[] {
     const stored = this.storage.load<ReservasMesa[] | null>('reservas', null);
-    if (stored === null) {
-      this.storage.save('reservas', SEED_RESERVAS);
-      return SEED_RESERVAS;
-    }
-    return stored;
+    const reservas = stored !== null ? stored : [...SEED_RESERVAS];
+    const updated = this.autoCancelPastReservas(reservas);
+    this.storage.save('reservas', updated);
+    return updated;
+  }
+
+  private autoCancelPastReservas(reservas: ReservasMesa[]): ReservasMesa[] {
+    const now = new Date();
+    let changed = false;
+    const result = reservas.map(r => {
+      if (r.estado !== 'CONFIRMADA') return r;
+      const reservaTime = new Date(r.fechaReserva + 'T' + r.horaInicio + ':00');
+      const deadline = new Date(reservaTime.getTime() + 60 * 60 * 1000); // +1 hora
+      if (now > deadline) {
+        changed = true;
+        return { ...r, estado: 'CANCELADA' };
+      }
+      return r;
+    });
+    return result;
   }
 
   getAll(): Observable<ReservasMesa[]> {
@@ -38,6 +53,16 @@ export class MockReservasService {
   }
 
   create(reserva: Partial<ReservasMesa>): Observable<ReservasMesa> {
+    // Validar fecha/hora no pasada
+    const fecha = reserva.fechaReserva || '';
+    const hora = reserva.horaInicio || '';
+    if (fecha && hora) {
+      const reservaTime = new Date(fecha + 'T' + hora + ':00');
+      if (reservaTime < new Date()) {
+        return throwError(() => new Error('No se puede crear una reserva en una fecha/hora pasada'));
+      }
+    }
+
     const newReserva: ReservasMesa = {
       id: Math.max(0, ...this._reservas().map(r => r.id)) + 1,
       idCliente: reserva.idCliente || 0,

@@ -57,4 +57,8 @@ export class ComandaService {
   cancelarByCliente(id: number): Observable<Comanda> {
     return this.api.post<Comanda>(`${this.endpoint}/${id}/cancelar-cliente`, {});
   }
+
+  getBySesionCliente(idSesion: number): Observable<Comanda[]> {
+    return this.api.get<Comanda[]>(`${this.endpoint}/sesion/${idSesion}/cliente`);
+  }
 }

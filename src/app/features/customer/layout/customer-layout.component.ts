@@ -16,7 +16,12 @@ import { ClienteService } from '../../../core/services/cliente.service';
 
     <div class="customer-layout">
       <!-- Sidebar (desktop) / Horizontal nav (mobile) -->
-      <aside class="sidebar">
+      <aside class="sidebar" [class.collapsed]="sidebarCollapsed()">
+        <!-- Toggle button -->
+        <button class="sidebar-toggle" (click)="toggleSidebar()" [attr.title]="sidebarCollapsed() ? 'Expandir menu' : 'Colapsar menu'">
+          <i class="fa-solid" [class.fa-chevron-left]="!sidebarCollapsed()" [class.fa-chevron-right]="sidebarCollapsed()"></i>
+        </button>
+
         <!-- User greeting -->
         <div class="user-greeting">
           <div class="user-avatar">
@@ -26,10 +31,12 @@ import { ClienteService } from '../../../core/services/cliente.service';
               <span class="avatar-initial">{{ userInitial() }}</span>
             }
           </div>
-          <div class="user-info">
-            <p class="user-name">{{ userName() }}</p>
-            <p class="user-email">{{ userEmail() }}</p>
-          </div>
+          @if (!sidebarCollapsed()) {
+            <div class="user-info">
+              <p class="user-name">{{ userName() }}</p>
+              <p class="user-email">{{ userEmail() }}</p>
+            </div>
+          }
         </div>
 
         <!-- Navigation -->
@@ -40,18 +47,26 @@ import { ClienteService } from '../../../core/services/cliente.service';
               [routerLink]="link.path"
               routerLinkActive="active"
               [routerLinkActiveOptions]="{ exact: true }"
+              [attr.title]="sidebarCollapsed() ? link.label : null"
             >
               <i class="fa-solid" [class]="link.icon"></i>
-              <span class="link-label">{{ link.label }}</span>
-              @if (link.badge && link.badge() > 0) {
+              @if (!sidebarCollapsed()) {
+                <span class="link-label">{{ link.label }}</span>
+              }
+              @if (!sidebarCollapsed() && link.badge && link.badge() > 0) {
                 <span class="link-badge">{{ link.badge() }}</span>
+              }
+              @if (sidebarCollapsed() && link.badge && link.badge() > 0) {
+                <span class="link-badge-dot"></span>
               }
             </a>
           }
 
-          <button class="sidebar-link logout-btn" (click)="onLogout()">
+          <button class="sidebar-link logout-btn" (click)="onLogout()" [attr.title]="sidebarCollapsed() ? 'Cerrar sesion' : null">
             <i class="fa-solid fa-right-from-bracket"></i>
-            <span class="link-label">Cerrar sesion</span>
+            @if (!sidebarCollapsed()) {
+              <span class="link-label">Cerrar sesion</span>
+            }
           </button>
         </nav>
       </aside>
@@ -88,6 +103,44 @@ import { ClienteService } from '../../../core/services/cliente.service';
       top: var(--public-nav-height, 64px);
       height: calc(100vh - var(--public-nav-height, 64px));
       overflow-y: auto;
+      transition: width 0.3s ease;
+    }
+
+    .sidebar.collapsed {
+      width: 64px;
+      padding: 1.5rem 0.5rem;
+      align-items: center;
+    }
+
+    /* ===== Toggle button ===== */
+    .sidebar-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 1px solid var(--card-border, rgba(255,255,255,0.08));
+      background-color: rgba(255, 255, 255, 0.03);
+      color: var(--text-muted, #94a3b8);
+      cursor: pointer;
+      transition: all 0.2s;
+      align-self: flex-end;
+      flex-shrink: 0;
+    }
+
+    .sidebar.collapsed .sidebar-toggle {
+      align-self: center;
+    }
+
+    .sidebar-toggle:hover {
+      color: var(--neon-cyan, #00FFD1);
+      border-color: var(--neon-cyan, #00FFD1);
+      background-color: rgba(0, 255, 209, 0.08);
+    }
+
+    .sidebar-toggle i {
+      font-size: 0.7rem;
     }
 
     /* ===== User greeting ===== */
@@ -99,6 +152,13 @@ import { ClienteService } from '../../../core/services/cliente.service';
       background-color: rgba(255, 255, 255, 0.03);
       border: 1px solid var(--card-border, rgba(255,255,255,0.08));
       border-radius: var(--radius-lg, 16px);
+      overflow: hidden;
+      transition: padding 0.3s ease;
+    }
+
+    .sidebar.collapsed .user-greeting {
+      padding: 0.5rem;
+      justify-content: center;
     }
 
     .user-avatar {
@@ -113,6 +173,11 @@ import { ClienteService } from '../../../core/services/cliente.service';
       overflow: hidden;
     }
 
+    .sidebar.collapsed .user-avatar {
+      width: 36px;
+      height: 36px;
+    }
+
     .avatar-img {
       width: 100%;
       height: 100%;
@@ -125,6 +190,10 @@ import { ClienteService } from '../../../core/services/cliente.service';
       font-weight: 800;
       color: #0F172A;
       text-transform: uppercase;
+    }
+
+    .sidebar.collapsed .avatar-initial {
+      font-size: 0.9rem;
     }
 
     .user-info {
@@ -173,12 +242,20 @@ import { ClienteService } from '../../../core/services/cliente.service';
       cursor: pointer;
       width: 100%;
       text-align: left;
+      position: relative;
+    }
+
+    .sidebar.collapsed .sidebar-link {
+      justify-content: center;
+      padding: 0.7rem;
+      gap: 0;
     }
 
     .sidebar-link i {
       width: 20px;
       text-align: center;
       font-size: 0.95rem;
+      flex-shrink: 0;
     }
 
     .sidebar-link:hover {
@@ -213,6 +290,18 @@ import { ClienteService } from '../../../core/services/cliente.service';
       box-shadow: 0 0 8px rgba(255, 107, 157, 0.4);
     }
 
+    /* Badge dot for collapsed state */
+    .link-badge-dot {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background-color: var(--neon-pink, #FF6B9D);
+      box-shadow: 0 0 6px rgba(255, 107, 157, 0.5);
+    }
+
     /* Logout button */
     .logout-btn {
       margin-top: 1rem;
@@ -240,7 +329,7 @@ import { ClienteService } from '../../../core/services/cliente.service';
       }
 
       .sidebar {
-        width: 100%;
+        width: 100% !important;
         height: auto;
         position: relative;
         top: 0;
@@ -251,8 +340,16 @@ import { ClienteService } from '../../../core/services/cliente.service';
         border-bottom: 1px solid var(--card-border, rgba(255,255,255,0.08));
       }
 
+      .sidebar-toggle {
+        display: none;
+      }
+
       .user-greeting {
         padding: 0.75rem;
+      }
+
+      .sidebar .user-info {
+        display: block !important;
       }
 
       .sidebar-nav {
@@ -274,10 +371,11 @@ import { ClienteService } from '../../../core/services/cliente.service';
         padding: 0.6rem 0.85rem;
         font-size: 0.8rem;
         gap: 0.5rem;
+        justify-content: flex-start !important;
       }
 
       .sidebar-link .link-label {
-        display: inline;
+        display: inline !important;
       }
 
       .logout-btn {
@@ -298,6 +396,7 @@ export class CustomerLayoutComponent {
   private clienteService = inject(ClienteService);
   private router = inject(Router);
 
+  sidebarCollapsed = signal(false);
   hasProfilePhoto = signal(false);
 
   userInitial = computed(() => {
@@ -341,12 +440,13 @@ export class CustomerLayoutComponent {
   navLinks = [
     { path: '/customer/dashboard', label: 'Dashboard', icon: 'fa-house', badge: null as (() => number) | null },
     { path: '/customer/mi-sesion', label: 'Mi Sesion', icon: 'fa-utensils', badge: null },
-    { path: '/customer/favoritos', label: 'Favoritos', icon: 'fa-heart', badge: null },
-    { path: '/customer/historial', label: 'Historial', icon: 'fa-clock-rotate-left', badge: null },
-    { path: '/customer/reservas', label: 'Mis Reservas', icon: 'fa-calendar-check', badge: null },
     { path: '/customer/notificaciones', label: 'Notificaciones', icon: 'fa-bell', badge: () => this.notificationService.unreadCount() },
     { path: '/customer/facturas', label: 'Mis Facturas', icon: 'fa-file-invoice', badge: null },
   ];
+
+  toggleSidebar(): void {
+    this.sidebarCollapsed.update(v => !v);
+  }
 
   onImageError(): void {
     this.hasProfilePhoto.set(false);
