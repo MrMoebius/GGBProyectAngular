@@ -177,18 +177,23 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
           }
 
           @if (currentStep() < 4) {
-            <button
-              class="nav-btn btn-next"
-              [ngClass]="{ 'disabled': !canAdvance() }"
-              [disabled]="!canAdvance()"
-              (click)="goNext()"
-            >
-              Siguiente
-              <i class="fa-solid fa-arrow-right"></i>
-            </button>
+            <div class="step-buttons">
+              <button class="nav-btn btn-skip" (click)="skipStep()">
+                Saltar
+              </button>
+              <button
+                class="nav-btn btn-next"
+                [ngClass]="{ 'disabled': !canAdvance() }"
+                [disabled]="!canAdvance()"
+                (click)="goNext()"
+              >
+                Siguiente
+                <i class="fa-solid fa-arrow-right"></i>
+              </button>
+            </div>
           } @else {
-            <div class="last-step-buttons">
-              <button class="nav-btn btn-skip" (click)="getResults()">
+            <div class="step-buttons">
+              <button class="nav-btn btn-skip" (click)="skipStep()">
                 Saltar
               </button>
               <button class="nav-btn btn-next" (click)="getResults()">
@@ -600,7 +605,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       gap: 1rem;
     }
 
-    .last-step-buttons {
+    .step-buttons {
       display: flex;
       gap: 0.75rem;
       align-items: center;
@@ -818,7 +823,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
         flex-wrap: wrap;
       }
 
-      .last-step-buttons {
+      .step-buttons {
         flex-wrap: wrap;
       }
     }
@@ -949,6 +954,14 @@ export class GameQuizComponent implements OnDestroy {
   goNext(): void {
     if (this.canAdvance() && this.currentStep() < 4) {
       this.currentStep.update(v => v + 1);
+    }
+  }
+
+  skipStep(): void {
+    if (this.currentStep() < 4) {
+      this.currentStep.update(v => v + 1);
+    } else {
+      this.getResults();
     }
   }
 

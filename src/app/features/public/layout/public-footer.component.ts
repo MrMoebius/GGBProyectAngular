@@ -119,8 +119,15 @@ import { NewsletterService } from '../../../core/services/newsletter.service';
 
     /* ===== Footer shell ===== */
     .footer {
+      background-color: var(--card-bg);
+      color: var(--text-main);
+      border-top: 1px solid var(--card-border);
+    }
+
+    :host-context([data-theme="dark"]) .footer {
       background-color: var(--secondary-dark);
       color: var(--text-white);
+      border-top: none;
     }
 
     /* ===== Inner container ===== */
@@ -147,12 +154,16 @@ import { NewsletterService } from '../../../core/services/newsletter.service';
     .col-title {
       font-size: 1.05rem;
       font-weight: 700;
-      color: var(--text-white);
+      color: var(--text-main);
       margin: 0 0 1.25rem;
       text-transform: uppercase;
       letter-spacing: 1px;
       position: relative;
       padding-bottom: 0.75rem;
+    }
+
+    :host-context([data-theme="dark"]) .col-title {
+      color: var(--text-white);
     }
 
     .col-title::after {
@@ -292,8 +303,12 @@ import { NewsletterService } from '../../../core/services/newsletter.service';
     .hours-title {
       font-size: 0.875rem;
       font-weight: 600;
-      color: var(--text-white);
+      color: var(--text-main);
       margin: 0 0 0.25rem;
+    }
+
+    :host-context([data-theme="dark"]) .hours-title {
+      color: var(--text-white);
     }
 
     .hours-line {
@@ -320,13 +335,18 @@ import { NewsletterService } from '../../../core/services/newsletter.service';
       width: 100%;
       padding: 0.7rem 0.9rem;
       font-size: 0.875rem;
-      color: var(--text-white);
-      background-color: rgba(255, 255, 255, 0.06);
+      color: var(--text-main);
+      background-color: var(--bg-main);
       border: 1px solid var(--card-border);
       border-radius: 8px;
       outline: none;
       transition: border-color 0.25s, box-shadow 0.25s;
       box-sizing: border-box;
+    }
+
+    :host-context([data-theme="dark"]) .newsletter-input {
+      color: var(--text-white);
+      background-color: rgba(255, 255, 255, 0.06);
     }
 
     .newsletter-input::placeholder {
@@ -363,6 +383,10 @@ import { NewsletterService } from '../../../core/services/newsletter.service';
     /* ===== Bottom bar ===== */
     .footer-bottom {
       border-top: 1px solid var(--card-border);
+      background-color: var(--secondary-bg);
+    }
+
+    :host-context([data-theme="dark"]) .footer-bottom {
       background-color: rgba(0, 0, 0, 0.15);
     }
 
@@ -383,13 +407,17 @@ import { NewsletterService } from '../../../core/services/newsletter.service';
 
     .admin-link {
       font-size: 0.8rem;
-      color: #FFFFFF;
+      color: var(--text-muted);
       text-decoration: none;
       padding: 0.4rem 1rem;
       border: 1px solid var(--card-border);
       border-radius: var(--radius-md, 8px);
       transition: color 0.2s, background-color 0.2s, border-color 0.2s;
       cursor: pointer;
+    }
+
+    :host-context([data-theme="dark"]) .admin-link {
+      color: #FFFFFF;
     }
 
     .admin-link:hover {
