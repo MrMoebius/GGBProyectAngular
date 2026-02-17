@@ -37,4 +37,8 @@ export class SesionMesaService {
   cerrar(id: number): Observable<SesionMesa> {
     return this.api.post<SesionMesa>(`${this.endpoint}/${id}/cerrar`, {});
   }
+
+  getMiSesion(): Observable<SesionMesa | null> {
+    return this.api.get<SesionMesa>(`${this.endpoint}/mi-sesion`);
+  }
 }

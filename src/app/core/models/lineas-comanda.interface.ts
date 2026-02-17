@@ -4,5 +4,5 @@ export interface LineasComanda {
   idProducto: number;
   cantidad: number;
   precioUnitarioHistorico: number;
-  notas?: string;
+  notasChef?: string;
 }

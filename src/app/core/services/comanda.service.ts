@@ -49,4 +49,12 @@ export class ComandaService {
   createByCliente(comanda: Partial<Comanda>): Observable<Comanda> {
     return this.api.post<Comanda>(`${this.endpoint}/cliente`, comanda);
   }
+
+  getMisComandas(): Observable<Comanda[]> {
+    return this.api.get<Comanda[]>(`${this.endpoint}/mis-comandas`);
+  }
+
+  cancelarByCliente(id: number): Observable<Comanda> {
+    return this.api.post<Comanda>(`${this.endpoint}/${id}/cancelar-cliente`, {});
+  }
 }

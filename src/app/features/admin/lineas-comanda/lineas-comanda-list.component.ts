@@ -29,7 +29,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
                 <td>{{ l.id }}</td><td>{{ l.idComanda }}</td><td>{{ l.idProducto }}</td><td>{{ l.cantidad }}</td>
                 <td class="num-cell">{{ formatCurrency(l.precioUnitarioHistorico) }}</td>
                 <td class="num-cell total-cell">{{ formatCurrency(l.precioUnitarioHistorico * l.cantidad) }}</td>
-                <td class="notes-cell">{{ l.notas || '-' }}</td>
+                <td class="notes-cell">{{ l.notasChef || '-' }}</td>
                 <td class="actions-cell">
                   <button class="btn btn-ghost btn-sm" (click)="openEdit(l)"><i class="fa-solid fa-pen-to-square"></i></button>
                   <button class="btn btn-danger btn-sm" (click)="confirmDelete(l.id)"><i class="fa-solid fa-trash"></i></button>
