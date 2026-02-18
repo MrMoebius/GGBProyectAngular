@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NewsletterService } from '../../../core/services/newsletter.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-public-footer',
@@ -106,7 +107,9 @@ import { NewsletterService } from '../../../core/services/newsletter.service';
           <p class="copyright">
             &copy; 2026 Giber Games Bar. Todos los derechos reservados.
           </p>
-          <a class="admin-link" routerLink="/admin">Panel Admin</a>
+          @if (authService.currentRole() === 'ADMIN') {
+            <a class="admin-link" routerLink="/admin">Panel Admin</a>
+          }
         </div>
       </div>
     </footer>
@@ -465,6 +468,7 @@ import { NewsletterService } from '../../../core/services/newsletter.service';
 export class PublicFooterComponent {
   // ---------- DI ----------
   private readonly newsletterService = inject(NewsletterService);
+  protected readonly authService = inject(AuthService);
 
   // ---------- State ----------
   email = signal('');

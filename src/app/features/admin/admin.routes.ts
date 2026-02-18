@@ -16,6 +16,7 @@ export const ADMIN_ROUTES: Routes = [
       { path: 'juegos-copia', loadComponent: () => import('./juegos-copia/juegos-copia-list.component').then(m => m.JuegosCopiaListComponent) },
       { path: 'peticiones-pago', loadComponent: () => import('./peticiones-pago/peticiones-pago-list.component').then(m => m.PeticionesPagoListComponent) },
       { path: 'eventos', loadComponent: () => import('./eventos/eventos-list.component').then(m => m.EventosListComponent) },
+      { path: 'reservas', loadComponent: () => import('./reservas/reservas-list.component').then(m => m.ReservasListComponent) },
       { path: 'sesiones-mesa', loadComponent: () => import('./sesiones-mesa/sesiones-mesa-list.component').then(m => m.SesionesMesaListComponent) },
       { path: 'sesiones-mesa/:id', loadComponent: () => import('./sesiones-mesa/sesion-mesa-detail.component').then(m => m.SesionMesaDetailComponent) },
       { path: 'facturas', loadComponent: () => import('./facturas/facturas-list.component').then(m => m.FacturasListComponent) },

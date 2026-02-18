@@ -1,10 +1,17 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { forkJoin } from 'rxjs';
 import { FacturaService } from '../../../core/services/factura.service';
 import { ClienteService } from '../../../core/services/cliente.service';
+import { ComandaService } from '../../../core/services/comanda.service';
+import { LineasComandaService } from '../../../core/services/lineas-comanda.service';
+import { ProductoService } from '../../../core/services/producto.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { Factura } from '../../../core/models/factura.interface';
 import { Cliente } from '../../../core/models/cliente.interface';
+import { Comanda } from '../../../core/models/comanda.interface';
+import { LineasComanda } from '../../../core/models/lineas-comanda.interface';
+import { Producto } from '../../../core/models/producto.interface';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
 import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer-loader.component';
 
@@ -110,10 +117,16 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
 export class FacturasListComponent implements OnInit {
   private facturaService = inject(FacturaService);
   private clienteService = inject(ClienteService);
+  private comandaService = inject(ComandaService);
+  private lineasService = inject(LineasComandaService);
+  private productoService = inject(ProductoService);
   private toastService = inject(ToastService);
 
   facturas = signal<Factura[]>([]);
   clientes = signal<Cliente[]>([]);
+  comandas = signal<Comanda[]>([]);
+  lineas = signal<LineasComanda[]>([]);
+  productos = signal<Producto[]>([]);
   searchTerm = signal('');
   estadoFilter = signal('');
   isLoading = signal(true);
@@ -136,13 +149,22 @@ export class FacturasListComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.facturaService.getAll().subscribe({
-      next: (data) => { this.facturas.set(data); this.isLoading.set(false); },
+    forkJoin({
+      facturas: this.facturaService.getAll(),
+      clientes: this.clienteService.getAll(),
+      comandas: this.comandaService.getAll(),
+      lineas: this.lineasService.getAll(),
+      productos: this.productoService.getAll()
+    }).subscribe({
+      next: ({ facturas, clientes, comandas, lineas, productos }) => {
+        this.facturas.set(facturas);
+        this.clientes.set(clientes);
+        this.comandas.set(comandas);
+        this.lineas.set(lineas);
+        this.productos.set(productos);
+        this.isLoading.set(false);
+      },
       error: () => { this.toastService.error('Error al cargar facturas'); this.isLoading.set(false); }
-    });
-    this.clienteService.getAll().subscribe({
-      next: (data) => this.clientes.set(data),
-      error: () => {}
     });
   }
 
@@ -158,8 +180,44 @@ export class FacturasListComponent implements OnInit {
     return c?.email || '';
   }
 
+  private getTicketLines(f: Factura): { nombre: string; cantidad: number; precio: number; subtotal: number }[] {
+    const sesionComandas = this.comandas().filter(c => c.idSesion === f.idSesion);
+    const comandaIds = new Set(sesionComandas.map(c => c.id));
+    const sesionLineas = this.lineas().filter(l => comandaIds.has(l.idComanda));
+
+    const grouped = new Map<number, { nombre: string; cantidad: number; precio: number }>();
+    for (const l of sesionLineas) {
+      const prod = this.productos().find(p => p.id === l.idProducto);
+      const nombre = prod?.nombre ?? `Producto #${l.idProducto}`;
+      const precio = l.precioUnitarioHistorico ?? prod?.precio ?? 0;
+      const existing = grouped.get(l.idProducto);
+      if (existing) {
+        existing.cantidad += l.cantidad;
+      } else {
+        grouped.set(l.idProducto, { nombre, cantidad: l.cantidad, precio });
+      }
+    }
+
+    return Array.from(grouped.values()).map(g => ({
+      ...g,
+      subtotal: g.cantidad * g.precio
+    }));
+  }
+
   printTicket(f: Factura): void {
     const cliente = this.getClienteNombre(f.idCliente);
+    const items = this.getTicketLines(f);
+
+    let itemsHtml = '';
+    if (items.length > 0) {
+      itemsHtml += '<div class="line"></div>';
+      itemsHtml += '<table><tr class="thead"><td>Ud</td><td>Producto</td><td class="r">Imp.</td></tr>';
+      for (const item of items) {
+        itemsHtml += `<tr><td>${item.cantidad}</td><td>${item.nombre}</td><td class="r">${this.formatCurrency(item.subtotal)}</td></tr>`;
+      }
+      itemsHtml += '</table>';
+    }
+
     const html = `<!DOCTYPE html>
 <html><head><title>Ticket ${f.numeroFactura}</title>
 <style>
@@ -171,6 +229,10 @@ export class FacturasListComponent implements OnInit {
   .row { display: flex; justify-content: space-between; padding: 2px 0; }
   .total-row { font-size: 15px; font-weight: bold; padding: 4px 0; }
   h2 { font-size: 18px; margin-bottom: 2px; }
+  table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  table td { padding: 3px 2px; vertical-align: top; }
+  .thead td { font-weight: bold; border-bottom: 1px solid #000; font-size: 10px; }
+  .r { text-align: right; }
   @media print { body { margin: 0; } }
 </style></head><body>
   <div class="center">
@@ -182,11 +244,12 @@ export class FacturasListComponent implements OnInit {
   <div class="line"></div>
   ${cliente !== '-' ? '<p>Cliente: ' + cliente + '</p>' : ''}
   <p>Sesion: ${f.idSesion}</p>
+  ${itemsHtml}
   <div class="line"></div>
-  <div class="row"><span>Base IVA 10%</span><span>${this.formatCurrency(f.baseImponible10)} EUR</span></div>
-  <div class="row"><span>Cuota IVA 10%</span><span>${this.formatCurrency(f.cuotaIva10)} EUR</span></div>
-  <div class="row"><span>Base IVA 21%</span><span>${this.formatCurrency(f.baseImponible21)} EUR</span></div>
-  <div class="row"><span>Cuota IVA 21%</span><span>${this.formatCurrency(f.cuotaIva21)} EUR</span></div>
+  ${f.baseImponible10 > 0 ? `<div class="row"><span>Base IVA 10%</span><span>${this.formatCurrency(f.baseImponible10)} EUR</span></div>
+  <div class="row"><span>Cuota IVA 10%</span><span>${this.formatCurrency(f.cuotaIva10)} EUR</span></div>` : ''}
+  ${f.baseImponible21 > 0 ? `<div class="row"><span>Base IVA 21%</span><span>${this.formatCurrency(f.baseImponible21)} EUR</span></div>
+  <div class="row"><span>Cuota IVA 21%</span><span>${this.formatCurrency(f.cuotaIva21)} EUR</span></div>` : ''}
   ${f.importeLudoteca > 0 ? '<div class="row"><span>Ludoteca</span><span>' + this.formatCurrency(f.importeLudoteca) + ' EUR</span></div>' : ''}
   <div class="line"></div>
   <div class="row total-row"><span>TOTAL</span><span>${this.formatCurrency(f.total)} EUR</span></div>

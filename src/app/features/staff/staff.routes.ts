@@ -15,6 +15,7 @@ export const STAFF_ROUTES: Routes = [
       { path: 'juegos-copia', loadComponent: () => import('../admin/juegos-copia/juegos-copia-list.component').then(m => m.JuegosCopiaListComponent) },
       { path: 'peticiones-pago', loadComponent: () => import('../admin/peticiones-pago/peticiones-pago-list.component').then(m => m.PeticionesPagoListComponent) },
       { path: 'eventos', loadComponent: () => import('../admin/eventos/eventos-list.component').then(m => m.EventosListComponent) },
+      { path: 'reservas', loadComponent: () => import('../admin/reservas/reservas-list.component').then(m => m.ReservasListComponent) },
       { path: 'sesiones-mesa', loadComponent: () => import('../admin/sesiones-mesa/sesiones-mesa-list.component').then(m => m.SesionesMesaListComponent) },
       { path: 'sesiones-mesa/:id', loadComponent: () => import('../admin/sesiones-mesa/sesion-mesa-detail.component').then(m => m.SesionMesaDetailComponent) },
       { path: 'facturas', loadComponent: () => import('../admin/facturas/facturas-list.component').then(m => m.FacturasListComponent) },

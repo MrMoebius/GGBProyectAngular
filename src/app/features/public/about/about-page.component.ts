@@ -99,11 +99,11 @@ import { RouterModule } from '@angular/router';
       <h2 class="section-title">Que ofrecemos</h2>
       <div class="offer-grid">
         @for (item of offerings(); track item.title) {
-          <div class="card offer-card">
+          <a [routerLink]="item.route" class="card offer-card">
             <i [class]="item.icon"></i>
             <h3 class="offer-title">{{ item.title }}</h3>
             <p class="offer-desc">{{ item.description }}</p>
-          </div>
+          </a>
         }
       </div>
     </section>
@@ -122,8 +122,12 @@ import { RouterModule } from '@angular/router';
           <span class="social-handle">&#64;gibergames</span>
         </a>
         <a href="https://x.com/giber_games" target="_blank" rel="noopener" class="social-card">
-          <i class="fa-brands fa-x-twitter"></i>
+          <svg class="x-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
           <span class="social-handle">&#64;giber_games</span>
+        </a>
+        <a href="https://www.tiktok.com/@gibergamesbar" target="_blank" rel="noopener" class="social-card">
+          <i class="fa-brands fa-tiktok"></i>
+          <span class="social-handle">&#64;gibergamesbar</span>
         </a>
       </div>
     </section>
@@ -249,6 +253,11 @@ import { RouterModule } from '@angular/router';
       min-height: 320px;
       object-fit: cover;
       display: block;
+      transition: transform 0.4s ease;
+    }
+
+    .story-image:hover img {
+      transform: scale(1.05);
     }
 
     /* Numbers Section */
@@ -432,6 +441,8 @@ import { RouterModule } from '@angular/router';
     .offer-card {
       padding: 2rem 1.25rem;
       text-align: center;
+      text-decoration: none;
+      cursor: pointer;
       transition: transform 0.3s ease, border-color 0.3s ease;
     }
 
@@ -503,6 +514,11 @@ import { RouterModule } from '@angular/router';
     .social-card i {
       font-size: 1.5rem;
       color: var(--neon-pink);
+    }
+
+    .social-card .x-icon {
+      width: 1.5rem;
+      height: 1.5rem;
     }
 
     .social-handle {
@@ -678,22 +694,26 @@ export class AboutPageComponent {
     {
       icon: 'fa-solid fa-chess-board',
       title: 'Ludoteca',
-      description: 'Mas de 330 juegos de mesa disponibles para jugar. Te ayudamos a elegir el perfecto para tu grupo.'
+      description: 'Mas de 330 juegos de mesa disponibles para jugar. Te ayudamos a elegir el perfecto para tu grupo.',
+      route: '/public/juegos'
     },
     {
       icon: 'fa-solid fa-beer-mug-empty',
       title: 'Bar',
-      description: 'Cervezas, refrescos, cafes y una variada seleccion de bebidas para acompanar tus partidas.'
+      description: 'Cervezas, refrescos, cafes y una variada seleccion de bebidas para acompanar tus partidas.',
+      route: '/public/carta'
     },
     {
       icon: 'fa-solid fa-burger',
       title: 'Cocina',
-      description: 'Comida casera y rica pensada para comer mientras juegas. Bocados perfectos entre turno y turno.'
+      description: 'Comida casera y rica pensada para comer mientras juegas. Bocados perfectos entre turno y turno.',
+      route: '/public/carta'
     },
     {
       icon: 'fa-solid fa-trophy',
       title: 'Eventos',
-      description: 'Torneos, noches tematicas, talleres y eventos especiales. Siempre hay algo nuevo que descubrir.'
+      description: 'Torneos, noches tematicas, talleres y eventos especiales. Siempre hay algo nuevo que descubrir.',
+      route: '/public/eventos'
     }
   ]);
 }

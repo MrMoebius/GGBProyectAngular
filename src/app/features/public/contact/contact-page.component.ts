@@ -144,7 +144,11 @@ import { ToastService } from '../../../core/services/toast.service';
             <div class="social-links">
               @for (social of socials(); track social.label) {
                 <a [href]="social.url" target="_blank" rel="noopener" class="social-link" [attr.aria-label]="social.label">
-                  <i [class]="social.icon"></i>
+                  @if (social.svg) {
+                    <svg class="x-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                  } @else {
+                    <i [class]="social.icon"></i>
+                  }
                 </a>
               }
             </div>
@@ -373,6 +377,11 @@ import { ToastService } from '../../../core/services/toast.service';
       font-size: 1.1rem;
     }
 
+    .social-link .x-icon {
+      width: 1.1rem;
+      height: 1.1rem;
+    }
+
     /* Map Placeholder */
     .map-section {
       padding: 0 2rem 3rem 2rem;
@@ -434,10 +443,10 @@ export class ContactPageComponent {
   ]);
 
   socials = signal([
-    { icon: 'fa-brands fa-instagram', url: 'https://www.instagram.com/gibergamesbar/', label: 'Instagram Bar' },
-    { icon: 'fa-brands fa-instagram', url: 'https://www.instagram.com/gibergames/', label: 'Instagram Giber Games' },
-    { icon: 'fa-brands fa-x-twitter', url: 'https://x.com/giber_games', label: 'X (Twitter)' },
-    { icon: 'fa-brands fa-tiktok', url: 'https://www.tiktok.com/@gibergamesbar', label: 'TikTok' }
+    { icon: 'fa-brands fa-instagram', url: 'https://www.instagram.com/gibergamesbar/', label: 'Instagram Bar', svg: false },
+    { icon: 'fa-brands fa-instagram', url: 'https://www.instagram.com/gibergames/', label: 'Instagram Giber Games', svg: false },
+    { icon: '', url: 'https://x.com/giber_games', label: 'X (Twitter)', svg: true },
+    { icon: 'fa-brands fa-tiktok', url: 'https://www.tiktok.com/@gibergamesbar', label: 'TikTok', svg: false }
   ]);
 
   onSubmit(): void {

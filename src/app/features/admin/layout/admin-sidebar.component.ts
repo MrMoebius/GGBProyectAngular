@@ -299,9 +299,9 @@ export class AdminSidebarComponent {
   navItems: NavItem[] = [
     { label: 'Dashboard',       icon: 'fa-gauge-high',    route: '/admin/dashboard' },
     // TPV
+    { label: 'Reservas',         icon: 'fa-calendar-check', route: '/admin/reservas' },
     { label: 'Sesiones Mesa',   icon: 'fa-door-open',     route: '/admin/sesiones-mesa' },
     { label: 'Pagos Mesa',      icon: 'fa-money-bill',    route: '/admin/pagos-mesa' },
-    { label: 'Peticiones Pago', icon: 'fa-credit-card',   route: '/admin/peticiones-pago' },
     { label: 'Facturas',        icon: 'fa-file-invoice',  route: '/admin/facturas' },
     // Catalogo
     { label: 'Productos',       icon: 'fa-utensils',      route: '/admin/productos' },

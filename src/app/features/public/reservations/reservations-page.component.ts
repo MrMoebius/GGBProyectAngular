@@ -4,6 +4,7 @@ import { MockReservasService } from '../../../core/services/mock-reservas.servic
 import { JuegoService } from '../../../core/services/juego.service';
 import { MesaService } from '../../../core/services/mesa.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { JuegoExtended } from '../../../core/models/juego-extended.interface';
 import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer-loader.component';
 
@@ -86,16 +87,28 @@ interface ContactInfo {
                 <i class="fa-solid fa-clock"></i>
                 Hora
               </label>
-              <div class="time-slots">
-                @for (slot of allTimeSlots; track slot) {
-                  <button
-                    class="time-pill"
-                    [class.selected]="selectedTime() === slot"
-                    (click)="selectedTime.set(slot)">
-                    {{ slot }}
-                  </button>
-                }
-              </div>
+              @if (isDayClosed()) {
+                <div class="closed-banner">
+                  <i class="fa-solid fa-door-closed"></i>
+                  <span>Los lunes estamos cerrados. Selecciona otro dia.</span>
+                </div>
+              } @else if (availableTimeSlots().length === 0 && selectedDate()) {
+                <div class="closed-banner">
+                  <i class="fa-solid fa-circle-info"></i>
+                  <span>Selecciona una fecha para ver los horarios disponibles.</span>
+                </div>
+              } @else {
+                <div class="time-slots">
+                  @for (slot of availableTimeSlots(); track slot) {
+                    <button
+                      class="time-pill"
+                      [class.selected]="selectedTime() === slot"
+                      (click)="selectedTime.set(slot)">
+                      {{ slot }}
+                    </button>
+                  }
+                </div>
+              }
             </div>
 
             <!-- Party Size -->
@@ -713,6 +726,31 @@ interface ContactInfo {
 
     .form-section-title i {
       color: var(--primary-coral);
+    }
+
+    /* === Date input dark mode fix === */
+    :host-context([data-theme="dark"]) input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(1) brightness(0.8);
+      cursor: pointer;
+    }
+
+    /* === Closed banner === */
+    .closed-banner {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.85rem 1.1rem;
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      border-radius: var(--radius-md, 0.5rem);
+      font-size: 0.88rem;
+      color: var(--text-main);
+    }
+
+    .closed-banner i {
+      color: #ef4444;
+      font-size: 1rem;
+      flex-shrink: 0;
     }
 
     /* === Time Slots === */
@@ -1430,6 +1468,7 @@ export class ReservationsPageComponent {
   private juegosService = inject(JuegoService);
   private mesaService = inject(MesaService);
   private toastService = inject(ToastService);
+  private authService = inject(AuthService);
 
   // Progress steps
   readonly steps = [
@@ -1444,11 +1483,39 @@ export class ReservationsPageComponent {
   // Today's date string for min attribute
   readonly todayStr = new Date().toISOString().split('T')[0];
 
-  // All time slots
-  readonly allTimeSlots = [
-    '12:00', '13:00', '14:00', '15:00', '16:00',
-    '17:00', '18:00', '19:00', '20:00', '21:00', '22:00'
-  ];
+  // Horarios por dia (0=Dom, 1=Lun, 2=Mar, 3=Mie, 4=Jue, 5=Vie, 6=Sab)
+  private readonly schedule: Record<number, { open: number; lastSlot: number } | null> = {
+    0: { open: 12, lastSlot: 21 },     // Dom  12:00-22:00 → ultima reserva 21:00
+    1: null,                             // Lun  Cerrado
+    2: { open: 17, lastSlot: 22 },      // Mar  17:00-23:00
+    3: { open: 17, lastSlot: 22 },      // Mie  17:00-23:00
+    4: { open: 17, lastSlot: 22 },      // Jue  17:00-23:00
+    5: { open: 17, lastSlot: 23 },      // Vie  17:00-00:00
+    6: { open: 12, lastSlot: 23 },      // Sab  12:00-00:00
+  };
+
+  readonly isDayClosed = computed(() => {
+    const dateStr = this.selectedDate();
+    if (!dateStr) return false;
+    const day = new Date(dateStr + 'T12:00:00').getDay();
+    return this.schedule[day] === null;
+  });
+
+  readonly availableTimeSlots = computed(() => {
+    const dateStr = this.selectedDate();
+    if (!dateStr) return [];
+    const day = new Date(dateStr + 'T12:00:00').getDay();
+    const hours = this.schedule[day];
+    if (!hours) return [];
+    const slots: string[] = [];
+    for (let h = hours.open; h <= hours.lastSlot; h++) {
+      slots.push(`${h.toString().padStart(2, '0')}:00`);
+      if (h < hours.lastSlot) {
+        slots.push(`${h.toString().padStart(2, '0')}:30`);
+      }
+    }
+    return slots;
+  });
 
   // Step 1 signals
   readonly selectedDate = signal('');
@@ -1456,7 +1523,7 @@ export class ReservationsPageComponent {
   readonly partySize = signal(2);
 
   readonly step1Valid = computed(() =>
-    this.selectedDate() !== '' && this.selectedTime() !== '' && this.partySize() >= 1
+    this.selectedDate() !== '' && this.selectedTime() !== '' && this.partySize() >= 1 && !this.isDayClosed()
   );
 
   // Availability check signals
@@ -1495,11 +1562,19 @@ export class ReservationsPageComponent {
   isLoading = signal(true);
 
   constructor() {
-    // Pre-load games
     this.juegosService.getAll().subscribe(games => {
       this.allGames.set(games);
       this.isLoading.set(false);
     });
+
+    const user = this.authService.currentUser();
+    if (user) {
+      this.contactInfo.set({
+        nombre: user.nombre || '',
+        telefono: user.telefono || '',
+        email: user.email || ''
+      });
+    }
   }
 
   // Navigation
@@ -1511,6 +1586,10 @@ export class ReservationsPageComponent {
   onDateChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     this.selectedDate.set(input.value);
+    const slots = this.availableTimeSlots();
+    if (!slots.includes(this.selectedTime())) {
+      this.selectedTime.set('');
+    }
   }
 
   incrementParty(): void {

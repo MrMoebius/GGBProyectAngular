@@ -23,6 +23,9 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
         <!-- Hero banner -->
         <div class="hero-banner" [style.background]="'url(' + eventService.getImageUrl(event()!.id) + ') center/cover no-repeat, ' + getHeroGradient(event()!.type)">
           <div class="hero-overlay">
+            @if (isPastEvent()) {
+              <img class="hero-completed-stamp" src="assets/GGBarPhotoSlide/Completed.png" alt="Completado" />
+            }
             <span class="type-badge" [style.background-color]="getTypeColor(event()!.type)">
               <i [class]="getTypeIcon(event()!.type)"></i>
               {{ getTypeLabel(event()!.type) }}
@@ -36,7 +39,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
             @if (event()!.status === 'CANCELADO') {
               <span class="cancelled-indicator">Evento cancelado</span>
             }
-            @if (event()!.status === 'FINALIZADO') {
+            @if (isPastEvent()) {
               <span class="finished-indicator">Evento finalizado</span>
             }
           </div>
@@ -181,7 +184,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
             <div class="sub-card card">
               <h3 class="sub-title">Inscripcion</h3>
 
-              @if (event()!.status === 'FINALIZADO' || event()!.status === 'CANCELADO') {
+              @if (isPastEvent()) {
                 <div class="sub-disabled">
                   <i class="fa-solid fa-ban"></i>
                   <p>Este evento ya ha {{ event()!.status === 'CANCELADO' ? 'sido cancelado' : 'finalizado' }}.</p>
@@ -275,11 +278,25 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
     }
 
     .hero-overlay {
+      position: relative;
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
       padding: 3rem 2.5rem;
       background: linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.3) 100%);
+    }
+
+    .hero-completed-stamp {
+      position: absolute;
+      top: 50%;
+      right: 2.5rem;
+      transform: translateY(-50%) rotate(-15deg);
+      width: 180px;
+      height: auto;
+      opacity: 0.85;
+      pointer-events: none;
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.5));
+      z-index: 2;
     }
 
     .type-badge {
@@ -913,6 +930,15 @@ export class EventDetailComponent implements OnInit {
     }).catch(() => {
       this.toastService.error('No se pudo copiar el enlace');
     });
+  }
+
+  isPastEvent(): boolean {
+    const ev = this.event();
+    if (!ev) return false;
+    if (ev.status === 'FINALIZADO' || ev.status === 'CANCELADO') return true;
+    const endTime = ev.endTime ?? ev.time;
+    const eventEnd = new Date(ev.date + 'T' + endTime + ':00');
+    return eventEnd < new Date();
   }
 
   getTypeColor(type: string): string {
