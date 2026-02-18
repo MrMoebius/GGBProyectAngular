@@ -70,12 +70,18 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       <!-- Grid -->
       <div class="sesiones-grid">
         @for (s of filteredSesiones(); track s.id) {
-          <div class="sesion-card" (click)="navigateToDetail(s.id)">
+          <div class="sesion-card" [class.stale]="isStale(s)" (click)="navigateToDetail(s.id)">
             <div class="card-top">
               <span class="card-mesa">{{ getMesaNombre(s.idMesa) }}</span>
               <app-status-badge [status]="s.estado" />
             </div>
             <div class="card-body">
+              @if (isStale(s)) {
+                <div class="stale-alert">
+                  <i class="fa-solid fa-triangle-exclamation"></i>
+                  Abierta hace {{ getElapsedTime(s) }}
+                </div>
+              }
               <div class="card-field">
                 <i class="fa-solid fa-users"></i>
                 <span>{{ s.numComensales ?? '-' }} comensales</span>
@@ -104,6 +110,9 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
                 </button>
                 <button class="btn btn-danger btn-sm" (click)="openCerrar(s.id)" title="Cerrar sesion">
                   <i class="fa-solid fa-door-closed"></i> Cerrar
+                </button>
+                <button class="btn btn-ghost btn-sm btn-cancel" (click)="openCancelar(s.id)" title="Cancelar sin factura">
+                  <i class="fa-solid fa-ban"></i> Cancelar
                 </button>
               } @else {
                 <button class="btn btn-ghost btn-sm" (click)="navigateToDetail(s.id)" title="Ver detalle">
@@ -181,6 +190,15 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
         (onConfirm)="submitCerrar()"
         (onCancel)="showCerrarModal.set(false)"
       />
+
+      <!-- Confirm Cancelar -->
+      <app-confirm-modal
+        [isOpen]="showCancelarModal()"
+        title="Cancelar Sesion"
+        message="Se cancelara la sesion sin generar factura. Esta accion no se puede deshacer."
+        (onConfirm)="submitCancelar()"
+        (onCancel)="showCancelarModal.set(false)"
+      />
     </div>
   `,
   styles: [`
@@ -209,6 +227,12 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
     .card-field i { width: 14px; text-align: center; font-size: 0.75rem; }
     .ludo-tag { color: var(--success); font-weight: 600; }
     .card-bottom { display: flex; gap: 0.5rem; border-top: 1px solid var(--card-border); padding-top: 0.75rem; }
+    .sesion-card.stale { border-color: var(--danger); border-left: 3px solid var(--danger); }
+    .stale-alert { display: flex; align-items: center; gap: 0.4rem; font-size: 0.75rem; font-weight: 600; color: var(--danger); background: rgba(239,68,68,0.1); padding: 0.3rem 0.6rem; border-radius: var(--radius-md, 8px); }
+    .stale-alert i { font-size: 0.7rem; }
+    .btn-cancel { color: var(--danger); }
+    .btn-cancel:hover { background-color: rgba(239,68,68,0.1); }
+
     .empty-state-full { grid-column: 1 / -1; text-align: center; padding: 3rem 1rem; color: var(--text-muted); }
     .empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; opacity: 0.5; display: block; }
 
@@ -239,6 +263,8 @@ export class SesionesMesaListComponent implements OnInit {
   showAbrirModal = signal(false);
   showCerrarModal = signal(false);
   cerrarId = signal<number | null>(null);
+  showCancelarModal = signal(false);
+  cancelarId = signal<number | null>(null);
   isLoading = signal(true);
 
   estadoFilters = [
@@ -340,8 +366,19 @@ export class SesionesMesaListComponent implements OnInit {
   submitAbrir(): void {
     if (this.abrirForm.invalid) return;
     const raw = this.abrirForm.getRawValue();
-    this.sesionService.abrir(raw as any).subscribe({
+    const mockReservaId = raw.idReserva;
+
+    const payload: any = {
+      idMesa: raw.idMesa,
+      idCliente: raw.idCliente,
+      numComensales: raw.numComensales
+    };
+
+    this.sesionService.abrir(payload).subscribe({
       next: (sesion) => {
+        if (mockReservaId) {
+          this.reservasService.changeEstado(mockReservaId, 'COMPLETADA').subscribe();
+        }
         this.toastService.success('Sesion abierta correctamente');
         this.showAbrirModal.set(false);
         this.navigateToDetail(sesion.id);
@@ -373,6 +410,43 @@ export class SesionesMesaListComponent implements OnInit {
         this.showCerrarModal.set(false);
       }
     });
+  }
+
+  openCancelar(id: number): void {
+    this.cancelarId.set(id);
+    this.showCancelarModal.set(true);
+  }
+
+  submitCancelar(): void {
+    const id = this.cancelarId();
+    if (!id) return;
+    this.sesionService.update(id, { estado: 'CANCELADA' } as any).subscribe({
+      next: () => {
+        this.toastService.success('Sesion cancelada');
+        this.showCancelarModal.set(false);
+        this.loadData();
+      },
+      error: (err) => {
+        const msg = err?.error?.message || err?.error || 'Error al cancelar sesion';
+        this.toastService.error(msg);
+        this.showCancelarModal.set(false);
+      }
+    });
+  }
+
+  isStale(s: SesionMesa): boolean {
+    if (s.estado !== 'ACTIVA') return false;
+    const opened = new Date(s.fechaHoraApertura).getTime();
+    return Date.now() - opened > 24 * 60 * 60 * 1000;
+  }
+
+  getElapsedTime(s: SesionMesa): string {
+    const ms = Date.now() - new Date(s.fechaHoraApertura).getTime();
+    const hours = Math.floor(ms / (1000 * 60 * 60));
+    if (hours < 24) return `${hours} horas`;
+    const days = Math.floor(hours / 24);
+    const remHours = hours % 24;
+    return remHours > 0 ? `${days}d ${remHours}h` : `${days} dias`;
   }
 
   formatDateTime(iso: string): string {

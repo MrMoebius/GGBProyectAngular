@@ -36,12 +36,14 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
     <div class="session-wrapper">
       <!-- HEADER -->
       <div class="session-header">
-        <div class="header-info">
+        <div class="header-left">
           <button class="btn btn-ghost btn-sm" (click)="router.navigate(['/customer/dashboard'])">
-            <i class="fa-solid fa-arrow-left"></i>
+            <i class="fa-solid fa-arrow-left"></i> Volver al panel
           </button>
           <h1 class="session-title">Mesa {{ sesion()!.idMesa }}</h1>
           <app-status-badge [status]="sesion()!.estado" />
+        </div>
+        <div class="header-right">
           <span class="header-detail"><i class="fa-solid fa-users"></i> {{ sesion()!.numComensales ?? '-' }} comensales</span>
           <span class="header-detail"><i class="fa-solid fa-clock"></i> {{ formatDateTime(sesion()!.fechaHoraApertura) }}</span>
         </div>
@@ -264,7 +266,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
   styles: [`
     /* NO SESSION */
     .no-session { text-align: center; padding: 4rem 2rem; color: var(--text-muted); }
-    .no-session i { font-size: 3rem; opacity: 0.3; margin-bottom: 1rem; display: block; }
+    .no-session i { font-size: 3rem; opacity: 0.3; display: block; }
     .no-session h2 { color: var(--text-main); margin: 0 0 0.5rem 0; }
     .no-session p { margin: 0 0 1.5rem 0; }
 
@@ -272,8 +274,9 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
     .session-wrapper { padding: var(--spacing-lg); display: flex; flex-direction: column; gap: var(--spacing-lg); }
 
     /* HEADER */
-    .session-header { display: flex; align-items: center; padding: 1rem 1.25rem; background-color: var(--card-bg); border: 1px solid var(--table-border); border-radius: var(--radius-md, 8px); }
-    .header-info { display: flex; align-items: center; gap: var(--spacing-md); flex-wrap: wrap; }
+    .session-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.25rem; background-color: var(--card-bg); border: 1px solid var(--table-border); border-radius: var(--radius-md, 8px); flex-wrap: wrap; gap: 0.75rem; }
+    .header-left { display: flex; align-items: center; gap: var(--spacing-md); }
+    .header-right { display: flex; align-items: center; gap: var(--spacing-md); }
     .session-title { font-size: 1.25rem; font-weight: 700; color: var(--text-main); margin: 0; }
     .header-detail { font-size: 0.8125rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.3rem; }
 

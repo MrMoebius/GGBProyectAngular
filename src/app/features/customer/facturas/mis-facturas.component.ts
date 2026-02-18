@@ -113,6 +113,10 @@ interface FacturaLineDetail {
                       <div class="detail-row pending-row"><span>Pendiente</span><span>{{ formatCurrency(f.total - f.totalPagado) }}</span></div>
                     }
                   </div>
+
+                  <button class="btn-export" (click)="exportPdf(f, $event)">
+                    <i class="fa-solid fa-file-pdf"></i> Descargar PDF
+                  </button>
                 </div>
               }
             </div>
@@ -186,6 +190,10 @@ interface FacturaLineDetail {
     .detail-totals { border-top: 1px solid var(--card-border, rgba(255,255,255,0.08)); padding-top: 0.75rem; }
     .total-row span:last-child { font-weight: 700; font-size: 1rem; color: var(--neon-cyan, #00FFD1); }
     .pending-row span:last-child { color: #FACC15; }
+
+    .btn-export { display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 1rem; padding: 0.5rem 1rem; border: 1px solid var(--card-border, rgba(255,255,255,0.08)); border-radius: var(--radius-md, 8px); background: var(--secondary-bg, rgba(255,255,255,0.04)); color: var(--text-main); font-size: 0.8125rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .btn-export:hover { border-color: var(--neon-cyan, #00FFD1); color: var(--neon-cyan, #00FFD1); }
+    .btn-export i { font-size: 0.875rem; }
 
     @media (max-width: 768px) {
       .facturas-grid { grid-template-columns: 1fr; }
@@ -300,5 +308,102 @@ export class MisFacturasComponent implements OnInit {
   formatCurrency(v: number): string {
     if (v == null) return '0,00 \u20AC';
     return v.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' \u20AC';
+  }
+
+  exportPdf(f: Factura, event: Event): void {
+    event.stopPropagation();
+    const lines = this.facturaLines();
+    let productosHtml = '';
+    if (lines.length > 0) {
+      productosHtml = `
+        <table class="productos">
+          <thead><tr><th style="text-align:left">Producto</th><th>Cant.</th><th style="text-align:right">P/U</th><th style="text-align:right">Subtotal</th></tr></thead>
+          <tbody>
+            ${lines.map(l => `<tr><td>${l.productoNombre}</td><td style="text-align:center">${l.cantidad}</td><td style="text-align:right">${this.formatCurrency(l.precioUnitario)}</td><td style="text-align:right">${this.formatCurrency(l.subtotal)}</td></tr>`).join('')}
+          </tbody>
+        </table>`;
+    }
+
+    const html = `<!DOCTYPE html>
+<html><head><title>Factura ${f.numeroFactura}</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Arial, sans-serif; max-width: 700px; margin: 0 auto; padding: 40px 32px; font-size: 13px; color: #1E293B; }
+  .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; border-bottom: 2px solid #0F172A; padding-bottom: 20px; }
+  .brand h1 { font-size: 22px; font-weight: 800; color: #0F172A; }
+  .brand p { font-size: 11px; color: #64748B; margin-top: 2px; }
+  .factura-info { text-align: right; }
+  .factura-info .numero { font-size: 16px; font-weight: 700; color: #0F172A; }
+  .factura-info .fecha { font-size: 12px; color: #64748B; margin-top: 4px; }
+  .estado { display: inline-block; padding: 3px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase; margin-top: 6px; }
+  .estado-PAGADA { background: #DCFCE7; color: #166534; }
+  .estado-EMITIDA { background: #FEF9C3; color: #854D0E; }
+  .estado-ANULADA { background: #FEE2E2; color: #991B1B; }
+  .section { margin-bottom: 20px; }
+  .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #64748B; margin-bottom: 8px; }
+  .productos { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+  .productos th { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #64748B; padding: 6px 8px; border-bottom: 1px solid #E2E8F0; }
+  .productos td { padding: 6px 8px; border-bottom: 1px solid #F1F5F9; font-size: 12px; }
+  .desglose { display: flex; gap: 20px; margin-bottom: 16px; }
+  .desglose-col { flex: 1; background: #F8FAFC; border-radius: 6px; padding: 12px; }
+  .desglose-col h4 { font-size: 11px; font-weight: 600; color: #64748B; margin-bottom: 6px; text-transform: uppercase; }
+  .row { display: flex; justify-content: space-between; padding: 3px 0; font-size: 12px; }
+  .row .label { color: #64748B; }
+  .row .value { font-weight: 500; color: #1E293B; }
+  .totals { border-top: 2px solid #0F172A; padding-top: 12px; margin-top: 8px; }
+  .total-row { font-size: 18px; font-weight: 800; }
+  .total-row .value { color: #0F172A; }
+  .footer-note { text-align: center; margin-top: 32px; font-size: 11px; color: #94A3B8; border-top: 1px solid #E2E8F0; padding-top: 16px; }
+  @media print { body { padding: 20px; } }
+</style></head><body>
+  <div class="header">
+    <div class="brand">
+      <h1>Giber Games Bar</h1>
+      <p>Av. Alcalde Jose Aranda 57, 28925 Alcorcon, Madrid</p>
+    </div>
+    <div class="factura-info">
+      <div class="numero">${f.numeroFactura}</div>
+      <div class="fecha">${this.formatDate(f.fechaEmision)}</div>
+      <span class="estado estado-${f.estado}">${f.estado}</span>
+    </div>
+  </div>
+
+  ${productosHtml ? `<div class="section"><div class="section-title">Productos consumidos</div>${productosHtml}</div>` : ''}
+
+  <div class="section">
+    <div class="section-title">Desglose fiscal</div>
+    <div class="desglose">
+      <div class="desglose-col">
+        <h4>IVA 10%</h4>
+        <div class="row"><span class="label">Base imponible</span><span class="value">${this.formatCurrency(f.baseImponible10)}</span></div>
+        <div class="row"><span class="label">Cuota IVA</span><span class="value">${this.formatCurrency(f.cuotaIva10)}</span></div>
+      </div>
+      <div class="desglose-col">
+        <h4>IVA 21%</h4>
+        <div class="row"><span class="label">Base imponible</span><span class="value">${this.formatCurrency(f.baseImponible21)}</span></div>
+        <div class="row"><span class="label">Cuota IVA</span><span class="value">${this.formatCurrency(f.cuotaIva21)}</span></div>
+      </div>
+    </div>
+  </div>
+
+  ${f.importeLudoteca > 0 ? `<div class="row" style="margin-bottom:8px"><span class="label">Ludoteca</span><span class="value">${this.formatCurrency(f.importeLudoteca)}</span></div>` : ''}
+
+  <div class="totals">
+    <div class="row total-row"><span class="label">Total</span><span class="value">${this.formatCurrency(f.total)}</span></div>
+    <div class="row"><span class="label">Pagado</span><span class="value">${this.formatCurrency(f.totalPagado)}</span></div>
+    ${f.total - f.totalPagado > 0.01 ? `<div class="row"><span class="label">Pendiente</span><span class="value" style="color:#D97706">${this.formatCurrency(f.total - f.totalPagado)}</span></div>` : ''}
+  </div>
+
+  <div class="footer-note">
+    Gracias por tu visita &middot; IVA incluido &middot; Giber Games Bar
+  </div>
+</body></html>`;
+
+    const win = window.open('', '_blank', 'width=800,height=900');
+    if (win) {
+      win.document.write(html);
+      win.document.close();
+      setTimeout(() => win.print(), 400);
+    }
   }
 }

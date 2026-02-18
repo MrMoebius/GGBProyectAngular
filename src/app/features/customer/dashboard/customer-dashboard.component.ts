@@ -179,30 +179,35 @@ import { GameCardPublicComponent } from '../../../shared/components/game-card-pu
             } @else {
               <ul class="event-list">
                 @for (sub of enrichedSubscriptions(); track sub.id) {
-                  <a class="event-item" [routerLink]="'/public/eventos/' + sub.eventId">
-                    <div class="event-icon" [class.event-icon-finished]="sub.finished">
-                      <i class="fa-solid" [class.fa-star]="!sub.finished" [class.fa-flag-checkered]="sub.finished"></i>
-                    </div>
-                    <div class="event-info">
-                      <span class="event-title">{{ sub.title }}</span>
-                      <span class="event-date">{{ sub.date }} a las {{ sub.time }}</span>
-                      <div class="event-meta">
-                        <span class="event-status" [class.event-status-finished]="sub.finished" [class.event-status-waitlist]="sub.status === 'WAITLIST'">
-                          @if (sub.finished) {
-                            Finalizado
-                          } @else {
-                            @switch (sub.status) {
-                              @case ('CONFIRMED') { Confirmado }
-                              @case ('WAITLIST') { Lista de espera }
-                            }
-                          }
-                        </span>
-                        <span class="event-capacity">
-                          <i class="fa-solid fa-users"></i> {{ sub.currentAttendees }}/{{ sub.capacity }}
-                        </span>
+                  <img class="event-img-probe" [src]="eventService.getImageUrl(sub.eventId)" (load)="onEventImageLoad(sub.eventId)" (error)="$event" />
+                  <a class="event-item" [class.event-item-with-bg]="eventHasImage(sub.eventId)" [routerLink]="'/public/eventos/' + sub.eventId"
+                     [style.background-image]="eventHasImage(sub.eventId) ? 'url(' + eventService.getImageUrl(sub.eventId) + ')' : ''">
+                    @if (eventHasImage(sub.eventId)) { <div class="event-item-overlay"></div> }
+                    <div class="event-item-content">
+                      <div class="event-icon" [class.event-icon-finished]="sub.finished">
+                        <i class="fa-solid" [class.fa-star]="!sub.finished" [class.fa-flag-checkered]="sub.finished"></i>
                       </div>
+                      <div class="event-info">
+                        <span class="event-title">{{ sub.title }}</span>
+                        <span class="event-date">{{ sub.date }} a las {{ sub.time }}</span>
+                        <div class="event-meta">
+                          <span class="event-status" [class.event-status-finished]="sub.finished" [class.event-status-waitlist]="sub.status === 'WAITLIST'">
+                            @if (sub.finished) {
+                              Finalizado
+                            } @else {
+                              @switch (sub.status) {
+                                @case ('CONFIRMED') { Confirmado }
+                                @case ('WAITLIST') { Lista de espera }
+                              }
+                            }
+                          </span>
+                          <span class="event-capacity">
+                            <i class="fa-solid fa-users"></i> {{ sub.currentAttendees }}/{{ sub.capacity }}
+                          </span>
+                        </div>
+                      </div>
+                      <i class="fa-solid fa-chevron-right event-arrow"></i>
                     </div>
-                    <i class="fa-solid fa-chevron-right event-arrow"></i>
                   </a>
                 }
               </ul>
@@ -702,18 +707,62 @@ import { GameCardPublicComponent } from '../../../shared/components/game-card-pu
       gap: 0.75rem;
     }
 
+    .event-img-probe {
+      display: none;
+    }
+
     .event-item {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
+      display: block;
       text-decoration: none;
       padding: 0.5rem;
       border-radius: var(--radius-md, 8px);
-      transition: background-color 0.2s;
+      transition: background-color 0.2s, transform 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .event-item-content {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      position: relative;
+      z-index: 1;
     }
 
     .event-item:hover {
       background-color: rgba(255, 255, 255, 0.04);
+    }
+
+    .event-item-with-bg {
+      background-size: cover;
+      background-position: center;
+      padding: 0.75rem;
+      min-height: 72px;
+    }
+
+    .event-item-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(15, 23, 42, 0.88) 0%, rgba(15, 23, 42, 0.7) 100%);
+      z-index: 0;
+      border-radius: var(--radius-md, 8px);
+    }
+
+    .event-item-with-bg .event-title {
+      color: #FFFFFF;
+    }
+
+    .event-item-with-bg .event-date {
+      color: #CBD5E1;
+    }
+
+    .event-item-with-bg .event-arrow {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .event-item-with-bg:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
     }
 
     .event-icon {
@@ -1069,7 +1118,8 @@ export class CustomerDashboardComponent implements OnInit {
   private clienteService = inject(ClienteService);
   private gameHistory = inject(GameHistoryService);
   private reservasService = inject(MockReservasService);
-  private eventService = inject(EventService);
+  protected eventService = inject(EventService);
+  private loadedEventImages = signal<Set<number>>(new Set());
   private recommendationService = inject(RecommendationService);
   private favoritesService = inject(FavoritesService);
   private sesionMesaService = inject(SesionMesaService);
@@ -1236,5 +1286,17 @@ export class CustomerDashboardComponent implements OnInit {
     const h = Math.floor(minutes / 60);
     const m = minutes % 60;
     return m > 0 ? `${h}h ${m}m` : `${h}h`;
+  }
+
+  onEventImageLoad(eventId: number): void {
+    this.loadedEventImages.update(set => {
+      const copy = new Set(set);
+      copy.add(eventId);
+      return copy;
+    });
+  }
+
+  eventHasImage(eventId: number): boolean {
+    return this.loadedEventImages().has(eventId);
   }
 }

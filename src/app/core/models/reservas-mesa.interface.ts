@@ -1,11 +1,14 @@
 export interface ReservasMesa {
   id: number;
-  idCliente: number; // ID reference to Cliente
-  idMesa?: number; // ID reference to Mesa (optional, staff assigns later)
+  idCliente: number;
+  nombreManual?: string;
+  telefonoManual?: string;
+  idMesa?: number;
   fechaReserva: string;
   horaInicio: string;
   horaFin?: string;
   numPersonas: number;
-  estado: string; // 'CONFIRMADA', 'CANCELADA', 'COMPLETADA', 'NO_SHOW'
+  estado: string;
   notas?: string;
+  fechaSolicitud?: string;
 }

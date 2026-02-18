@@ -55,12 +55,14 @@ import { NotificationService } from '../../../core/services/notification.service
           }
 
           <!-- Notification bell -->
-          <a class="action-btn notification-btn" routerLink="/customer/notificaciones">
-            <i class="fa-solid fa-bell"></i>
-            @if (notificationService.unreadCount() > 0) {
-              <span class="badge">{{ notificationService.unreadCount() }}</span>
-            }
-          </a>
+          @if (authService.isAuthenticated()) {
+            <a class="action-btn notification-btn" routerLink="/customer/notificaciones">
+              <i class="fa-solid fa-bell"></i>
+              @if (notificationService.unreadCount() > 0) {
+                <span class="badge">{{ notificationService.unreadCount() }}</span>
+              }
+            </a>
+          }
 
           <!-- User avatar or Login button -->
           @if (authService.isAuthenticated()) {
@@ -816,6 +818,7 @@ export class PublicNavbarComponent {
     { label: 'Eventos', path: '/public/eventos' },
     { label: 'Reservar', path: '/public/reservas' },
     { label: 'Nosotros', path: '/public/nosotros' },
+    { label: 'Contacto', path: '/public/contacto' },
   ];
 
   // ---------- Scroll listener ----------

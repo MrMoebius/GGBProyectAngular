@@ -293,9 +293,9 @@ export class StaffSidebarComponent {
   navItems: NavItem[] = [
     { label: 'Dashboard',       icon: 'fa-gauge-high',    route: '/staff/dashboard' },
     // TPV
+    { label: 'Reservas',         icon: 'fa-calendar-check', route: '/staff/reservas' },
     { label: 'Sesiones Mesa',   icon: 'fa-door-open',     route: '/staff/sesiones-mesa' },
     { label: 'Pagos Mesa',      icon: 'fa-money-bill',    route: '/staff/pagos-mesa' },
-    { label: 'Peticiones Pago', icon: 'fa-credit-card',   route: '/staff/peticiones-pago' },
     { label: 'Facturas',        icon: 'fa-file-invoice',  route: '/staff/facturas' },
     // Catalogo
     { label: 'Productos',       icon: 'fa-utensils',      route: '/staff/productos' },

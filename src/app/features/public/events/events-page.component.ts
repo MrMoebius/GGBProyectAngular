@@ -68,6 +68,9 @@ type EventType = GGBEvent['type'];
             <!-- Card image -->
             <div class="card-image" [style.background-image]="'url(' + eventService.getImageUrl(event.id) + ')'">
               <div class="card-image-overlay"></div>
+              @if (isPastEvent(event)) {
+                <img class="completed-stamp" src="assets/GGBarPhotoSlide/Completed.png" alt="Finalizado" />
+              }
             </div>
             <!-- Type badge -->
             <div class="card-top">
@@ -149,8 +152,8 @@ type EventType = GGBEvent['type'];
 
             <!-- Action button -->
             <div class="card-action">
-              @if (event.status === 'FINALIZADO' || event.status === 'CANCELADO') {
-                <span class="btn btn-ghost btn-sm action-btn" disabled>
+              @if (isPastEvent(event)) {
+                <span class="btn btn-ghost btn-sm action-btn action-disabled">
                   <i class="fa-solid fa-clock-rotate-left"></i>
                   Evento pasado
                 </span>
@@ -345,6 +348,19 @@ type EventType = GGBEvent['type'];
       background: linear-gradient(to bottom, transparent 40%, var(--card-bg, #fff) 100%);
     }
 
+    .completed-stamp {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-15deg);
+      width: 140px;
+      height: auto;
+      z-index: 1;
+      pointer-events: none;
+      opacity: 0.9;
+      filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4));
+    }
+
     .card-top {
       display: flex;
       align-items: center;
@@ -536,6 +552,12 @@ type EventType = GGBEvent['type'];
       width: 100%;
     }
 
+    .action-disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
     /* ── Empty state ── */
     .empty-state {
       grid-column: 1 / -1;
@@ -704,5 +726,12 @@ export class EventsPageComponent implements OnInit {
       month: 'long',
       year: 'numeric'
     });
+  }
+
+  isPastEvent(event: GGBEvent): boolean {
+    if (event.status === 'FINALIZADO' || event.status === 'CANCELADO') return true;
+    const endTime = event.endTime ?? event.time;
+    const eventEnd = new Date(event.date + 'T' + endTime + ':00');
+    return eventEnd < new Date();
   }
 }
