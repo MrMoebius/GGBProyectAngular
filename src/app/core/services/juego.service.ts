@@ -26,6 +26,13 @@ export class JuegoService {
     return this.http.get<Juego>(`${this.apiUrl}/${id}`);
   }
 
+  existsByNombre(nombre: string): Observable<boolean> {
+    const params = new HttpParams().set('nombre', nombre);
+    return this.http.get<{ exists: boolean }>(`${this.apiUrl}/exists`, { params }).pipe(
+      map(res => res.exists)
+    );
+  }
+
   saveJuego(juego: Juego): Observable<Juego> {
     return this.http.post<Juego>(this.apiUrl, juego);
   }
@@ -36,6 +43,10 @@ export class JuegoService {
 
   deleteJuego(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
+
+  copyImagen(targetId: number, sourceId: number): Observable<any> {
+    return this.http.post(`${this.apiUrl}/${targetId}/copy-imagen/${sourceId}`, {});
   }
 
   uploadImagen(id: number, file: File): Observable<any> {

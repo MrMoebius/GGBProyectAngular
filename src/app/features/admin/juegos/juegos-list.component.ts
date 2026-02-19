@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { JuegoService } from '../../../core/services/juego.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { BggAdminService, BggSearchResult } from '../../../core/services/bgg-admin.service';
+import { forkJoin } from 'rxjs';
 import { Juego } from '../../../core/models/juego.interface';
 import { EntityFormModalComponent } from '../../../shared/components/entity-form-modal/entity-form-modal.component';
 import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
@@ -164,11 +166,73 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
         <form [formGroup]="form">
           <div class="form-group">
             <label class="form-label">Nombre *</label>
-            <input type="text" class="form-input" formControlName="nombre" placeholder="Nombre del juego" />
+            <input type="text" class="form-input" formControlName="nombre" placeholder="Nombre del juego" (blur)="checkNombreDuplicado()" />
             @if (form.get('nombre')?.invalid && form.get('nombre')?.touched) {
               <span class="form-error">El nombre es obligatorio</span>
             }
+            @if (nombreDuplicado() && !isEditing()) {
+              <div class="form-warning-row">
+                <span class="form-warning"><i class="fa-solid fa-triangle-exclamation"></i> Ya existe un juego con este nombre.</span>
+                <span class="copies-inline">
+                  Copias a añadir:
+                  <input type="number" class="copies-input" min="1" max="20" [value]="copiasExtra()" (input)="copiasExtra.set(Math.max(1, +$any($event.target).value || 1))" />
+                </span>
+              </div>
+            }
           </div>
+
+          @if (!isEditing()) {
+            <div class="bgg-section">
+              @if (!bggSearchMode()) {
+                <button type="button" class="bgg-trigger" (click)="toggleBggSearch()">
+                  <i class="fa-solid fa-magnifying-glass"></i> Buscar en BGG
+                </button>
+              } @else {
+                <div class="bgg-search-panel">
+                  <div class="bgg-search-header">
+                    <span class="bgg-search-title">BoardGameGeek</span>
+                    <button type="button" class="btn btn-ghost btn-sm" (click)="toggleBggSearch()">
+                      <i class="fa-solid fa-xmark"></i>
+                    </button>
+                  </div>
+                  <div class="bgg-search-input-row">
+                    <input
+                      type="text"
+                      class="form-input"
+                      placeholder="Nombre del juego en BGG..."
+                      [value]="bggSearchTerm()"
+                      (input)="bggSearchTerm.set($any($event.target).value)"
+                      (keydown.enter)="searchBgg(); $event.preventDefault()"
+                    />
+                    <button type="button" class="btn btn-primary btn-sm" (click)="searchBgg()" [disabled]="bggLoading()">
+                      @if (bggLoading()) {
+                        <i class="fa-solid fa-spinner fa-spin"></i>
+                      } @else {
+                        Buscar
+                      }
+                    </button>
+                  </div>
+                  @if (bggLoading()) {
+                    <div class="bgg-loading">
+                      <i class="fa-solid fa-spinner fa-spin"></i> Buscando en BoardGameGeek...
+                    </div>
+                  }
+                  @if (bggResults().length > 0 && !bggLoading()) {
+                    <div class="bgg-results-list">
+                      @for (result of bggResults(); track result.bggId) {
+                        <button type="button" class="bgg-result-item" (click)="selectBggResult(result)" [disabled]="bggDetailLoading()">
+                          <span class="bgg-result-name">{{ result.name }}</span>
+                          @if (result.yearPublished) {
+                            <span class="bgg-result-year">({{ result.yearPublished }})</span>
+                          }
+                        </button>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
 
           <div class="form-row">
             <div class="form-group form-col">
@@ -455,6 +519,41 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       display: block;
     }
 
+    .form-warning-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.375rem;
+    }
+
+    .form-warning {
+      font-size: 0.8rem;
+      color: #f59e0b;
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+    }
+
+    .copies-inline {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.375rem;
+    }
+
+    .copies-input {
+      width: 3.5rem;
+      padding: 0.2rem 0.375rem;
+      font-size: 0.8rem;
+      text-align: center;
+      border: 1px solid var(--card-border, #d1d5db);
+      border-radius: var(--radius-sm, 0.25rem);
+      background: var(--card-bg, #fff);
+      color: var(--text-main);
+    }
+
     .form-checkbox-label {
       display: flex;
       align-items: center;
@@ -470,6 +569,114 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       height: 1rem;
       accent-color: var(--primary-coral);
       cursor: pointer;
+    }
+
+    /* BGG Search Panel */
+    .bgg-section { margin-bottom: 0.25rem; }
+
+    .bgg-trigger {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.375rem 0.75rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--primary-coral);
+      background: none;
+      border: 1px dashed var(--primary-coral);
+      border-radius: var(--radius-md, 0.5rem);
+      cursor: pointer;
+      transition: background-color 0.2s, color 0.2s;
+    }
+
+    .bgg-trigger:hover {
+      background-color: rgba(255, 107, 107, 0.08);
+    }
+
+    :host-context([data-theme="dark"]) .bgg-trigger {
+      color: var(--neon-cyan, #00FFD1);
+      border-color: var(--neon-cyan, #00FFD1);
+    }
+
+    :host-context([data-theme="dark"]) .bgg-trigger:hover {
+      background-color: rgba(0, 255, 209, 0.08);
+    }
+
+    .bgg-search-panel {
+      background: var(--table-row-hover, #f9fafb);
+      border: 1px solid var(--card-border, #e5e7eb);
+      border-radius: var(--radius-md, 0.5rem);
+      padding: 0.75rem;
+    }
+
+    .bgg-search-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+    }
+
+    .bgg-search-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .bgg-search-input-row {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .bgg-search-input-row .form-input { flex: 1; }
+
+    .bgg-loading {
+      padding: 0.75rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .bgg-results-list {
+      max-height: 200px;
+      overflow-y: auto;
+      margin-top: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .bgg-result-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      background: none;
+      border: none;
+      border-radius: var(--radius-sm, 0.25rem);
+      cursor: pointer;
+      text-align: left;
+      width: 100%;
+      font-size: 0.85rem;
+      color: var(--text-main);
+      transition: background-color 0.15s;
+    }
+
+    .bgg-result-item:hover:not(:disabled) {
+      background-color: var(--card-border, #e5e7eb);
+    }
+
+    .bgg-result-item:disabled {
+      opacity: 0.5;
+      cursor: wait;
+    }
+
+    .bgg-result-name { font-weight: 500; }
+
+    .bgg-result-year {
+      color: var(--text-muted);
+      font-size: 0.75rem;
     }
 
     @media (max-width: 768px) {
@@ -501,6 +708,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
 export class JuegosListComponent implements OnInit {
   private juegoService = inject(JuegoService);
   private toastService = inject(ToastService);
+  private bggAdmin = inject(BggAdminService);
   private fb = inject(FormBuilder);
 
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
@@ -515,11 +723,22 @@ export class JuegosListComponent implements OnInit {
   deleteId = signal<number | null>(null);
   uploadTargetId = signal<number | null>(null);
 
-  // Cache-buster para forzar recarga de imagenes tras upload
   imageVersion = signal(0);
   failedImages = signal(new Set<number>());
 
+  bggSearchMode = signal(false);
+  bggSearchTerm = signal('');
+  bggResults = signal<BggSearchResult[]>([]);
+  bggLoading = signal(false);
+  bggDetailLoading = signal(false);
+  bggSelectedId = signal<number | null>(null);
+
+  nombreDuplicado = signal(false);
+  copiasExtra = signal(1);
+  originalId = signal<number | null>(null);
+
   readonly pageSize = 25;
+  protected readonly Math = Math;
 
   filteredJuegos = computed(() => {
     const term = this.searchTerm().toLowerCase();
@@ -615,6 +834,13 @@ export class JuegosListComponent implements OnInit {
   openCreate(): void {
     this.isEditing.set(false);
     this.currentId.set(null);
+    this.bggSearchMode.set(false);
+    this.bggResults.set([]);
+    this.bggSelectedId.set(null);
+    this.bggSearchTerm.set('');
+    this.nombreDuplicado.set(false);
+    this.copiasExtra.set(1);
+    this.originalId.set(null);
     this.form.reset({ activo: true, recomendadoDosJugadores: false });
     this.showFormModal.set(true);
   }
@@ -660,6 +886,91 @@ export class JuegosListComponent implements OnInit {
     });
   }
 
+  toggleBggSearch(): void {
+    this.bggSearchMode.update(v => !v);
+    if (!this.bggSearchMode()) {
+      this.bggResults.set([]);
+      this.bggSearchTerm.set('');
+    }
+  }
+
+  searchBgg(): void {
+    const term = this.bggSearchTerm().trim();
+    if (term.length < 2) return;
+    this.bggLoading.set(true);
+    this.bggResults.set([]);
+    this.bggAdmin.search(term).subscribe({
+      next: (results) => {
+        this.bggResults.set(results);
+        this.bggLoading.set(false);
+      },
+      error: () => {
+        this.toastService.error('Error al buscar en BGG');
+        this.bggLoading.set(false);
+      }
+    });
+  }
+
+  selectBggResult(result: BggSearchResult): void {
+    this.bggDetailLoading.set(true);
+    this.bggAdmin.getDetails(result.bggId).subscribe({
+      next: (details) => {
+        this.form.patchValue({
+          nombre: details.nombre,
+          minJugadores: details.minJugadores,
+          maxJugadores: details.maxJugadores,
+          duracionMediaMin: details.duracionMediaMin,
+          complejidad: details.complejidad || '',
+          genero: details.genero || '',
+          descripcion: details.descripcion || '',
+        });
+        this.bggSelectedId.set(details.bggId);
+        this.bggSearchMode.set(false);
+        this.bggResults.set([]);
+        this.bggDetailLoading.set(false);
+        this.toastService.success('Datos importados de BGG');
+      },
+      error: () => {
+        this.toastService.error('Error al obtener detalles de BGG');
+        this.bggDetailLoading.set(false);
+      }
+    });
+  }
+
+  checkNombreDuplicado(): void {
+    const nombre = this.form.get('nombre')?.value?.trim();
+    if (!nombre || this.isEditing()) {
+      this.nombreDuplicado.set(false);
+      return;
+    }
+    const matches = this.juegos()
+      .filter(j => j.nombre.toLowerCase() === nombre.toLowerCase())
+      .sort((a, b) => a.id - b.id);
+    const original = matches[0];
+    if (original) {
+      this.nombreDuplicado.set(true);
+      this.copiasExtra.set(1);
+      this.originalId.set(original.id);
+      this.form.patchValue({
+        nombre: original.nombre,
+        minJugadores: original.minJugadores,
+        maxJugadores: original.maxJugadores,
+        duracionMediaMin: original.duracionMediaMin ?? null,
+        complejidad: original.complejidad || '',
+        genero: original.genero || '',
+        idioma: original.idioma || '',
+        ubicacion: original.ubicacion || '',
+        recomendadoDosJugadores: original.recomendadoDosJugadores ?? false,
+        activo: original.activo !== false,
+        descripcion: original.descripcion || '',
+        observaciones: original.observaciones || ''
+      });
+    } else {
+      this.nombreDuplicado.set(false);
+      this.originalId.set(null);
+    }
+  }
+
   onSubmit(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -678,14 +989,49 @@ export class JuegosListComponent implements OnInit {
         error: () => this.toastService.error('Error al actualizar el juego')
       });
     } else {
-      this.juegoService.saveJuego(payload).subscribe({
-        next: () => {
-          this.toastService.success('Juego creado correctamente');
-          this.loadJuegos();
-          this.showFormModal.set(false);
-        },
-        error: () => this.toastService.error('Error al crear el juego')
-      });
+      this.executeCreate();
     }
+  }
+
+  executeCreate(): void {
+    const payload = this.form.getRawValue() as any;
+    const total = this.nombreDuplicado() ? this.copiasExtra() : 1;
+    const bggId = this.bggSelectedId();
+    const sourceId = this.originalId();
+    const calls = Array.from({ length: total }, () => this.juegoService.saveJuego(payload));
+    forkJoin(calls).subscribe({
+      next: (results) => {
+        if (total === 1) {
+          this.toastService.success('Juego creado correctamente');
+        } else {
+          this.toastService.success(total + ' copias de "' + payload.nombre + '" añadidas');
+        }
+        if (bggId && results[0]?.id) {
+          this.bggAdmin.importImage(bggId, results[0].id).subscribe({
+            next: () => {
+              this.imageVersion.update(v => v + 1);
+              this.failedImages.update(set => { const s = new Set(set); s.delete(results[0].id); return s; });
+            },
+            error: () => {}
+          });
+        } else if (sourceId) {
+          const imageCalls = results
+            .filter(r => r?.id)
+            .map(r => this.juegoService.copyImagen(r.id, sourceId));
+          if (imageCalls.length > 0) {
+            forkJoin(imageCalls).subscribe({
+              next: () => this.imageVersion.update(v => v + 1),
+              error: () => {}
+            });
+          }
+        }
+        this.bggSelectedId.set(null);
+        this.copiasExtra.set(1);
+        this.originalId.set(null);
+        this.loadJuegos();
+        this.showFormModal.set(false);
+      },
+      error: () => this.toastService.error('Error al crear el juego')
+    });
   }
 }
