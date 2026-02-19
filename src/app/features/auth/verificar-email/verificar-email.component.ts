@@ -133,16 +133,26 @@ import { AuthService } from '../../../core/services/auth.service';
       align-items: center;
       justify-content: center;
       padding: 2rem 1rem;
+      background: var(--content-bg, #F3F4F6);
+    }
+
+    :host-context([data-theme="dark"]) .verificar-page {
       background: linear-gradient(135deg, var(--hero-gradient-start, #0F172A), var(--hero-gradient-end, #1E293B));
     }
 
     .verificar-card {
       width: 100%;
       max-width: 420px;
-      background-color: rgba(30, 41, 59, 0.85);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background-color: var(--card-bg, #FFFFFF);
+      border: 1px solid var(--card-border, #E5E7EB);
       border-radius: var(--radius-lg, 16px);
       padding: 2.5rem 2rem;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    :host-context([data-theme="dark"]) .verificar-card {
+      background-color: rgba(30, 41, 59, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.08);
       box-shadow:
         0 8px 32px rgba(0, 0, 0, 0.4),
         0 0 60px rgba(0, 255, 209, 0.04),
@@ -156,7 +166,7 @@ import { AuthService } from '../../../core/services/auth.service';
 
     .verificar-subtitle {
       text-align: center;
-      color: #fff;
+      color: var(--text-main);
       font-size: 1.1rem;
       font-weight: 700;
       margin: 0.5rem 0 0.25rem;
@@ -181,7 +191,7 @@ import { AuthService } from '../../../core/services/auth.service';
     .form-label {
       font-size: 0.8125rem;
       font-weight: 600;
-      color: var(--text-muted, #94a3b8);
+      color: var(--text-main);
       letter-spacing: 0.02em;
     }
 
@@ -189,9 +199,9 @@ import { AuthService } from '../../../core/services/auth.service';
       width: 100%;
       padding: 0.75rem 1rem;
       font-size: 0.9rem;
-      color: var(--text-white, #fff);
-      background-color: var(--input-bg, rgba(255, 255, 255, 0.06));
-      border: 1px solid var(--input-border, rgba(255, 255, 255, 0.12));
+      color: var(--text-main, #1F2937);
+      background-color: var(--input-bg, #FFFFFF);
+      border: 1px solid var(--input-border, #D1D5DB);
       border-radius: var(--radius-md, 8px);
       outline: none;
       transition: border-color 0.25s, box-shadow 0.25s;
@@ -201,7 +211,12 @@ import { AuthService } from '../../../core/services/auth.service';
     .form-input::placeholder { color: var(--text-muted, #94a3b8); opacity: 0.6; }
 
     .form-input:focus {
-      border-color: var(--input-focus, var(--neon-cyan, #00FFD1));
+      border-color: var(--input-focus);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+    :host-context([data-theme="dark"]) .form-input:focus {
+      border-color: var(--neon-cyan, #00FFD1);
       box-shadow: 0 0 0 3px rgba(0, 255, 209, 0.12);
     }
 
@@ -271,11 +286,12 @@ import { AuthService } from '../../../core/services/auth.service';
       margin-bottom: 1rem;
     }
 
-    .status-icon.success { color: var(--neon-cyan, #00FFD1); }
+    .status-icon.success { color: var(--primary-coral, #FF6B6B); }
+    :host-context([data-theme="dark"]) .status-icon.success { color: var(--neon-cyan, #00FFD1); }
     .status-icon.error { color: var(--danger, #EF4444); }
 
     .status-title {
-      color: #fff;
+      color: var(--text-main);
       font-size: 1.25rem;
       margin: 0 0 0.5rem;
     }
@@ -299,7 +315,8 @@ import { AuthService } from '../../../core/services/auth.service';
       transition: color 0.2s;
     }
 
-    .back-link:hover { color: var(--neon-cyan, #00FFD1); }
+    .back-link:hover { color: var(--primary-coral); }
+    :host-context([data-theme="dark"]) .back-link:hover { color: var(--neon-cyan, #00FFD1); }
     .back-link i { font-size: 0.75rem; transition: transform 0.2s; }
     .back-link:hover i { transform: translateX(-3px); }
 
