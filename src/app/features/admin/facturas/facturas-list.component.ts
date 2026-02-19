@@ -26,78 +26,194 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
         <div class="header-left">
           <h1 class="page-title">Facturas</h1>
           <span class="record-count">{{ filteredFacturas().length }} registros</span>
+          <div class="view-toggle">
+            <button class="toggle-btn" [class.active]="viewMode() === 'list'" (click)="viewMode.set('list')">
+              <i class="fa-solid fa-table-list"></i> Lista
+            </button>
+            <button class="toggle-btn" [class.active]="viewMode() === 'grid'" (click)="viewMode.set('grid')">
+              <i class="fa-solid fa-grid-2"></i> Cuadricula
+            </button>
+          </div>
         </div>
         <input type="text" class="form-input search-input" placeholder="Buscar por numero..."
           [value]="searchTerm()" (input)="searchTerm.set($any($event.target).value)" />
       </div>
 
-      <div class="estado-filters">
-        @for (f of estadoFilters; track f.value) {
-          <button class="filter-pill" [class.active]="estadoFilter() === f.value" (click)="estadoFilter.set(f.value)">{{ f.label }}</button>
-        }
+      <div class="filters-row">
+        <div class="estado-filters">
+          @for (f of estadoFilters; track f.value) {
+            <button class="filter-pill" [class.active]="estadoFilter() === f.value" (click)="estadoFilter.set(f.value)">{{ f.label }}</button>
+          }
+        </div>
+        <label class="group-toggle">
+          <input type="checkbox" [checked]="groupByDay()" (change)="groupByDay.set(!groupByDay())" />
+          Agrupar por dias
+        </label>
       </div>
 
-      <div class="card table-container">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Numero</th>
-              <th>Sesion</th>
-              <th>Cliente</th>
-              <th>Fecha</th>
-              <th>Base 10%</th>
-              <th>IVA 10%</th>
-              <th>Base 21%</th>
-              <th>IVA 21%</th>
-              <th>Total</th>
-              <th>Estado</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (f of filteredFacturas(); track f.id) {
+      <!-- VISTA LISTA -->
+      @if (viewMode() === 'list') {
+        <div class="card table-container">
+          <table class="data-table">
+            <thead>
               <tr>
-                <td class="name-cell">{{ f.numeroFactura }}</td>
-                <td>{{ f.idSesion }}</td>
-                <td>{{ getClienteNombre(f.idCliente) }}</td>
-                <td>{{ formatDate(f.fechaEmision) }}</td>
-                <td class="num-cell">{{ formatCurrency(f.baseImponible10) }}</td>
-                <td class="num-cell">{{ formatCurrency(f.cuotaIva10) }}</td>
-                <td class="num-cell">{{ formatCurrency(f.baseImponible21) }}</td>
-                <td class="num-cell">{{ formatCurrency(f.cuotaIva21) }}</td>
-                <td class="num-cell total-cell">{{ formatCurrency(f.total) }}</td>
-                <td><app-status-badge [status]="f.estado" /></td>
-                <td class="actions-cell">
-                  <button class="btn btn-ghost btn-sm" (click)="printTicket(f)" title="Imprimir ticket">
-                    <i class="fa-solid fa-print"></i>
-                  </button>
-                  <button class="btn btn-ghost btn-sm"
-                    [class.btn-disabled]="!f.idCliente"
-                    [disabled]="!f.idCliente || emailSending()"
-                    (click)="enviarEmail(f)" title="Enviar por email">
-                    <i class="fa-solid fa-envelope"></i>
-                  </button>
-                </td>
+                <th>Numero</th>
+                <th>Sesion</th>
+                <th>Cliente</th>
+                <th>Fecha</th>
+                <th>Base 10%</th>
+                <th>IVA 10%</th>
+                <th>Base 21%</th>
+                <th>IVA 21%</th>
+                <th>Total</th>
+                <th>Estado</th>
+                <th>Acciones</th>
               </tr>
+            </thead>
+            <tbody>
+              @if (groupByDay()) {
+                @for (group of groupedFacturas(); track group.date) {
+                  <tr class="day-row">
+                    <td colspan="11">
+                      <span class="day-label">{{ formatDayHeader(group.date) }}</span>
+                      <span class="day-count">{{ group.items.length }} {{ group.items.length === 1 ? 'factura' : 'facturas' }}</span>
+                      <span class="day-total">{{ formatCurrency(getDayTotal(group.items)) }} EUR</span>
+                    </td>
+                  </tr>
+                  @for (f of group.items; track f.id) {
+                    <ng-container *ngTemplateOutlet="facturaRow; context: { $implicit: f }" />
+                  }
+                }
+              } @else {
+                @for (f of filteredFacturas(); track f.id) {
+                  <ng-container *ngTemplateOutlet="facturaRow; context: { $implicit: f }" />
+                } @empty {
+                  <tr><td colspan="11" class="empty-state"><i class="fa-solid fa-file-invoice empty-icon"></i><p>No se encontraron facturas</p></td></tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <ng-template #facturaRow let-f>
+          <tr>
+            <td class="name-cell">{{ f.numeroFactura }}</td>
+            <td>{{ f.idSesion }}</td>
+            <td>{{ getClienteNombre(f.idCliente) }}</td>
+            <td>{{ formatDate(f.fechaEmision) }}</td>
+            <td class="num-cell">{{ formatCurrency(f.baseImponible10) }}</td>
+            <td class="num-cell">{{ formatCurrency(f.cuotaIva10) }}</td>
+            <td class="num-cell">{{ formatCurrency(f.baseImponible21) }}</td>
+            <td class="num-cell">{{ formatCurrency(f.cuotaIva21) }}</td>
+            <td class="num-cell total-cell">{{ formatCurrency(f.total) }}</td>
+            <td><app-status-badge [status]="f.estado" /></td>
+            <td class="actions-cell">
+              <button class="btn btn-ghost btn-sm" (click)="printTicket(f)" title="Imprimir ticket">
+                <i class="fa-solid fa-print"></i>
+              </button>
+              <button class="btn btn-ghost btn-sm"
+                [class.btn-disabled]="!f.idCliente"
+                [disabled]="!f.idCliente || emailSending()"
+                (click)="enviarEmail(f)" title="Enviar por email">
+                <i class="fa-solid fa-envelope"></i>
+              </button>
+            </td>
+          </tr>
+        </ng-template>
+      }
+
+      <!-- VISTA CUADRICULA -->
+      @if (viewMode() === 'grid') {
+        @if (groupByDay()) {
+          @for (group of groupedFacturas(); track group.date) {
+            <div class="day-header">
+              <span class="day-label">{{ formatDayHeader(group.date) }}</span>
+              <span class="day-count">{{ group.items.length }} {{ group.items.length === 1 ? 'factura' : 'facturas' }}</span>
+              <span class="day-total">{{ formatCurrency(getDayTotal(group.items)) }} EUR</span>
+            </div>
+            <div class="facturas-grid">
+              @for (f of group.items; track f.id) {
+                <div class="factura-card">
+                  <div class="card-top">
+                    <span class="card-numero">{{ f.numeroFactura }}</span>
+                    <app-status-badge [status]="f.estado" />
+                  </div>
+                  <div class="card-body">
+                    <div class="card-row"><span class="card-label">Cliente</span><span>{{ getClienteNombre(f.idCliente) }}</span></div>
+                    <div class="card-row"><span class="card-label">Sesion</span><span>{{ f.idSesion }}</span></div>
+                    <div class="card-row"><span class="card-label">Fecha</span><span>{{ formatDate(f.fechaEmision) }}</span></div>
+                    <div class="card-row"><span class="card-label">Base 10%</span><span>{{ formatCurrency(f.baseImponible10) }}</span></div>
+                    <div class="card-row"><span class="card-label">IVA 10%</span><span>{{ formatCurrency(f.cuotaIva10) }}</span></div>
+                    <div class="card-row"><span class="card-label">Base 21%</span><span>{{ formatCurrency(f.baseImponible21) }}</span></div>
+                    <div class="card-row"><span class="card-label">IVA 21%</span><span>{{ formatCurrency(f.cuotaIva21) }}</span></div>
+                  </div>
+                  <div class="card-bottom">
+                    <span class="card-total">{{ formatCurrency(f.total) }} EUR</span>
+                    <div class="card-actions">
+                      <button class="btn btn-ghost btn-sm" (click)="printTicket(f)" title="Imprimir ticket"><i class="fa-solid fa-print"></i></button>
+                      <button class="btn btn-ghost btn-sm" [class.btn-disabled]="!f.idCliente" [disabled]="!f.idCliente || emailSending()" (click)="enviarEmail(f)" title="Enviar por email"><i class="fa-solid fa-envelope"></i></button>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        } @else {
+          <div class="facturas-grid">
+            @for (f of filteredFacturas(); track f.id) {
+              <div class="factura-card">
+                <div class="card-top">
+                  <span class="card-numero">{{ f.numeroFactura }}</span>
+                  <app-status-badge [status]="f.estado" />
+                </div>
+                <div class="card-body">
+                  <div class="card-row"><span class="card-label">Cliente</span><span>{{ getClienteNombre(f.idCliente) }}</span></div>
+                  <div class="card-row"><span class="card-label">Sesion</span><span>{{ f.idSesion }}</span></div>
+                  <div class="card-row"><span class="card-label">Fecha</span><span>{{ formatDate(f.fechaEmision) }}</span></div>
+                  <div class="card-row"><span class="card-label">Base 10%</span><span>{{ formatCurrency(f.baseImponible10) }}</span></div>
+                  <div class="card-row"><span class="card-label">IVA 10%</span><span>{{ formatCurrency(f.cuotaIva10) }}</span></div>
+                  <div class="card-row"><span class="card-label">Base 21%</span><span>{{ formatCurrency(f.baseImponible21) }}</span></div>
+                  <div class="card-row"><span class="card-label">IVA 21%</span><span>{{ formatCurrency(f.cuotaIva21) }}</span></div>
+                </div>
+                <div class="card-bottom">
+                  <span class="card-total">{{ formatCurrency(f.total) }} EUR</span>
+                  <div class="card-actions">
+                    <button class="btn btn-ghost btn-sm" (click)="printTicket(f)" title="Imprimir ticket"><i class="fa-solid fa-print"></i></button>
+                    <button class="btn btn-ghost btn-sm" [class.btn-disabled]="!f.idCliente" [disabled]="!f.idCliente || emailSending()" (click)="enviarEmail(f)" title="Enviar por email"><i class="fa-solid fa-envelope"></i></button>
+                  </div>
+                </div>
+              </div>
             } @empty {
-              <tr><td colspan="11" class="empty-state"><i class="fa-solid fa-file-invoice empty-icon"></i><p>No se encontraron facturas</p></td></tr>
+              <div class="empty-state-grid"><i class="fa-solid fa-file-invoice empty-icon"></i><p>No se encontraron facturas</p></div>
             }
-          </tbody>
-        </table>
-      </div>
+          </div>
+        }
+      }
     </div>
   `,
   styles: [`
     .page-wrapper { padding: var(--spacing-xl); }
     .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--spacing-lg); flex-wrap: wrap; gap: var(--spacing-md); }
-    .header-left { display: flex; align-items: baseline; gap: var(--spacing-md); }
+    .header-left { display: flex; align-items: center; gap: var(--spacing-md); }
     .page-title { font-size: 1.75rem; font-weight: 700; color: var(--text-main); margin: 0; }
     .record-count { font-size: 0.875rem; color: var(--text-muted); }
     .search-input { width: 260px; }
-    .estado-filters { display: flex; gap: 0.5rem; margin-bottom: var(--spacing-lg); }
+
+    .view-toggle { display: flex; border: 1px solid var(--card-border); border-radius: var(--radius-md); overflow: hidden; }
+    .toggle-btn { padding: 0.375rem 0.75rem; font-size: 0.8rem; font-weight: 600; border: none; background: var(--card-bg); color: var(--text-muted); cursor: pointer; display: flex; align-items: center; gap: 0.375rem; transition: all 0.15s; }
+    .toggle-btn:not(:last-child) { border-right: 1px solid var(--card-border); }
+    .toggle-btn:hover { background: var(--table-row-hover); }
+    .toggle-btn.active { background: var(--primary-coral); color: white; }
+
+    .filters-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--spacing-lg); flex-wrap: wrap; gap: var(--spacing-md); }
+    .estado-filters { display: flex; gap: 0.5rem; }
     .filter-pill { padding: 0.375rem 1rem; border-radius: 9999px; border: 1px solid var(--input-border); background-color: var(--card-bg); color: var(--text-muted); font-size: 0.8125rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
     .filter-pill:hover { border-color: var(--primary-coral); color: var(--primary-coral); }
     .filter-pill.active { background-color: var(--primary-coral); border-color: var(--primary-coral); color: var(--text-white); }
+
+    .group-toggle { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8125rem; color: var(--text-muted); cursor: pointer; user-select: none; }
+    .group-toggle input[type="checkbox"] { width: 1rem; height: 1rem; accent-color: var(--primary-coral); cursor: pointer; }
+
     .table-container { overflow-x: auto; }
     .data-table { width: 100%; border-collapse: collapse; }
     .data-table thead tr { background-color: var(--table-header-bg); }
@@ -109,9 +225,37 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
     .total-cell { font-weight: 700; }
     .actions-cell { display: flex; gap: 0.375rem; white-space: nowrap; }
     .btn-disabled { opacity: 0.3; cursor: not-allowed; }
+
+    .day-row td { background: var(--table-header-bg); padding: 0.5rem 0.625rem !important; border-bottom: 2px solid var(--primary-coral); }
+    .day-header { display: flex; align-items: center; gap: 0.75rem; padding: 0.625rem 0; margin-top: var(--spacing-md); border-bottom: 2px solid var(--primary-coral); }
+    .day-label { font-size: 0.9rem; font-weight: 700; color: var(--text-main); }
+    .day-count { font-size: 0.75rem; color: var(--text-muted); }
+    .day-total { font-size: 0.8rem; font-weight: 600; color: var(--primary-coral); margin-left: auto; }
+
+    .facturas-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; margin-bottom: var(--spacing-md); }
+    .factura-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius-lg, 0.75rem); padding: 1rem; display: flex; flex-direction: column; gap: 0.75rem; transition: box-shadow 0.2s; }
+    .factura-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .card-top { display: flex; align-items: center; justify-content: space-between; }
+    .card-numero { font-size: 0.9rem; font-weight: 700; color: var(--text-main); }
+    .card-body { display: flex; flex-direction: column; gap: 0.25rem; }
+    .card-row { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-main); }
+    .card-label { color: var(--text-muted); }
+    .card-bottom { display: flex; align-items: center; justify-content: space-between; padding-top: 0.5rem; border-top: 1px solid var(--card-border); }
+    .card-total { font-size: 1.1rem; font-weight: 700; color: var(--text-main); }
+    .card-actions { display: flex; gap: 0.375rem; }
+
     .empty-state { text-align: center; padding: 3rem 1rem !important; color: var(--text-muted); }
+    .empty-state-grid { text-align: center; padding: 3rem 1rem; color: var(--text-muted); grid-column: 1 / -1; }
     .empty-icon { font-size: 2rem; margin-bottom: 0.5rem; display: block; opacity: 0.4; }
-    @media (max-width: 768px) { .page-wrapper { padding: var(--spacing-md); } .page-header { flex-direction: column; align-items: flex-start; } .search-input { width: 100%; } }
+
+    @media (max-width: 768px) {
+      .page-wrapper { padding: var(--spacing-md); }
+      .page-header { flex-direction: column; align-items: flex-start; }
+      .header-left { flex-wrap: wrap; }
+      .search-input { width: 100%; }
+      .filters-row { flex-direction: column; align-items: flex-start; }
+      .facturas-grid { grid-template-columns: 1fr; }
+    }
   `]
 })
 export class FacturasListComponent implements OnInit {
@@ -131,6 +275,8 @@ export class FacturasListComponent implements OnInit {
   estadoFilter = signal('');
   isLoading = signal(true);
   emailSending = signal(false);
+  viewMode = signal<'list' | 'grid'>('list');
+  groupByDay = signal(false);
 
   estadoFilters = [
     { label: 'Todas', value: '' },
@@ -146,6 +292,18 @@ export class FacturasListComponent implements OnInit {
     if (estado) list = list.filter(f => f.estado === estado);
     if (term) list = list.filter(f => f.numeroFactura.toLowerCase().includes(term));
     return list.sort((a, b) => new Date(b.fechaEmision).getTime() - new Date(a.fechaEmision).getTime());
+  });
+
+  groupedFacturas = computed(() => {
+    const list = this.filteredFacturas();
+    const map = new Map<string, Factura[]>();
+    for (const f of list) {
+      const day = f.fechaEmision?.substring(0, 10) || 'sin-fecha';
+      const group = map.get(day) || [];
+      group.push(f);
+      map.set(day, group);
+    }
+    return Array.from(map.entries()).map(([date, items]) => ({ date, items }));
   });
 
   ngOnInit(): void {
@@ -178,6 +336,16 @@ export class FacturasListComponent implements OnInit {
     if (!idCliente) return '';
     const c = this.clientes().find(cl => cl.id === idCliente);
     return c?.email || '';
+  }
+
+  getDayTotal(items: Factura[]): number {
+    return items.reduce((sum, f) => sum + (f.total || 0), 0);
+  }
+
+  formatDayHeader(dateStr: string): string {
+    if (!dateStr || dateStr === 'sin-fecha') return 'Sin fecha';
+    const [y, m, d] = dateStr.split('-');
+    return `${d}/${m}/${y}`;
   }
 
   private getTicketLines(f: Factura): { nombre: string; cantidad: number; precio: number; subtotal: number }[] {
