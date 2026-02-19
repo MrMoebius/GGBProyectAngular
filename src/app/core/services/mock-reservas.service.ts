@@ -4,12 +4,7 @@ import { Observable, of, throwError } from 'rxjs';
 import { LocalStorageService } from './local-storage.service';
 import { ReservasMesa } from '../models/reservas-mesa.interface';
 
-const SEED_RESERVAS: ReservasMesa[] = [
-  { id: 1, idCliente: 1, idMesa: 3, fechaReserva: '2026-02-08', horaInicio: '17:00', horaFin: '19:00', numPersonas: 4, estado: 'CONFIRMADA', notas: 'Cumpleanos', fechaSolicitud: '2026-02-05T10:30:00' },
-  { id: 2, idCliente: 2, idMesa: 5, fechaReserva: '2026-02-10', horaInicio: '18:00', horaFin: '20:00', numPersonas: 6, estado: 'CONFIRMADA', fechaSolicitud: '2026-02-07T14:15:00' },
-  { id: 3, idCliente: 1, idMesa: 1, fechaReserva: '2026-01-25', horaInicio: '16:00', horaFin: '18:00', numPersonas: 2, estado: 'COMPLETADA', fechaSolicitud: '2026-01-22T09:00:00' },
-  { id: 4, idCliente: 3, idMesa: 7, fechaReserva: '2026-02-14', horaInicio: '19:00', horaFin: '21:00', numPersonas: 2, estado: 'CONFIRMADA', notas: 'San Valentin', fechaSolicitud: '2026-02-10T11:45:00' },
-];
+const SEED_RESERVAS: ReservasMesa[] = [];
 
 @Injectable({ providedIn: 'root' })
 export class MockReservasService {
