@@ -55,6 +55,11 @@ import { AuthService } from '../../../core/services/auth.service';
             }
           </div>
 
+          <!-- Enlace recuperar contraseña -->
+          <div class="forgot-password">
+            <a class="forgot-link" routerLink="/auth/solicitar-recuperacion">¿Olvidaste tu contraseña?</a>
+          </div>
+
           <!-- Error Message -->
           @if (errorMessage()) {
             <div class="error-banner">
@@ -266,6 +271,27 @@ import { AuthService } from '../../../core/services/auth.service';
     .btn-submit:disabled {
       opacity: 0.5;
       cursor: not-allowed;
+    }
+
+    /* ===== Forgot password ===== */
+    .forgot-password {
+      text-align: right;
+      margin-top: -0.5rem;
+    }
+
+    .forgot-link {
+      font-size: 0.8rem;
+      color: var(--text-muted, #94a3b8);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .forgot-link:hover {
+      color: var(--primary-coral, #FF6B6B);
+    }
+
+    :host-context([data-theme="dark"]) .forgot-link:hover {
+      color: var(--neon-cyan, #00FFD1);
     }
 
     /* ===== Enlace a registro ===== */
