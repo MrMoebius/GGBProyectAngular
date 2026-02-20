@@ -294,6 +294,10 @@ import { NotificationService } from '../../../core/services/notification.service
 
     .nav-link:hover {
       color: var(--text-main);
+      background-color: var(--secondary-bg);
+    }
+
+    :host-context([data-theme="dark"]) .nav-link:hover {
       background-color: rgba(255, 255, 255, 0.06);
     }
 
@@ -360,8 +364,12 @@ import { NotificationService } from '../../../core/services/notification.service
 
     .action-btn:hover {
       color: var(--text-main);
-      background-color: rgba(255, 255, 255, 0.08);
+      background-color: var(--secondary-bg);
       transform: scale(1.08);
+    }
+
+    :host-context([data-theme="dark"]) .action-btn:hover {
+      background-color: rgba(255, 255, 255, 0.08);
     }
 
     .navbar.scrolled .action-btn:hover {
@@ -404,6 +412,7 @@ import { NotificationService } from '../../../core/services/notification.service
       justify-content: center;
       width: 36px;
       height: 36px;
+      border: none;
       border-radius: 50%;
       background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
       color: #0F172A;
@@ -741,41 +750,8 @@ import { NotificationService } from '../../../core/services/notification.service
       margin-left: auto;
     }
 
-    /* ===== Responsive - Tablet ===== */
-    @media (max-width: 1024px) and (min-width: 769px) {
-      .navbar-inner {
-        padding: 0 1rem;
-      }
-
-      .nav-link {
-        padding: 0.4rem 0.65rem;
-        font-size: 0.8rem;
-      }
-
-      .action-btn {
-        width: 36px;
-        height: 36px;
-      }
-
-      .user-avatar {
-        width: 34px;
-        height: 34px;
-        font-size: 0.8rem;
-      }
-
-      .staff-btn {
-        padding: 0.3rem 0.7rem;
-        font-size: 0.75rem;
-      }
-
-      .login-btn {
-        font-size: 0.75rem;
-        padding: 0.35rem 0.75rem;
-      }
-    }
-
-    /* ===== Responsive - Mobile ===== */
-    @media (max-width: 768px) {
+    /* ===== Responsive - Tablet & Mobile (hamburger menu) ===== */
+    @media (max-width: 1024px) {
       .nav-links {
         display: none;
       }
@@ -870,7 +846,7 @@ import { NotificationService } from '../../../core/services/notification.service
       }
     }
 
-    @media (min-width: 769px) {
+    @media (min-width: 1025px) {
       .mobile-menu {
         display: none !important;
       }
