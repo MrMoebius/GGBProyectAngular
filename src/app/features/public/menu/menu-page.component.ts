@@ -948,8 +948,32 @@ interface CategoryTab {
       color: var(--text-main);
     }
 
-    /* === Responsive === */
+    /* === Responsive - Tablet === */
+    @media (max-width: 1024px) {
+      .product-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+      }
+
+      .product-name {
+        font-size: 1.5rem;
+      }
+
+      .product-desc {
+        font-size: 1.05rem;
+      }
+
+      .customizer-modal {
+        max-width: min(480px, 90vw);
+      }
+    }
+
+    /* === Responsive - Mobile === */
     @media (max-width: 768px) {
+      .menu-header {
+        padding: 2rem 1rem 0.75rem;
+      }
+
       .menu-title {
         font-size: 1.75rem;
       }
@@ -958,8 +982,8 @@ interface CategoryTab {
         font-size: 0.95rem;
       }
 
-      .product-grid {
-        grid-template-columns: 1fr;
+      .menu-tabs-wrapper {
+        padding: 1rem 1rem 0;
       }
 
       .menu-tabs {
@@ -973,6 +997,63 @@ interface CategoryTab {
       .tab-pill {
         white-space: nowrap;
         flex-shrink: 0;
+      }
+
+      .menu-search-wrapper {
+        padding: 1rem 1rem 0;
+      }
+
+      .search-bar {
+        max-width: 100%;
+      }
+
+      .menu-grid-wrapper {
+        padding: 1rem;
+      }
+
+      .product-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .product-card {
+        min-height: 140px;
+      }
+
+      .product-name {
+        font-size: 1.25rem;
+      }
+
+      .product-desc {
+        font-size: 0.95rem;
+      }
+
+      .product-icon {
+        width: 38px;
+        height: 38px;
+        min-width: 38px;
+        font-size: 1rem;
+      }
+
+      .product-card-inner {
+        padding: 1rem;
+      }
+
+      .customizer-modal {
+        max-width: 95vw;
+        max-height: 90vh;
+      }
+
+      .customizer-header {
+        padding: 1rem 1.25rem;
+      }
+
+      .customizer-body {
+        padding: 0.75rem 1.25rem;
+      }
+
+      .customizer-footer {
+        padding: 0.75rem 1.25rem;
       }
 
       .floating-cart {
@@ -991,6 +1072,94 @@ interface CategoryTab {
 
       .btn-cart-view {
         flex: 1;
+      }
+    }
+
+    /* === Responsive - Small Phone === */
+    @media (max-width: 480px) {
+      .menu-header {
+        padding: 1.5rem 0.75rem 0.5rem;
+      }
+
+      .menu-title {
+        font-size: 1.5rem;
+      }
+
+      .menu-subtitle {
+        font-size: 0.85rem;
+      }
+
+      .menu-tabs-wrapper {
+        padding: 0.75rem 0.75rem 0;
+      }
+
+      .tab-pill {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.8rem;
+      }
+
+      .menu-search-wrapper {
+        padding: 0.75rem 0.75rem 0;
+      }
+
+      .search-input {
+        font-size: 16px;
+      }
+
+      .menu-grid-wrapper {
+        padding: 0.75rem;
+      }
+
+      .product-name {
+        font-size: 1.1rem;
+      }
+
+      .product-desc {
+        font-size: 0.85rem;
+        -webkit-line-clamp: 1;
+      }
+
+      .product-icon {
+        width: 34px;
+        height: 34px;
+        min-width: 34px;
+        font-size: 0.9rem;
+      }
+
+      .product-card-inner {
+        padding: 0.85rem;
+        gap: 0.75rem;
+      }
+
+      .product-price {
+        font-size: 1rem;
+      }
+
+      .btn-add {
+        padding: 0.35rem 0.7rem;
+        font-size: 0.75rem;
+      }
+
+      .customizer-modal {
+        max-width: 100vw;
+        max-height: 100vh;
+        border-radius: var(--radius-md, 0.5rem);
+      }
+
+      .customizer-title {
+        font-size: 1.1rem;
+      }
+
+      .floating-cart {
+        padding: 0.5rem 0.75rem;
+      }
+
+      .cart-info {
+        font-size: 0.75rem;
+      }
+
+      .cart-total {
+        font-size: 0.875rem;
       }
     }
   `]

@@ -381,11 +381,61 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
 
     @media (max-width: 1024px) {
       .session-body { grid-template-columns: 1fr; }
+      .comandas-list { max-height: none; }
+      .productos-grid { max-height: 400px; }
     }
+
     @media (max-width: 768px) {
       .session-wrapper { padding: var(--spacing-md); }
       .session-header { flex-direction: column; align-items: flex-start; }
+      .header-left { flex-wrap: wrap; gap: 0.5rem; }
+      .header-right { flex-wrap: wrap; }
+      .session-title { font-size: 1.1rem; }
+      .header-detail { font-size: 0.75rem; }
+      .section-title { font-size: 0.9375rem; }
       .productos-grid { grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); }
+      .comanda-card { padding: 0.625rem 0.875rem; }
+      .linea-item { font-size: 0.75rem; }
+      .cart-bar { flex-direction: column; gap: 0.5rem; align-items: stretch; }
+      .cart-actions { justify-content: space-between; }
+      .customizer-modal { max-width: 100%; max-height: 90vh; border-radius: var(--radius-md, 8px); }
+      .form-input { font-size: 16px; }
+    }
+
+    @media (max-width: 480px) {
+      .session-wrapper { padding: var(--spacing-sm, 0.5rem); gap: var(--spacing-md, 1rem); }
+      .session-header { padding: 0.75rem; gap: 0.5rem; }
+      .session-title { font-size: 1rem; }
+      .header-detail { font-size: 0.7rem; }
+      .section-title { font-size: 0.875rem; }
+      .section-title i { font-size: 0.8rem; }
+      .productos-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 0.375rem; }
+      .producto-card { padding: 0.625rem; }
+      .producto-name { font-size: 0.75rem; }
+      .producto-price { font-size: 0.8125rem; }
+      .producto-cat { font-size: 0.625rem; }
+      .comanda-card { padding: 0.5rem 0.75rem; }
+      .comanda-id { font-size: 0.8125rem; }
+      .comanda-total { font-size: 0.8125rem; }
+      .linea-item { font-size: 0.7rem; gap: 0.375rem; }
+      .linea-qty { min-width: 1.75rem; font-size: 0.7rem; }
+      .linea-price { font-size: 0.7rem; }
+      .cart-bar { padding: 0.625rem 0.75rem; }
+      .cart-count { font-size: 0.75rem; }
+      .cart-total { font-size: 0.875rem; }
+      .cart-item { font-size: 0.75rem; padding: 0.3rem 0.4rem; }
+      .filter-pill { padding: 0.2rem 0.5rem; font-size: 0.7rem; }
+      .category-filters { gap: 0.25rem; }
+      .no-session { padding: 2.5rem 1.5rem; }
+      .no-session i { font-size: 2.5rem; }
+      .no-session h2 { font-size: 1.1rem; }
+      .no-session p { font-size: 0.875rem; }
+      .customizer-modal { max-height: 92vh; }
+      .customizer-header { padding: 0.75rem 1rem; }
+      .customizer-title { font-size: 1rem; }
+      .customizer-body { padding: 0.75rem 1rem; }
+      .customizer-footer { padding: 0.625rem 1rem; }
+      .form-input { font-size: 16px; }
     }
   `]
 })

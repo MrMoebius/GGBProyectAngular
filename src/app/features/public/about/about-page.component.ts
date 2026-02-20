@@ -600,54 +600,237 @@ import { RouterModule } from '@angular/router';
       color: #FFFFFF;
     }
 
-    /* Responsive */
-    @media (max-width: 768px) {
-      .hero-title {
-        font-size: 2rem;
+    /* Responsive - Tablet */
+    @media (max-width: 1024px) {
+      .about-hero {
+        padding: 5rem 1.5rem 4rem;
+        min-height: 280px;
       }
-
       .hero-logo {
-        height: 56px;
+        height: 140px;
       }
-
-      .story-grid {
-        grid-template-columns: 1fr;
-        gap: 2rem;
+      .hero-title {
+        font-size: 2.25rem;
       }
-
-      .story-text .section-title {
-        text-align: center;
+      .story-section {
+        padding: 3rem 1.5rem;
       }
-
+      .story-image img {
+        min-height: 260px;
+      }
+      .numbers-section {
+        padding: 3rem 1.5rem;
+      }
       .numbers-grid {
         grid-template-columns: repeat(2, 1fr);
+        gap: 1.25rem;
       }
-
+      .values-section {
+        padding: 3rem 1.5rem;
+      }
       .values-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .offer-grid {
         grid-template-columns: repeat(2, 1fr);
+        gap: 1.25rem;
       }
-
+      .gallery-section {
+        padding: 3rem 1.5rem;
+      }
       .gallery-grid {
         grid-template-columns: repeat(2, 1fr);
+      }
+      .offer-section {
+        padding: 3rem 1.5rem;
+      }
+      .offer-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+      }
+      .social-section {
+        padding: 3rem 1.5rem;
+      }
+      .cta-section {
+        padding: 3rem 1.5rem;
+      }
+      .cta-title {
+        font-size: 1.75rem;
+      }
+      .stat-number {
+        font-size: 2rem;
       }
     }
 
-    @media (max-width: 480px) {
-      .numbers-grid,
-      .offer-grid {
-        grid-template-columns: 1fr;
+    /* Responsive - Mobile */
+    @media (max-width: 768px) {
+      .about-hero {
+        padding: 4rem 1.25rem 3rem;
+        min-height: 240px;
       }
-
+      .hero-logo {
+        height: 100px;
+        margin-bottom: 1rem;
+      }
+      .hero-title {
+        font-size: 2rem;
+      }
+      .hero-subtitle {
+        font-size: 1rem;
+      }
+      .story-section {
+        padding: 2.5rem 1.25rem;
+      }
+      .story-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+      .story-text .section-title {
+        text-align: center;
+      }
+      .story-image img {
+        min-height: 220px;
+      }
+      .numbers-section {
+        padding: 2.5rem 1.25rem;
+      }
+      .numbers-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+      }
+      .stat-card {
+        padding: 1.5rem 0.75rem;
+      }
+      .stat-number {
+        font-size: 1.75rem;
+      }
+      .values-section {
+        padding: 2.5rem 1.25rem;
+      }
+      .values-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+      .value-card {
+        padding: 1.5rem 1.25rem;
+      }
+      .gallery-section {
+        padding: 2.5rem 1.25rem;
+      }
       .gallery-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
       }
+      .offer-section {
+        padding: 2.5rem 1.25rem;
+      }
+      .offer-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+      }
+      .offer-card {
+        padding: 1.5rem 1rem;
+      }
+      .social-section {
+        padding: 2.5rem 1.25rem;
+      }
+      .social-card {
+        padding: 0.85rem 1.25rem;
+      }
+      .cta-section {
+        padding: 2.5rem 1.25rem;
+      }
+      .cta-title {
+        font-size: 1.6rem;
+      }
+      .cta-address {
+        font-size: 0.95rem;
+      }
+    }
 
+    /* Responsive - Small Phone */
+    @media (max-width: 480px) {
+      .about-hero {
+        padding: 3rem 1rem 2.5rem;
+        min-height: 200px;
+      }
+      .hero-logo {
+        height: 72px;
+        margin-bottom: 0.75rem;
+      }
       .hero-title {
         font-size: 1.65rem;
+      }
+      .hero-subtitle {
+        font-size: 0.9rem;
+      }
+      .story-section {
+        padding: 2rem 1rem;
+      }
+      .story-paragraph {
+        font-size: 0.9rem;
+      }
+      .story-image img {
+        min-height: 180px;
+      }
+      .numbers-section {
+        padding: 2rem 1rem;
+      }
+      .numbers-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+      }
+      .stat-number {
+        font-size: 1.5rem;
+      }
+      .values-section {
+        padding: 2rem 1rem;
+      }
+      .value-card {
+        padding: 1.25rem 1rem;
+      }
+      .gallery-section {
+        padding: 2rem 1rem;
+      }
+      .gallery-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+      }
+      .offer-section {
+        padding: 2rem 1rem;
+      }
+      .offer-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+      }
+      .social-section {
+        padding: 2rem 1rem;
+      }
+      .social-grid {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .social-card {
+        width: 100%;
+        max-width: 280px;
+        justify-content: center;
+      }
+      .cta-section {
+        padding: 2rem 1rem;
+      }
+      .cta-title {
+        font-size: 1.4rem;
+      }
+      .cta-actions {
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .cta-button {
+        width: 100%;
+        max-width: 280px;
+        justify-content: center;
+      }
+      input, select, textarea {
+        font-size: 16px;
       }
     }
   `]

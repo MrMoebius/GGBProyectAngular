@@ -270,8 +270,26 @@ import { AuthService } from '../../../core/services/auth.service';
     .back-link i { font-size: 0.75rem; transition: transform 0.2s; }
     .back-link:hover i { transform: translateX(-3px); }
 
+    @media (max-width: 1024px) {
+      .recuperar-page { padding: 1.5rem 1rem; }
+    }
+    @media (max-width: 768px) {
+      .recuperar-page { padding: 1.25rem 0.75rem; }
+      .recuperar-card { max-width: min(420px, 90vw); padding: 2rem 1.5rem; }
+      .form-input { font-size: 16px; padding: 0.7rem 0.875rem; }
+      .btn-submit { padding: 0.75rem 1.25rem; font-size: 0.9rem; }
+      .recuperar-logo-img { height: 50px; }
+    }
     @media (max-width: 480px) {
-      .recuperar-card { padding: 2rem 1.25rem; }
+      .recuperar-page { padding: 1rem 0.5rem; }
+      .recuperar-card { max-width: min(420px, 94vw); padding: 1.5rem 1.25rem; }
+      .recuperar-form { gap: 1rem; }
+      .form-label { font-size: 0.775rem; }
+      .form-input { font-size: 16px; padding: 0.65rem 0.75rem; }
+      .btn-submit { padding: 0.7rem 1rem; font-size: 0.875rem; }
+      .recuperar-logo-img { height: 45px; }
+      .back-link { font-size: 0.8rem; }
+      .error-banner { font-size: 0.8rem; padding: 0.625rem 0.875rem; }
     }
   `]
 })

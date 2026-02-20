@@ -741,7 +741,40 @@ import { NotificationService } from '../../../core/services/notification.service
       margin-left: auto;
     }
 
-    /* ===== Responsive ===== */
+    /* ===== Responsive - Tablet ===== */
+    @media (max-width: 1024px) and (min-width: 769px) {
+      .navbar-inner {
+        padding: 0 1rem;
+      }
+
+      .nav-link {
+        padding: 0.4rem 0.65rem;
+        font-size: 0.8rem;
+      }
+
+      .action-btn {
+        width: 36px;
+        height: 36px;
+      }
+
+      .user-avatar {
+        width: 34px;
+        height: 34px;
+        font-size: 0.8rem;
+      }
+
+      .staff-btn {
+        padding: 0.3rem 0.7rem;
+        font-size: 0.75rem;
+      }
+
+      .login-btn {
+        font-size: 0.75rem;
+        padding: 0.35rem 0.75rem;
+      }
+    }
+
+    /* ===== Responsive - Mobile ===== */
     @media (max-width: 768px) {
       .nav-links {
         display: none;
@@ -766,6 +799,74 @@ import { NotificationService } from '../../../core/services/notification.service
 
       .navbar-inner {
         padding: 0 1rem;
+      }
+
+      .logo-img {
+        height: 36px;
+      }
+
+      .action-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+      }
+
+      .mobile-menu {
+        padding: 0.75rem 1rem 1rem;
+      }
+
+      .mobile-link {
+        padding: 0.65rem 0.85rem;
+        font-size: 0.9rem;
+      }
+
+      .staff-btn {
+        padding: 0.3rem 0.7rem;
+        font-size: 0.75rem;
+      }
+
+      .modal-card {
+        max-width: min(360px, 90vw);
+        padding: 1.5rem;
+      }
+    }
+
+    /* ===== Responsive - Small Phone ===== */
+    @media (max-width: 480px) {
+      .navbar-inner {
+        padding: 0 0.75rem;
+        gap: 0.25rem;
+      }
+
+      .logo-img {
+        height: 32px;
+      }
+
+      .action-btn {
+        width: 34px;
+        height: 34px;
+        font-size: 0.95rem;
+      }
+
+      .nav-actions {
+        gap: 0.25rem;
+      }
+
+      .mobile-link {
+        padding: 0.55rem 0.75rem;
+        font-size: 0.85rem;
+      }
+
+      .modal-card {
+        padding: 1.25rem;
+      }
+
+      .modal-title {
+        font-size: 1rem;
+      }
+
+      .modal-text {
+        font-size: 0.85rem;
       }
     }
 
