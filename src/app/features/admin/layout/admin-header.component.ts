@@ -9,7 +9,7 @@ import { AuthService } from '../../../core/services/auth.service';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <header class="header" [style.margin-left]="collapsed ? 'var(--sidebar-collapsed-width)' : 'var(--sidebar-width)'">
+    <header class="header" [class.sidebar-collapsed]="collapsed">
       <div class="header-left">
         <button class="header-btn" (click)="toggleSidebar.emit()">
           <i class="fa-solid fa-bars"></i>
@@ -41,9 +41,14 @@ import { AuthService } from '../../../core/services/auth.service';
       justify-content: space-between;
       height: 60px;
       padding: 0 1.5rem;
+      margin-left: var(--sidebar-width);
       background-color: var(--header-bg);
       border-bottom: 1px solid var(--header-border);
       transition: margin-left 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    .header.sidebar-collapsed {
+      margin-left: var(--sidebar-collapsed-width);
     }
 
     .header-left {
@@ -123,6 +128,26 @@ import { AuthService } from '../../../core/services/auth.service';
       background-color: rgba(239, 68, 68, 0.1);
       color: var(--danger, #EF4444);
       border-color: var(--danger, #EF4444);
+    }
+
+    @media (max-width: 1024px) {
+      .header, .header.sidebar-collapsed { margin-left: var(--sidebar-collapsed-width); }
+    }
+
+    @media (max-width: 768px) {
+      .header, .header.sidebar-collapsed { margin-left: 56px; padding: 0 1rem; }
+      .header-title { font-size: 1rem; }
+      .user-label { max-width: 120px; }
+    }
+
+    @media (max-width: 480px) {
+      .header, .header.sidebar-collapsed { margin-left: 0; padding: 0 0.75rem; }
+      .header-title { display: none; }
+      .user-label { display: none; }
+      .header-left { gap: 0.5rem; }
+      .header-right { gap: 0.5rem; }
+      .header-btn { width: 34px; height: 34px; font-size: 0.9rem; }
+      .user-badge { padding: 0.25rem 0.5rem; }
     }
   `]
 })

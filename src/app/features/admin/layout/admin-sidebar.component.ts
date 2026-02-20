@@ -13,7 +13,7 @@ interface NavItem {
   standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
-    <aside class="sidebar" [class.collapsed]="collapsed">
+    <aside class="sidebar" [class.collapsed]="collapsed" [class.mobile-open]="mobileOpen">
       <!-- Logo -->
       <div class="sidebar-logo">
         <a routerLink="/admin/dashboard" class="logo-link">
@@ -31,6 +31,7 @@ interface NavItem {
               routerLinkActive="active"
               class="nav-link"
               [title]="collapsed ? item.label : ''"
+              (click)="onNavClick()"
             >
               <i class="fa-solid {{ item.icon }} nav-icon"></i>
               <span class="nav-label" *ngIf="!collapsed">{{ item.label }}</span>
@@ -41,7 +42,7 @@ interface NavItem {
 
       <!-- External link -->
       <div class="sidebar-external">
-        <a routerLink="/public" class="nav-link external-link" [title]="collapsed ? 'Ver Web' : ''">
+        <a routerLink="/public" class="nav-link external-link" [title]="collapsed ? 'Ver Web' : ''" (click)="onNavClick()">
           <i class="fa-solid fa-arrow-up-right-from-square nav-icon"></i>
           <span class="nav-label" *ngIf="!collapsed">Ver Web</span>
         </a>
@@ -313,15 +314,39 @@ interface NavItem {
       .sidebar-footer { padding: 0.5rem 0.25rem; }
     }
 
-    /* Responsive - Small Phone */
+    /* Responsive - Small Phone (overlay drawer) */
     @media (max-width: 480px) {
-      .sidebar { display: none; }
+      .sidebar {
+        width: var(--sidebar-width);
+        transform: translateX(-100%);
+        transition: transform 0.3s ease, width 0.3s ease;
+        z-index: 30;
+      }
+      .sidebar.mobile-open {
+        transform: translateX(0);
+      }
+      /* Reset tablet overrides for full overlay sidebar */
+      .logo-text, .nav-label, .collapse-label { display: inline; }
+      .nav-link { justify-content: flex-start; padding: 0.7rem 1rem; }
+      .nav-icon { font-size: 1rem; }
+      .sidebar-logo { padding: 1.25rem 1rem; display: block; }
+      .logo-link { justify-content: flex-start; }
+      .logo-icon { width: 36px; height: 36px; font-size: 1.125rem; }
+      .sidebar-footer { display: none; }
     }
   `]
 })
 export class AdminSidebarComponent {
   @Input() collapsed = false;
+  @Input() mobileOpen = false;
   @Output() toggleCollapse = new EventEmitter<void>();
+  @Output() closeMobile = new EventEmitter<void>();
+
+  onNavClick(): void {
+    if (window.innerWidth <= 480) {
+      this.closeMobile.emit();
+    }
+  }
 
   navItems: NavItem[] = [
     { label: 'Dashboard',       icon: 'fa-gauge-high',    route: '/admin/dashboard' },
