@@ -290,6 +290,33 @@ interface NavItem {
     .sidebar-nav::-webkit-scrollbar-thumb:hover {
       background: rgba(255, 255, 255, 0.2);
     }
+
+    /* Responsive - Tablet */
+    @media (max-width: 1024px) {
+      .sidebar { width: var(--sidebar-collapsed-width); }
+      .nav-link { justify-content: center; padding: 0.7rem 0; }
+      .nav-icon { margin: 0; font-size: 1.1rem; }
+      .sidebar-logo { padding: 1.25rem 0; display: flex; justify-content: center; }
+      .logo-link { justify-content: center; }
+      .logo-text, .nav-label, .collapse-label { display: none; }
+      .sidebar-footer { padding: 0.75rem 0.5rem; }
+      .collapse-btn { justify-content: center; padding: 0.6rem 0; }
+    }
+
+    /* Responsive - Mobile */
+    @media (max-width: 768px) {
+      .sidebar { width: 56px; }
+      .nav-link { padding: 0.6rem 0; font-size: 0.8125rem; }
+      .nav-icon { font-size: 1rem; }
+      .logo-icon { width: 30px; height: 30px; font-size: 0.9375rem; }
+      .sidebar-logo { padding: 1rem 0; }
+      .sidebar-footer { padding: 0.5rem 0.25rem; }
+    }
+
+    /* Responsive - Small Phone */
+    @media (max-width: 480px) {
+      .sidebar { display: none; }
+    }
   `]
 })
 export class AdminSidebarComponent {

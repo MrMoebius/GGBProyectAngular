@@ -84,8 +84,31 @@ interface ActivityItem {
     .activity-arrow { font-size: 0.625rem; color: var(--text-muted); }
 
     @media (max-width: 1200px) { .stats-grid { grid-template-columns: repeat(3, 1fr); } }
-    @media (max-width: 768px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 480px) { .stats-grid { grid-template-columns: 1fr; } .dashboard-wrapper { padding: var(--spacing-md); } }
+    @media (max-width: 1024px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: var(--spacing-md); }
+      .dashboard-wrapper { padding: var(--spacing-lg); }
+      .dashboard-title { font-size: 1.5rem; }
+    }
+    @media (max-width: 768px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: var(--spacing-sm); }
+      .dashboard-wrapper { padding: var(--spacing-md); }
+      .dashboard-title { font-size: 1.35rem; margin-bottom: var(--spacing-lg); }
+      .activity-title { font-size: 1rem; }
+      .activity-item { padding: 0.75rem 1rem; gap: 0.75rem; }
+      .activity-item-title { font-size: 0.8125rem; }
+      .activity-item-detail { font-size: 0.6875rem; }
+      .activity-icon { width: 28px; height: 28px; min-width: 28px; font-size: 0.75rem; }
+    }
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: 1fr; gap: var(--spacing-sm); }
+      .dashboard-wrapper { padding: var(--spacing-sm); }
+      .dashboard-title { font-size: 1.2rem; margin-bottom: var(--spacing-md); }
+      .activity-item { padding: 0.625rem 0.75rem; gap: 0.5rem; flex-wrap: wrap; }
+      .activity-item-title { font-size: 0.75rem; }
+      .activity-item-detail { font-size: 0.625rem; }
+      .activity-icon { width: 24px; height: 24px; min-width: 24px; font-size: 0.6875rem; }
+      .activity-arrow { display: none; }
+    }
   `]
 })
 export class AdminDashboardComponent implements OnInit {

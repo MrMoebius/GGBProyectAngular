@@ -400,18 +400,94 @@ import { ToastService } from '../../../core/services/toast.service';
       width: 100%;
     }
 
-    /* Responsive */
+    /* Responsive - Tablet */
+    @media (max-width: 1024px) {
+      .contact-hero {
+        padding: 3rem 1.5rem;
+      }
+      .hero-title {
+        font-size: 2.2rem;
+      }
+      .contact-content {
+        padding: 2.5rem 1.5rem;
+      }
+      .contact-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+      }
+    }
+
+    /* Responsive - Mobile */
     @media (max-width: 768px) {
+      .contact-hero {
+        padding: 2.5rem 1.25rem;
+      }
+      .hero-title {
+        font-size: 1.85rem;
+      }
+      .hero-subtitle {
+        font-size: 0.95rem;
+      }
+      .contact-content {
+        padding: 2rem 1.25rem;
+      }
       .contact-grid {
         grid-template-columns: 1fr;
+        gap: 1.75rem;
       }
-
-      .hero-title {
-        font-size: 2rem;
-      }
-
       .contact-form-wrapper {
         padding: 1.5rem;
+      }
+      .form-input,
+      .contact-form input,
+      .contact-form select,
+      .contact-form textarea {
+        font-size: 16px;
+      }
+      .submit-btn {
+        width: 100%;
+        padding: 0.75rem 1.25rem;
+      }
+      .info-card {
+        padding: 1rem;
+        gap: 0.75rem;
+      }
+      .social-link {
+        width: 38px;
+        height: 38px;
+      }
+      .map-container iframe {
+        height: 280px;
+      }
+    }
+
+    /* Responsive - Small Phone */
+    @media (max-width: 480px) {
+      .contact-hero {
+        padding: 2rem 1rem;
+      }
+      .hero-title {
+        font-size: 1.55rem;
+      }
+      .hero-subtitle {
+        font-size: 0.88rem;
+      }
+      .contact-content {
+        padding: 1.5rem 1rem;
+      }
+      .contact-form-wrapper {
+        padding: 1.15rem;
+      }
+      .info-card {
+        padding: 0.85rem;
+        gap: 0.6rem;
+      }
+      .social-link {
+        width: 34px;
+        height: 34px;
+      }
+      .map-container iframe {
+        height: 220px;
       }
     }
   `]

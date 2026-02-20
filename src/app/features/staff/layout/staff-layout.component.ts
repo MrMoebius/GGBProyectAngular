@@ -41,6 +41,16 @@ import { ToastComponent } from '../../../shared/components/toast/toast.component
       transition: margin-left 0.3s ease;
       background-color: var(--content-bg);
     }
+
+    @media (max-width: 1024px) {
+      .staff-content { margin-left: var(--sidebar-collapsed-width) !important; padding: 1.25rem; }
+    }
+    @media (max-width: 768px) {
+      .staff-content { margin-left: 56px !important; padding: 1rem; }
+    }
+    @media (max-width: 480px) {
+      .staff-content { margin-left: 0 !important; padding: 0.75rem; }
+    }
   `]
 })
 export class StaffLayoutComponent {

@@ -1341,77 +1341,89 @@ interface ContactInfo {
     }
 
     /* === Responsive === */
-    @media (max-width: 640px) {
-      .reservations-wizard {
-        padding: 1rem 0.75rem 3rem;
-      }
+    @media (max-width: 1024px) {
+      .reservations-wizard { padding: 2rem 1.5rem 3rem; }
+      .wizard-title { font-size: 1.75rem; }
+      .step-content { padding: 1.5rem 1.25rem; }
+      .games-grid { grid-template-columns: repeat(2, 1fr); }
+    }
 
-      .wizard-title {
-        font-size: 1.5rem;
-      }
-
-      .progress-bar {
-        padding: 0 0.25rem;
-      }
-
-      .step-circle {
-        width: 34px;
-        height: 34px;
-        font-size: 0.8rem;
-      }
-
-      .step-label {
-        font-size: 0.6rem;
-      }
-
-      .step-connector {
-        min-width: 16px;
-      }
-
-      .step-content {
-        padding: 1.25rem 1rem;
-      }
-
-      .step-title {
-        font-size: 1.1rem;
-      }
-
-      .time-slots {
-        gap: 0.375rem;
-      }
-
-      .time-pill {
-        padding: 0.4rem 0.75rem;
-        font-size: 0.8rem;
-      }
-
-      .step-actions {
-        flex-direction: column-reverse;
-        gap: 0.5rem;
-      }
-
+    @media (max-width: 768px) {
+      .reservations-wizard { padding: 1.25rem 0.75rem 3rem; }
+      .wizard-title { font-size: 1.5rem; gap: 0.5rem; }
+      .wizard-subtitle { font-size: 0.9rem; }
+      .progress-bar { padding: 0 0.25rem; margin-bottom: 2rem; }
+      .step-circle { width: 36px; height: 36px; font-size: 0.8rem; }
+      .step-label { font-size: 0.6rem; }
+      .step-connector { min-width: 20px; }
+      .step-content { padding: 1.5rem 1.25rem; }
+      .step-title { font-size: 1.15rem; gap: 0.5rem; margin-bottom: 1.25rem; padding-bottom: 0.75rem; }
+      .form-input { font-size: 16px; padding: 0.65rem 0.85rem; }
+      .form-textarea { font-size: 16px; }
+      .time-slots { gap: 0.4rem; }
+      .time-pill { padding: 0.45rem 0.85rem; font-size: 0.82rem; }
+      .games-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); max-height: 350px; gap: 0.6rem; }
+      .game-card { padding: 0.85rem; }
+      .game-name { font-size: 0.88rem; }
+      .step-actions { flex-direction: column-reverse; gap: 0.5rem; margin-top: 1.5rem; padding-top: 1.25rem; }
       .step-actions .btn-primary,
       .step-actions .btn-secondary,
-      .step-actions .btn-confirm {
-        width: 100%;
-        justify-content: center;
-      }
+      .step-actions .btn-confirm { width: 100%; justify-content: center; }
+      .btn-primary, .btn-secondary, .btn-confirm { padding: 0.65rem 1.25rem; font-size: 0.88rem; }
+      .summary-card { padding: 1rem; }
+      .summary-row { flex-direction: column; align-items: flex-start; gap: 0.15rem; }
+      .game-toggle .toggle-label { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+      .availability-banner { padding: 0.85rem 1rem; font-size: 0.85rem; }
+      .success-title { font-size: 1.35rem; }
+      .success-subtitle { font-size: 0.9rem; }
+      .confirmation-value { font-size: 1.5rem; }
+      .qr-placeholder { width: 150px; height: 150px; }
+      .qr-placeholder i { font-size: 2.5rem; }
+    }
 
-      .games-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .summary-row {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.15rem;
-      }
-
-      .game-toggle .toggle-label {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.75rem;
-      }
+    @media (max-width: 480px) {
+      .reservations-wizard { padding: 1rem 0.5rem 2.5rem; }
+      .wizard-header { margin-bottom: 1.5rem; }
+      .wizard-title { font-size: 1.3rem; gap: 0.4rem; }
+      .wizard-title i { font-size: 0.9em; }
+      .wizard-subtitle { font-size: 0.82rem; }
+      .progress-bar { margin-bottom: 1.5rem; }
+      .step-circle { width: 30px; height: 30px; font-size: 0.7rem; }
+      .step-label { font-size: 0.5rem; }
+      .step-connector { min-width: 12px; margin-bottom: 1.25rem; }
+      .step-content { padding: 1rem 0.85rem; }
+      .step-title { font-size: 1rem; margin-bottom: 1rem; padding-bottom: 0.6rem; }
+      .form-label { font-size: 0.8rem; }
+      .form-input { font-size: 16px; padding: 0.6rem 0.75rem; }
+      .form-section-title { font-size: 1rem; }
+      .size-display { font-size: 1.5rem; min-width: 40px; }
+      .size-btn { width: 38px; height: 38px; }
+      .time-slots { gap: 0.3rem; }
+      .time-pill { padding: 0.35rem 0.65rem; font-size: 0.75rem; }
+      .closed-banner { padding: 0.7rem 0.85rem; font-size: 0.82rem; }
+      .games-grid { grid-template-columns: 1fr; max-height: 300px; }
+      .game-card-meta { gap: 0.4rem; }
+      .game-meta-item { font-size: 0.72rem; }
+      .summary-heading { font-size: 0.9rem; }
+      .summary-label { font-size: 0.82rem; }
+      .summary-value { font-size: 0.85rem; }
+      .toggle-text { font-size: 0.88rem; }
+      .success-container { padding: 0.5rem 0; }
+      .success-icon-wrap { width: 64px; height: 64px; }
+      .success-icon-wrap i { font-size: 2rem; }
+      .success-title { font-size: 1.2rem; }
+      .success-subtitle { font-size: 0.85rem; margin-bottom: 1.5rem; }
+      .confirmation-card { max-width: 100%; }
+      .confirmation-id { padding: 0.85rem; }
+      .confirmation-label { font-size: 0.65rem; }
+      .confirmation-value { font-size: 1.35rem; }
+      .confirmation-details { padding: 1rem; }
+      .confirmation-row { font-size: 0.85rem; }
+      .qr-placeholder { width: 130px; height: 130px; margin-bottom: 1.5rem; }
+      .qr-placeholder i { font-size: 2rem; }
+      .qr-placeholder span { font-size: 0.75rem; }
+      .btn-home { padding: 0.65rem 1.5rem; font-size: 0.85rem; }
+      .field-error { font-size: 0.72rem; }
     }
 
     /* === Availability Banners === */

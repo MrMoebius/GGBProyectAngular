@@ -759,96 +759,94 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       flex-wrap: wrap;
     }
 
-    /* ===== Responsive ===== */
-    @media (max-width: 768px) {
-      .quiz-container {
-        padding: 1.5rem 1rem 3rem;
-      }
-
-      .quiz-title {
-        font-size: 1.5rem;
-      }
-
-      .progress-bar {
-        padding: 0;
-      }
-
-      .step-label {
-        font-size: 0.575rem;
-      }
-
-      .step-circle {
-        width: 34px;
-        height: 34px;
-        font-size: 0.8rem;
-      }
-
-      .progress-line {
-        min-width: 16px;
-      }
-
-      .step-content {
-        padding: 1.5rem 1.25rem 2rem;
-      }
-
-      .step-question {
-        font-size: 1.2rem;
-      }
-
-      .step-hint {
-        padding-left: 0;
-      }
-
-      .options-grid.cols-4 {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .options-grid.cols-3 {
-        grid-template-columns: repeat(1, 1fr);
-      }
-
-      .player-grid {
-        grid-template-columns: repeat(4, 1fr);
-      }
-
-      .option-card {
-        padding: 1.25rem 0.75rem;
-      }
-
-      .results-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .nav-buttons {
-        flex-wrap: wrap;
-      }
-
-      .step-buttons {
-        flex-wrap: wrap;
-      }
+    /* ===== Responsive: Tablet ===== */
+    @media (max-width: 1024px) {
+      .quiz-container { max-width: 760px; padding: 1.75rem 1.25rem 3.5rem; }
+      .quiz-title { font-size: 1.75rem; }
+      .step-content { padding: 1.75rem 1.75rem 2.25rem; }
+      .options-grid.cols-4 { grid-template-columns: repeat(2, 1fr); }
+      .results-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+      .results-title { font-size: 1.75rem; }
     }
 
+    /* ===== Responsive: Mobile ===== */
+    @media (max-width: 768px) {
+      .quiz-container { padding: 1.5rem 1rem 3rem; }
+      .quiz-title { font-size: 1.5rem; }
+      .quiz-subtitle { font-size: 0.9rem; }
+      .header-icon { font-size: 2rem; }
+      .progress-bar { padding: 0; margin-bottom: 2rem; }
+      .step-label { font-size: 0.575rem; }
+      .step-circle { width: 34px; height: 34px; font-size: 0.8rem; }
+      .progress-line { min-width: 16px; }
+      .steps-wrapper { min-height: 280px; }
+      .step-content { padding: 1.5rem 1.25rem 2rem; }
+      .step-question { font-size: 1.2rem; gap: 0.5rem; }
+      .step-hint { padding-left: 0; font-size: 0.85rem; margin-bottom: 1.25rem; }
+      .options-grid.cols-4 { grid-template-columns: repeat(2, 1fr); }
+      .options-grid.cols-3 { grid-template-columns: repeat(1, 1fr); }
+      .option-card { padding: 1.25rem 0.75rem; }
+      .option-icon { font-size: 1.5rem; }
+      .option-title { font-size: 0.9rem; }
+      .option-desc { font-size: 0.7rem; }
+      .player-grid { grid-template-columns: repeat(4, 1fr); gap: 0.6rem; }
+      .player-btn { padding: 1rem 0.4rem; }
+      .player-number { font-size: 1.5rem; }
+      .genres-grid { gap: 0.6rem; }
+      .genre-pill { padding: 0.5rem 1rem; font-size: 0.78rem; }
+      .results-grid { grid-template-columns: 1fr; gap: 1.25rem; }
+      .results-title { font-size: 1.5rem; }
+      .results-subtitle { font-size: 0.9rem; }
+      .results-icon { font-size: 2.5rem; }
+      .nav-buttons { flex-wrap: wrap; }
+      .step-buttons { flex-wrap: wrap; }
+      .nav-btn { padding: 0.65rem 1.25rem; font-size: 0.875rem; }
+      .results-actions { margin-top: 2rem; }
+    }
+
+    /* ===== Responsive: Small Phone ===== */
     @media (max-width: 480px) {
-      .player-grid {
-        grid-template-columns: repeat(3, 1fr);
-      }
-
-      .options-grid.cols-4 {
-        grid-template-columns: 1fr 1fr;
-      }
-
-      .genres-grid {
-        gap: 0.5rem;
-      }
-
-      .genre-pill {
-        padding: 0.5rem 1rem;
-        font-size: 0.75rem;
-      }
-
-      .results-title {
-        font-size: 1.5rem;
-      }
+      .quiz-container { padding: 1.25rem 0.75rem 2.5rem; }
+      .quiz-header { margin-bottom: 2rem; }
+      .header-icon { font-size: 1.75rem; margin-bottom: 0.5rem; }
+      .quiz-title { font-size: 1.3rem; }
+      .quiz-subtitle { font-size: 0.82rem; }
+      .progress-bar { margin-bottom: 1.5rem; }
+      .step-circle { width: 28px; height: 28px; font-size: 0.7rem; }
+      .step-label { display: none; }
+      .progress-line { min-width: 12px; }
+      .steps-wrapper { min-height: 240px; }
+      .step-content { padding: 1.25rem 1rem 1.5rem; }
+      .step-question { font-size: 1.05rem; gap: 0.4rem; }
+      .step-question i { font-size: 1rem; }
+      .step-hint { font-size: 0.8rem; margin-bottom: 1rem; }
+      .player-grid { grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+      .player-btn { padding: 0.85rem 0.35rem; }
+      .player-number { font-size: 1.35rem; }
+      .player-label { font-size: 0.6rem; }
+      .options-grid { gap: 0.75rem; }
+      .options-grid.cols-4 { grid-template-columns: 1fr 1fr; }
+      .options-grid.cols-3 { grid-template-columns: 1fr; }
+      .option-card { padding: 1rem 0.6rem; gap: 0.35rem; }
+      .option-icon { font-size: 1.25rem; }
+      .option-title { font-size: 0.85rem; }
+      .option-desc { font-size: 0.68rem; }
+      .genres-grid { gap: 0.4rem; }
+      .genre-pill { padding: 0.4rem 0.85rem; font-size: 0.72rem; }
+      .nav-buttons { flex-direction: column-reverse; gap: 0.5rem; margin-top: 1.5rem; }
+      .nav-btn { width: 100%; justify-content: center; padding: 0.6rem 1rem; font-size: 0.85rem; }
+      .step-buttons { width: 100%; flex-direction: column; gap: 0.5rem; }
+      .step-buttons .nav-btn { width: 100%; }
+      .results-header { margin-bottom: 2rem; }
+      .results-icon { font-size: 2rem; }
+      .results-title { font-size: 1.25rem; }
+      .results-subtitle { font-size: 0.8rem; }
+      .results-grid { gap: 1rem; }
+      .no-results { padding: 2rem 0.75rem; }
+      .no-results i { font-size: 2.5rem; }
+      .no-results p { font-size: 0.9rem; }
+      .results-actions { flex-direction: column; margin-top: 1.5rem; gap: 0.5rem; }
+      .results-actions .nav-btn { width: 100%; justify-content: center; }
     }
   `]
 })

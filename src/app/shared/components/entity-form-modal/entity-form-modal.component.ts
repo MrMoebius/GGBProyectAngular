@@ -134,6 +134,55 @@ import { CommonModule } from '@angular/common';
         opacity: 1;
       }
     }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 768px) {
+      .modal-card {
+        max-width: 95vw;
+        max-height: 90vh;
+      }
+
+      .modal-header {
+        padding: 1rem 1.25rem;
+      }
+
+      .modal-title {
+        font-size: 1rem;
+      }
+
+      .modal-body {
+        padding: 1rem 1.25rem;
+      }
+
+      .modal-footer {
+        padding: 0.75rem 1.25rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .modal-overlay {
+        padding: 0.5rem;
+      }
+
+      .modal-card {
+        max-width: 100vw;
+        max-height: 95vh;
+        border-radius: var(--radius-md);
+      }
+
+      .modal-header {
+        padding: 0.85rem 1rem;
+      }
+
+      .modal-body {
+        padding: 0.85rem 1rem;
+      }
+
+      .modal-footer {
+        padding: 0.65rem 1rem;
+        gap: 0.5rem;
+      }
+    }
   `]
 })
 export class EntityFormModalComponent {

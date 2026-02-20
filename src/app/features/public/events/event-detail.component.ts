@@ -775,46 +775,57 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
 
     /* ── Responsive ── */
     @media (max-width: 1024px) {
-      .content-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .sidebar {
-        position: static;
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
-      }
-
-      .share-btn {
-        grid-column: 1 / -1;
-      }
+      .content-grid { grid-template-columns: 1fr; }
+      .sidebar { position: static; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+      .share-btn { grid-column: 1 / -1; }
+      .hero-title { font-size: 2rem; }
+      .hero-overlay { padding: 2.5rem 2rem; }
+      .other-events-grid { grid-template-columns: repeat(2, 1fr); }
+      .hero-completed-stamp { width: 150px; height: 150px; }
+      .section-heading { font-size: 1.125rem; }
     }
 
     @media (max-width: 768px) {
-      .detail-page {
-        padding: 1rem;
-      }
+      .detail-page { padding: 1rem; }
+      .back-link { margin-bottom: 1rem; font-size: 0.8125rem; }
+      .hero-overlay { padding: 2rem 1.5rem; }
+      .hero-title { font-size: 1.75rem; }
+      .hero-completed-stamp { width: 120px; height: 120px; }
+      .info-grid { grid-template-columns: 1fr; gap: 0.75rem; }
+      .info-item { padding: 0.75rem; }
+      .info-icon { font-size: 2rem; }
+      .description-text { font-size: 0.875rem; }
+      .cap-ring-wrapper { width: 100px; height: 100px; }
+      .cap-ring-number { font-size: 1.25rem; }
+      .other-events-grid { grid-template-columns: 1fr; }
+      .sidebar { grid-template-columns: 1fr; }
+      .content-grid { gap: 1.5rem; }
+      .section-heading { font-size: 1.125rem; }
+    }
 
-      .hero-overlay {
-        padding: 2rem 1.5rem;
-      }
-
-      .hero-title {
-        font-size: 1.75rem;
-      }
-
-      .info-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .other-events-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .sidebar {
-        grid-template-columns: 1fr;
-      }
+    @media (max-width: 480px) {
+      .detail-page { padding: 0.75rem; }
+      .hero-overlay { padding: 1.5rem 1rem; }
+      .hero-title { font-size: 1.375rem; }
+      .hero-completed-stamp { width: 90px; height: 90px; font-size: 0.5rem; }
+      .type-badge { font-size: 0.7rem; padding: 0.25rem 0.625rem; }
+      .info-grid { gap: 0.5rem; }
+      .info-item { padding: 0.625rem; }
+      .info-icon { font-size: 1.75rem; }
+      .info-label { font-size: 0.625rem; }
+      .info-value { font-size: 0.8125rem; }
+      .section-heading { font-size: 1rem; }
+      .description-text { font-size: 0.8125rem; }
+      .tag-pill { font-size: 0.6875rem; }
+      .other-event-card { padding: 0.75rem; }
+      .other-title { font-size: 0.8125rem; }
+      .capacity-card { padding: 1.25rem; }
+      .cap-ring-wrapper { width: 90px; height: 90px; }
+      .cap-ring-number { font-size: 1.125rem; }
+      .cap-stat-num { font-size: 1rem; }
+      .cap-stats { gap: 0.75rem; }
+      .sub-card { padding: 1.25rem; }
+      .back-link { font-size: 0.75rem; }
     }
   `]
 })

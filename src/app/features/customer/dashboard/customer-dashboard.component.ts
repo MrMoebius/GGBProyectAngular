@@ -1034,27 +1034,70 @@ import { GameCardPublicComponent } from '../../../shared/components/game-card-pu
       }
     }
 
-    @media (max-width: 640px) {
-      .stats-grid {
-        grid-template-columns: 1fr;
-      }
+    @media (max-width: 768px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+      .content-grid { grid-template-columns: 1fr; gap: 1rem; }
+      .recommendations-grid { grid-template-columns: 1fr; }
+      .favorites-grid { grid-template-columns: repeat(2, 1fr); }
+      .welcome-title { font-size: 1.5rem; }
+      .welcome-sub { font-size: 0.825rem; }
+      .welcome-avatar { width: 80px; height: 80px; }
+      .welcome-avatar-initial { font-size: 2rem; }
+      .stat-card { padding: 0.875rem; }
+      .stat-value { font-size: 1.15rem; }
+      .stat-icon { width: 40px; height: 40px; font-size: 1.1rem; }
+      .card-header { padding: 0.75rem 1rem; }
+      .card-body { padding: 0.75rem 1rem; }
+      .section-heading { font-size: 1rem; }
+      .pick-name { font-size: 1.05rem; }
+      .pick-desc { font-size: 0.8rem; }
+      .pick-meta { flex-wrap: wrap; gap: 0.5rem; }
+      .rec-card { padding: 1rem; }
+      .rec-name { font-size: 0.95rem; }
+      .active-session-banner { flex-direction: column; gap: 0.75rem; align-items: flex-start; padding: 0.875rem 1rem; }
+      .session-banner-action { width: 100%; justify-content: center; }
+    }
 
-      .recommendations-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .favorites-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .welcome-title {
-        font-size: 1.35rem;
-      }
-
-      .pick-meta {
-        flex-wrap: wrap;
-        gap: 0.5rem;
-      }
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: 1fr; gap: 0.5rem; }
+      .recommendations-grid { grid-template-columns: 1fr; }
+      .favorites-grid { grid-template-columns: 1fr; }
+      .welcome-section { margin-bottom: 1.25rem; }
+      .welcome-title { font-size: 1.2rem; }
+      .welcome-sub { font-size: 0.8rem; }
+      .welcome-avatar { width: 64px; height: 64px; margin-bottom: 0.75rem; }
+      .welcome-avatar-initial { font-size: 1.6rem; }
+      .stat-card { padding: 0.75rem; gap: 0.75rem; }
+      .stat-value { font-size: 1.1rem; }
+      .stat-label { font-size: 0.7rem; }
+      .stat-icon { width: 36px; height: 36px; font-size: 1rem; }
+      .content-grid { gap: 0.75rem; margin-bottom: 1.25rem; }
+      .card-header { padding: 0.625rem 0.875rem; }
+      .card-title { font-size: 0.875rem; }
+      .card-body { padding: 0.625rem 0.875rem; }
+      .card-action { font-size: 0.75rem; }
+      .section-heading { font-size: 0.95rem; }
+      .game-name { font-size: 0.8125rem; }
+      .game-meta { font-size: 0.7rem; }
+      .game-duration { font-size: 0.75rem; }
+      .res-date { font-size: 0.8rem; }
+      .res-detail { font-size: 0.7rem; }
+      .event-title { font-size: 0.8rem; }
+      .event-date { font-size: 0.7rem; }
+      .pick-card { padding: 0.875rem; }
+      .pick-badge { font-size: 0.65rem; padding: 0.2rem 0.6rem; }
+      .pick-name { font-size: 1rem; }
+      .pick-desc { font-size: 0.775rem; line-height: 1.4; }
+      .pick-meta span { font-size: 0.75rem; }
+      .btn-pick { font-size: 0.8rem; padding: 0.5rem 1rem; width: 100%; justify-content: center; }
+      .rec-card { padding: 0.875rem; }
+      .rec-name { font-size: 0.925rem; }
+      .rec-meta span { font-size: 0.7rem; }
+      .empty-banner { padding: 1rem; font-size: 0.8125rem; }
+      .session-banner-title { font-size: 0.875rem; }
+      .session-banner-sub { font-size: 0.75rem; }
+      .session-banner-icon { font-size: 1.25rem; }
+      .session-banner-action { font-size: 0.75rem; padding: 0.4rem 0.875rem; }
     }
 
     /* Active Session Banner */
@@ -1107,9 +1150,6 @@ import { GameCardPublicComponent } from '../../../shared/components/game-card-pu
       font-size: 0.8125rem;
       font-weight: 700;
       white-space: nowrap;
-    }
-    @media (max-width: 640px) {
-      .active-session-banner { flex-direction: column; gap: 0.75rem; align-items: flex-start; }
     }
   `]
 })

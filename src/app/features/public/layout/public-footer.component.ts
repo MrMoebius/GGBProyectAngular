@@ -435,32 +435,112 @@ import { AuthService } from '../../../core/services/auth.service';
       background-color: rgba(0, 255, 209, 0.08);
     }
 
-    /* ===== Responsive ===== */
+    /* ===== Responsive - Tablet ===== */
     @media (max-width: 1024px) {
       .footer-grid {
         grid-template-columns: 1fr 1fr;
         gap: 2.5rem 2rem;
       }
-    }
 
-    @media (max-width: 640px) {
       .footer-inner {
         padding: 2.5rem 1.25rem 2rem;
+      }
+    }
+
+    /* ===== Responsive - Mobile ===== */
+    @media (max-width: 768px) {
+      .footer-inner {
+        padding: 2rem 1rem 1.5rem;
       }
 
       .footer-grid {
         grid-template-columns: 1fr;
-        gap: 2rem;
+        gap: 1.75rem;
+      }
+
+      .col-title {
+        font-size: 0.95rem;
+        margin-bottom: 1rem;
+      }
+
+      .brand-description {
+        font-size: 0.825rem;
+      }
+
+      .social-link {
+        width: 36px;
+        height: 36px;
+        font-size: 0.95rem;
+      }
+
+      .footer-links a {
+        font-size: 0.85rem;
+      }
+
+      .contact-list li {
+        font-size: 0.825rem;
+        gap: 0.5rem;
+      }
+
+      .hours-line {
+        font-size: 0.8rem;
+      }
+
+      .newsletter-input {
+        font-size: 16px;
+        padding: 0.6rem 0.8rem;
+      }
+
+      .newsletter-btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.825rem;
       }
 
       .footer-bottom-inner {
         flex-direction: column;
         gap: 0.75rem;
         text-align: center;
+        padding: 1rem;
       }
 
-      .newsletter-form {
-        flex-direction: column;
+      .copyright {
+        font-size: 0.75rem;
+      }
+    }
+
+    /* ===== Responsive - Small Phone ===== */
+    @media (max-width: 480px) {
+      .footer-inner {
+        padding: 1.5rem 0.75rem 1.25rem;
+      }
+
+      .footer-grid {
+        gap: 1.5rem;
+      }
+
+      .logo-img {
+        height: 30px;
+      }
+
+      .social-link {
+        width: 34px;
+        height: 34px;
+      }
+
+      .col-title {
+        font-size: 0.9rem;
+      }
+
+      .footer-links a {
+        font-size: 0.8rem;
+      }
+
+      .contact-list li {
+        font-size: 0.8rem;
+      }
+
+      .newsletter-description {
+        font-size: 0.825rem;
       }
     }
   `]

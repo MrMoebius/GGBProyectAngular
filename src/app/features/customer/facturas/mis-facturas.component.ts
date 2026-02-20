@@ -195,11 +195,50 @@ interface FacturaLineDetail {
     .btn-export:hover { border-color: var(--neon-cyan, #00FFD1); color: var(--neon-cyan, #00FFD1); }
     .btn-export i { font-size: 0.875rem; }
 
+    @media (max-width: 1024px) {
+      .facturas-page { max-width: 100%; }
+      .factura-header { padding: 0.875rem 1rem; }
+    }
+
     @media (max-width: 768px) {
       .facturas-grid { grid-template-columns: 1fr; }
       .detail-grid { grid-template-columns: 1fr; }
-      .factura-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+      .factura-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; padding: 0.75rem 1rem; }
       .factura-right { width: 100%; justify-content: space-between; }
+      .page-title { font-size: 1.25rem; }
+      .page-subtitle { font-size: 0.8125rem; }
+      .factura-detail { padding: 0 1rem 1rem; }
+      .productos-section { padding: 0.625rem; }
+      .producto-row { flex-wrap: wrap; gap: 0.25rem; }
+      .tab { padding: 0.4rem 0.75rem; font-size: 0.75rem; }
+    }
+
+    @media (max-width: 480px) {
+      .page-title { font-size: 1.1rem; gap: 0.5rem; }
+      .page-title i { font-size: 0.9rem; }
+      .page-subtitle { font-size: 0.75rem; }
+      .page-header { margin-bottom: 1rem; }
+      .tabs { gap: 0.375rem; margin-bottom: 1rem; }
+      .tab { padding: 0.35rem 0.625rem; font-size: 0.7rem; }
+      .tab-count { min-width: 16px; height: 16px; font-size: 0.6rem; }
+      .factura-header { padding: 0.625rem 0.875rem; }
+      .factura-numero { font-size: 0.8125rem; }
+      .factura-fecha { font-size: 0.7rem; }
+      .factura-total { font-size: 0.875rem; }
+      .factura-estado { font-size: 0.625rem; padding: 0.15rem 0.5rem; }
+      .factura-detail { padding: 0 0.875rem 0.875rem; }
+      .detail-title { font-size: 0.7rem; }
+      .detail-row { font-size: 0.75rem; }
+      .total-row span:last-child { font-size: 0.875rem; }
+      .producto-nombre { font-size: 0.75rem; }
+      .producto-qty { font-size: 0.7rem; }
+      .producto-unit { font-size: 0.65rem; }
+      .producto-subtotal { font-size: 0.75rem; }
+      .btn-export { font-size: 0.75rem; padding: 0.4rem 0.875rem; }
+      .empty-state { padding: 2.5rem 1rem; }
+      .empty-icon { font-size: 2.5rem; }
+      .empty-title { font-size: 1rem; }
+      .empty-subtitle { font-size: 0.8125rem; }
     }
   `]
 })

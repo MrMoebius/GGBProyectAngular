@@ -322,7 +322,12 @@ import { ClienteService } from '../../../core/services/cliente.service';
       padding: 2rem;
     }
 
-    /* ===== Responsive: Mobile horizontal nav ===== */
+    /* ===== Responsive ===== */
+    @media (max-width: 1024px) {
+      .sidebar { width: 220px; padding: 1.25rem 0.75rem; }
+      .customer-content { padding: 1.5rem; }
+    }
+
     @media (max-width: 768px) {
       .customer-layout {
         flex-direction: column;
@@ -387,6 +392,17 @@ import { ClienteService } from '../../../core/services/cliente.service';
       .customer-content {
         padding: 1.25rem 1rem;
       }
+    }
+
+    @media (max-width: 480px) {
+      .sidebar { padding: 0.75rem; gap: 0.5rem; }
+      .user-greeting { padding: 0.5rem; }
+      .user-avatar { width: 36px; height: 36px; }
+      .user-name { font-size: 0.8rem; }
+      .user-email { font-size: 0.7rem; }
+      .sidebar-link { padding: 0.5rem 0.7rem; font-size: 0.75rem; gap: 0.4rem; }
+      .sidebar-nav { gap: 0.125rem; }
+      .customer-content { padding: 1rem 0.75rem; }
     }
   `]
 })
