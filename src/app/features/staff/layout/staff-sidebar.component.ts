@@ -13,7 +13,7 @@ interface NavItem {
   standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
-    <aside class="sidebar" [class.collapsed]="collapsed">
+    <aside class="sidebar" [class.collapsed]="collapsed" [class.mobile-open]="mobileOpen">
       <!-- Logo -->
       <div class="sidebar-logo">
         <a routerLink="/staff/dashboard" class="logo-link">
@@ -285,36 +285,31 @@ interface NavItem {
       background: rgba(255, 255, 255, 0.2);
     }
 
-    /* Responsive - Tablet */
+    /* Responsive - Tablet & Mobile: overlay sidebar */
     @media (max-width: 1024px) {
-      .sidebar { width: var(--sidebar-collapsed-width); }
-      .nav-link { justify-content: center; padding: 0.7rem 0; }
-      .nav-icon { margin: 0; font-size: 1.1rem; }
-      .sidebar-logo { padding: 1.25rem 0; display: flex; justify-content: center; }
-      .logo-link { justify-content: center; }
-      .logo-text, .nav-label, .collapse-label { display: none; }
-      .sidebar-footer { padding: 0.75rem 0.5rem; }
-      .collapse-btn { justify-content: center; padding: 0.6rem 0; }
-    }
-
-    /* Responsive - Mobile */
-    @media (max-width: 768px) {
-      .sidebar { width: 56px; }
-      .nav-link { padding: 0.6rem 0; font-size: 0.8125rem; }
+      .sidebar {
+        width: 280px;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        z-index: 30;
+      }
+      .sidebar.mobile-open {
+        transform: translateX(0);
+      }
+      .nav-link { justify-content: flex-start; padding: 0.7rem 1rem; font-size: 0.875rem; }
       .nav-icon { font-size: 1rem; }
-      .logo-icon { width: 30px; height: 30px; font-size: 0.9375rem; }
-      .sidebar-logo { padding: 1rem 0; }
-      .sidebar-footer { padding: 0.5rem 0.25rem; }
-    }
-
-    /* Responsive - Small Phone */
-    @media (max-width: 480px) {
-      .sidebar { display: none; }
+      .logo-text, .nav-label, .collapse-label { display: inline; }
+      .sidebar-logo { padding: 1.25rem 1rem; display: block; }
+      .logo-link { justify-content: flex-start; }
+      .logo-icon { width: 36px; height: 36px; font-size: 1.125rem; }
+      .sidebar-footer { padding: 0.75rem 1rem; }
+      .collapse-btn { justify-content: flex-start; padding: 0.6rem 0.5rem; }
     }
   `]
 })
 export class StaffSidebarComponent {
   @Input() collapsed = false;
+  @Input() mobileOpen = false;
   @Output() toggleCollapse = new EventEmitter<void>();
 
   navItems: NavItem[] = [
