@@ -21,22 +21,22 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
         </a>
 
         <!-- Hero banner -->
-        <div class="hero-banner" [style.background]="'url(' + eventService.getImageUrl(event()!.id) + ') center/cover no-repeat, ' + getHeroGradient(event()!.type)">
+        <div class="hero-banner" [style.background]="'url(' + eventService.getImageUrl(event()!.id) + ') center/cover no-repeat, ' + getHeroGradient(event()!.tipo)">
           <div class="hero-overlay">
             @if (isPastEvent()) {
               <img class="hero-completed-stamp" src="assets/GGBarPhotoSlide/Completed.png" alt="Completado" />
             }
-            <span class="type-badge" [style.background-color]="getTypeColor(event()!.type)">
-              <i [class]="getTypeIcon(event()!.type)"></i>
-              {{ getTypeLabel(event()!.type) }}
+            <span class="type-badge" [style.background-color]="getTypeColor(event()!.tipo)">
+              <i [class]="getTypeIcon(event()!.tipo)"></i>
+              {{ getTypeLabel(event()!.tipo) }}
             </span>
-            <h1 class="hero-title">{{ event()!.title }}</h1>
-            @if (event()!.status === 'EN_CURSO') {
+            <h1 class="hero-title">{{ event()!.titulo }}</h1>
+            @if (event()!.estado === 'EN_CURSO') {
               <span class="live-indicator">
                 <i class="fa-solid fa-circle fa-beat-fade"></i> En curso ahora
               </span>
             }
-            @if (event()!.status === 'CANCELADO') {
+            @if (event()!.estado === 'CANCELADO') {
               <span class="cancelled-indicator">Evento cancelado</span>
             }
             @if (isPastEvent()) {
@@ -57,28 +57,28 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
                 <div class="info-icon"><i class="fa-regular fa-calendar"></i></div>
                 <div class="info-text">
                   <span class="info-label">Fecha</span>
-                  <span class="info-value">{{ formatDate(event()!.date) }}</span>
+                  <span class="info-value">{{ formatDate(event()!.fecha) }}</span>
                 </div>
               </div>
               <div class="info-item">
                 <div class="info-icon"><i class="fa-regular fa-clock"></i></div>
                 <div class="info-text">
                   <span class="info-label">Horario</span>
-                  <span class="info-value">{{ event()!.time }}{{ event()!.endTime ? ' - ' + event()!.endTime : '' }}</span>
+                  <span class="info-value">{{ event()!.hora }}{{ event()!.horaFin ? ' - ' + event()!.horaFin : '' }}</span>
                 </div>
               </div>
               <div class="info-item">
                 <div class="info-icon"><i class="fa-solid fa-location-dot"></i></div>
                 <div class="info-text">
                   <span class="info-label">Ubicacion</span>
-                  <span class="info-value">{{ event()!.location }}</span>
+                  <span class="info-value">{{ event()!.ubicacion }}</span>
                 </div>
               </div>
               <div class="info-item">
                 <div class="info-icon"><i class="fa-solid fa-users"></i></div>
                 <div class="info-text">
                   <span class="info-label">Capacidad</span>
-                  <span class="info-value">{{ event()!.currentAttendees }} de {{ event()!.capacity }} plazas</span>
+                  <span class="info-value">{{ event()!.inscritos }} de {{ event()!.capacidad }} plazas</span>
                 </div>
               </div>
             </div>
@@ -86,7 +86,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
             <!-- Description -->
             <section class="description-section">
               <h2 class="section-heading">Descripcion del evento</h2>
-              <p class="description-text">{{ event()!.description }}</p>
+              <p class="description-text">{{ event()!.descripcion }}</p>
             </section>
 
             <!-- Tags -->
@@ -108,13 +108,13 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
                 <div class="other-events-grid">
                   @for (other of otherEvents(); track other.id) {
                     <a [routerLink]="['/public/eventos', other.id]" class="other-event-card card">
-                      <span class="other-type-badge" [style.background-color]="getTypeColor(other.type)">
-                        {{ getTypeLabel(other.type) }}
+                      <span class="other-type-badge" [style.background-color]="getTypeColor(other.tipo)">
+                        {{ getTypeLabel(other.tipo) }}
                       </span>
-                      <h4 class="other-title">{{ other.title }}</h4>
+                      <h4 class="other-title">{{ other.titulo }}</h4>
                       <span class="other-date">
                         <i class="fa-regular fa-calendar"></i>
-                        {{ formatDateShort(other.date) }} - {{ other.time }}
+                        {{ formatDateShort(other.fecha) }} - {{ other.hora }}
                       </span>
                     </a>
                   }
@@ -150,18 +150,18 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
               </div>
               <div class="cap-stats">
                 <div class="cap-stat">
-                  <span class="cap-stat-num">{{ event()!.currentAttendees }}</span>
+                  <span class="cap-stat-num">{{ event()!.inscritos }}</span>
                   <span class="cap-stat-label">Inscritos</span>
                 </div>
                 <div class="cap-stat-divider"></div>
                 <div class="cap-stat">
-                  <span class="cap-stat-num">{{ event()!.capacity - event()!.currentAttendees > 0 ? event()!.capacity - event()!.currentAttendees : 0 }}</span>
+                  <span class="cap-stat-num">{{ event()!.capacidad - event()!.inscritos > 0 ? event()!.capacidad - event()!.inscritos : 0 }}</span>
                   <span class="cap-stat-label">Disponibles</span>
                 </div>
-                @if (event()!.waitlistCount > 0) {
+                @if (event()!.listaEspera > 0) {
                   <div class="cap-stat-divider"></div>
                   <div class="cap-stat">
-                    <span class="cap-stat-num cap-waitlist">{{ event()!.waitlistCount }}</span>
+                    <span class="cap-stat-num cap-waitlist">{{ event()!.listaEspera }}</span>
                     <span class="cap-stat-label">En espera</span>
                   </div>
                 }
@@ -187,7 +187,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
               @if (isPastEvent()) {
                 <div class="sub-disabled">
                   <i class="fa-solid fa-ban"></i>
-                  <p>Este evento ya ha {{ event()!.status === 'CANCELADO' ? 'sido cancelado' : 'finalizado' }}.</p>
+                  <p>Este evento ya ha {{ event()!.estado === 'CANCELADO' ? 'sido cancelado' : 'finalizado' }}.</p>
                 </div>
               } @else if (!isAuthenticated()) {
                 <div class="sub-login">
@@ -199,11 +199,11 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
                 </div>
               } @else if (subscription()) {
                 <div class="sub-status">
-                  @if (subscription()!.status === 'CONFIRMED') {
+                  @if (subscription()!.estado === 'CONFIRMADA') {
                     <div class="sub-badge confirmed">
                       <i class="fa-solid fa-circle-check"></i> Inscripcion confirmada
                     </div>
-                  } @else if (subscription()!.status === 'WAITLIST') {
+                  } @else if (subscription()!.estado === 'LISTA_ESPERA') {
                     <div class="sub-badge waitlist">
                       <i class="fa-solid fa-hourglass-half"></i> En lista de espera
                     </div>
@@ -846,8 +846,8 @@ export class EventDetailComponent implements OnInit {
     const current = this.event();
     if (!current) return [];
     return this.allEvents()
-      .filter(e => e.id !== current.id && (e.status === 'PROXIMO' || e.status === 'EN_CURSO'))
-      .sort((a, b) => a.date.localeCompare(b.date))
+      .filter(e => e.id !== current.id && (e.estado === 'PROXIMO' || e.estado === 'EN_CURSO'))
+      .sort((a, b) => a.fecha.localeCompare(b.fecha))
       .slice(0, 3);
   });
 
@@ -887,9 +887,11 @@ export class EventDetailComponent implements OnInit {
         this.loading.set(false);
 
         if (ev && this.authService.isAuthenticated()) {
-          const userId = this.getUserId();
-          this.eventService.getSubscription(ev.id, userId).subscribe({
-            next: (sub) => this.subscription.set(sub ?? null)
+          this.eventService.getMisInscripciones().subscribe({
+            next: (subs) => {
+              const sub = subs.find(s => s.idEvento === ev.id && s.estado !== 'CANCELADA');
+              this.subscription.set(sub ?? null);
+            }
           });
         }
       }
@@ -903,13 +905,12 @@ export class EventDetailComponent implements OnInit {
   subscribeToEvent(): void {
     const ev = this.event();
     if (!ev) return;
-    const userId = this.getUserId();
 
-    this.eventService.subscribe(ev.id, userId).subscribe({
+    this.eventService.inscribirse(ev.id).subscribe({
       next: (sub) => {
         this.subscription.set(sub);
         this.refreshEvent(ev.id);
-        if (sub.status === 'CONFIRMED') {
+        if (sub.estado === 'CONFIRMADA') {
           this.toastService.success('Inscripcion confirmada correctamente');
         } else {
           this.toastService.show('Te has unido a la lista de espera', 'info');
@@ -922,9 +923,8 @@ export class EventDetailComponent implements OnInit {
   cancelSubscription(): void {
     const ev = this.event();
     if (!ev) return;
-    const userId = this.getUserId();
 
-    this.eventService.unsubscribe(ev.id, userId).subscribe({
+    this.eventService.desinscribirse(ev.id).subscribe({
       next: () => {
         this.subscription.set(null);
         this.refreshEvent(ev.id);
@@ -946,9 +946,9 @@ export class EventDetailComponent implements OnInit {
   isPastEvent(): boolean {
     const ev = this.event();
     if (!ev) return false;
-    if (ev.status === 'FINALIZADO' || ev.status === 'CANCELADO') return true;
-    const endTime = ev.endTime ?? ev.time;
-    const eventEnd = new Date(ev.date + 'T' + endTime + ':00');
+    if (ev.estado === 'FINALIZADO' || ev.estado === 'CANCELADO') return true;
+    const endTime = ev.horaFin ?? ev.hora;
+    const eventEnd = new Date(ev.fecha + 'T' + endTime + ':00');
     return eventEnd < new Date();
   }
 
@@ -970,8 +970,8 @@ export class EventDetailComponent implements OnInit {
 
   getCapacityPercent(): number {
     const ev = this.event();
-    if (!ev || ev.capacity === 0) return 0;
-    return Math.min(100, Math.round((ev.currentAttendees / ev.capacity) * 100));
+    if (!ev || ev.capacidad === 0) return 0;
+    return Math.min(100, Math.round((ev.inscritos / ev.capacidad) * 100));
   }
 
   getCapacityColor(): string {
@@ -997,11 +997,6 @@ export class EventDetailComponent implements OnInit {
       day: 'numeric',
       month: 'short'
     });
-  }
-
-  private getUserId(): string {
-    const user = this.authService.currentUser();
-    return (user as any)?.email ?? 'anonymous';
   }
 
   private refreshEvent(id: number): void {

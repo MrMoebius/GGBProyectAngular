@@ -59,21 +59,21 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
             @for (evento of filteredEventos(); track evento.id) {
               <tr>
                 <td>{{ evento.id }}</td>
-                <td class="title-cell">{{ evento.title }}</td>
+                <td class="title-cell">{{ evento.titulo }}</td>
                 <td>
-                  <span class="type-badge" [style.background-color]="getTypeColor(evento.type)">
-                    {{ getTypeLabel(evento.type) }}
+                  <span class="type-badge" [style.background-color]="getTypeColor(evento.tipo)">
+                    {{ getTypeLabel(evento.tipo) }}
                   </span>
                 </td>
-                <td>{{ evento.date }}</td>
-                <td>{{ evento.time }}{{ evento.endTime ? ' - ' + evento.endTime : '' }}</td>
+                <td>{{ evento.fecha }}</td>
+                <td>{{ evento.hora }}{{ evento.horaFin ? ' - ' + evento.horaFin : '' }}</td>
                 <td>
                   <span class="capacity-cell">
-                    {{ evento.currentAttendees }}/{{ evento.capacity }}
+                    {{ evento.inscritos }}/{{ evento.capacidad }}
                   </span>
                 </td>
                 <td>
-                  <app-status-badge [status]="evento.status" />
+                  <app-status-badge [status]="evento.estado" />
                 </td>
                 <td class="actions-cell">
                   <button class="btn btn-ghost btn-sm" (click)="openEdit(evento)">
@@ -108,16 +108,16 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
         <form [formGroup]="eventoForm">
           <div class="form-group">
             <label class="form-label">Titulo</label>
-            <input type="text" class="form-input" formControlName="title" placeholder="Titulo del evento" />
-            @if (eventoForm.get('title')?.invalid && eventoForm.get('title')?.touched) {
+            <input type="text" class="form-input" formControlName="titulo" placeholder="Titulo del evento" />
+            @if (eventoForm.get('titulo')?.invalid && eventoForm.get('titulo')?.touched) {
               <span class="form-error">El titulo es obligatorio</span>
             }
           </div>
 
           <div class="form-group">
             <label class="form-label">Descripcion</label>
-            <textarea class="form-input" formControlName="description" placeholder="Descripcion del evento" rows="4"></textarea>
-            @if (eventoForm.get('description')?.invalid && eventoForm.get('description')?.touched) {
+            <textarea class="form-input" formControlName="descripcion" placeholder="Descripcion del evento" rows="4"></textarea>
+            @if (eventoForm.get('descripcion')?.invalid && eventoForm.get('descripcion')?.touched) {
               <span class="form-error">La descripcion es obligatoria</span>
             }
           </div>
@@ -125,15 +125,15 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
           <div class="form-row">
             <div class="form-group">
               <label class="form-label">Fecha</label>
-              <input type="date" class="form-input" formControlName="date" />
-              @if (eventoForm.get('date')?.invalid && eventoForm.get('date')?.touched) {
+              <input type="date" class="form-input" formControlName="fecha" />
+              @if (eventoForm.get('fecha')?.invalid && eventoForm.get('fecha')?.touched) {
                 <span class="form-error">La fecha es obligatoria</span>
               }
             </div>
             <div class="form-group">
               <label class="form-label">Hora inicio</label>
-              <input type="time" class="form-input" formControlName="time" />
-              @if (eventoForm.get('time')?.invalid && eventoForm.get('time')?.touched) {
+              <input type="time" class="form-input" formControlName="hora" />
+              @if (eventoForm.get('hora')?.invalid && eventoForm.get('hora')?.touched) {
                 <span class="form-error">La hora es obligatoria</span>
               }
             </div>
@@ -142,12 +142,12 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
           <div class="form-row">
             <div class="form-group">
               <label class="form-label">Hora fin</label>
-              <input type="time" class="form-input" formControlName="endTime" />
+              <input type="time" class="form-input" formControlName="horaFin" />
             </div>
             <div class="form-group">
               <label class="form-label">Ubicacion</label>
-              <input type="text" class="form-input" formControlName="location" placeholder="Sala Principal" />
-              @if (eventoForm.get('location')?.invalid && eventoForm.get('location')?.touched) {
+              <input type="text" class="form-input" formControlName="ubicacion" placeholder="Sala Principal" />
+              @if (eventoForm.get('ubicacion')?.invalid && eventoForm.get('ubicacion')?.touched) {
                 <span class="form-error">La ubicacion es obligatoria</span>
               }
             </div>
@@ -156,14 +156,14 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
           <div class="form-row">
             <div class="form-group">
               <label class="form-label">Capacidad</label>
-              <input type="number" class="form-input" formControlName="capacity" placeholder="0" min="1" />
-              @if (eventoForm.get('capacity')?.invalid && eventoForm.get('capacity')?.touched) {
+              <input type="number" class="form-input" formControlName="capacidad" placeholder="0" min="1" />
+              @if (eventoForm.get('capacidad')?.invalid && eventoForm.get('capacidad')?.touched) {
                 <span class="form-error">Minimo 1</span>
               }
             </div>
             <div class="form-group">
               <label class="form-label">Tipo</label>
-              <select class="form-input" formControlName="type">
+              <select class="form-input" formControlName="tipo">
                 <option value="TORNEO">Torneo</option>
                 <option value="NOCHE_TEMATICA">Noche Tematica</option>
                 <option value="TALLER">Taller</option>
@@ -175,7 +175,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
           <div class="form-row">
             <div class="form-group">
               <label class="form-label">Estado</label>
-              <select class="form-input" formControlName="status">
+              <select class="form-input" formControlName="estado">
                 <option value="PROXIMO">Proximo</option>
                 <option value="EN_CURSO">En Curso</option>
                 <option value="FINALIZADO">Finalizado</option>
@@ -429,22 +429,22 @@ export class EventosListComponent implements OnInit {
     const term = this.searchTerm().toLowerCase();
     if (!term) return this.eventos();
     return this.eventos().filter(e =>
-      e.title.toLowerCase().includes(term) ||
-      e.type.toLowerCase().includes(term) ||
-      this.getTypeLabel(e.type).toLowerCase().includes(term)
+      e.titulo.toLowerCase().includes(term) ||
+      e.tipo.toLowerCase().includes(term) ||
+      this.getTypeLabel(e.tipo).toLowerCase().includes(term)
     );
   });
 
   eventoForm = this.fb.group({
-    title: ['', Validators.required],
-    description: ['', Validators.required],
-    date: ['', Validators.required],
-    time: ['', Validators.required],
-    endTime: [''],
-    location: ['', Validators.required],
-    capacity: [1, [Validators.required, Validators.min(1)]],
-    type: ['TORNEO' as GGBEvent['type']],
-    status: ['PROXIMO' as GGBEvent['status']],
+    titulo: ['', Validators.required],
+    descripcion: ['', Validators.required],
+    fecha: ['', Validators.required],
+    hora: ['', Validators.required],
+    horaFin: [''],
+    ubicacion: ['', Validators.required],
+    capacidad: [1, [Validators.required, Validators.min(1)]],
+    tipo: ['TORNEO' as GGBEvent['tipo']],
+    estado: ['PROXIMO' as GGBEvent['estado']],
     tags: ['']
   });
 
@@ -488,15 +488,15 @@ export class EventosListComponent implements OnInit {
     this.imageFile.set(null);
     this.imagePreview.set(null);
     this.eventoForm.reset({
-      title: '',
-      description: '',
-      date: '',
-      time: '',
-      endTime: '',
-      location: '',
-      capacity: 1,
-      type: 'TORNEO',
-      status: 'PROXIMO',
+      titulo: '',
+      descripcion: '',
+      fecha: '',
+      hora: '',
+      horaFin: '',
+      ubicacion: '',
+      capacidad: 1,
+      tipo: 'TORNEO',
+      estado: 'PROXIMO',
       tags: ''
     });
     this.showFormModal.set(true);
@@ -508,15 +508,15 @@ export class EventosListComponent implements OnInit {
     this.imageFile.set(null);
     this.imagePreview.set(this.eventService.getImageUrl(evento.id));
     this.eventoForm.patchValue({
-      title: evento.title,
-      description: evento.description,
-      date: evento.date,
-      time: evento.time,
-      endTime: evento.endTime ?? '',
-      location: evento.location,
-      capacity: evento.capacity,
-      type: evento.type,
-      status: evento.status,
+      titulo: evento.titulo,
+      descripcion: evento.descripcion,
+      fecha: evento.fecha,
+      hora: evento.hora,
+      horaFin: evento.horaFin ?? '',
+      ubicacion: evento.ubicacion,
+      capacidad: evento.capacidad,
+      tipo: evento.tipo,
+      estado: evento.estado,
       tags: evento.tags.join(', ')
     });
     this.showFormModal.set(true);
@@ -554,15 +554,15 @@ export class EventosListComponent implements OnInit {
     const tags = tagsString ? tagsString.split(',').map((t: string) => t.trim()).filter((t: string) => t.length > 0) : [];
 
     const payload: Partial<GGBEvent> = {
-      title: raw.title ?? '',
-      description: raw.description ?? '',
-      date: raw.date ?? '',
-      time: raw.time ?? '',
-      endTime: raw.endTime || undefined,
-      location: raw.location ?? '',
-      capacity: raw.capacity ?? 1,
-      type: (raw.type as GGBEvent['type']) ?? 'TORNEO',
-      status: (raw.status as GGBEvent['status']) ?? 'PROXIMO',
+      titulo: raw.titulo ?? '',
+      descripcion: raw.descripcion ?? '',
+      fecha: raw.fecha ?? '',
+      hora: raw.hora ?? '',
+      horaFin: raw.horaFin || undefined,
+      ubicacion: raw.ubicacion ?? '',
+      capacidad: raw.capacidad ?? 1,
+      tipo: (raw.tipo as GGBEvent['tipo']) ?? 'TORNEO',
+      estado: (raw.estado as GGBEvent['estado']) ?? 'PROXIMO',
       tags
     };
 

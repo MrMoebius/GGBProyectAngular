@@ -1526,7 +1526,14 @@ export class ReservationsPageComponent {
         slots.push(`${h.toString().padStart(2, '0')}:30`);
       }
     }
-    return slots;
+    const isToday = dateStr === this.todayStr;
+    if (!isToday) return slots;
+    const now = new Date();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    return slots.filter(slot => {
+      const [hh, mm] = slot.split(':').map(Number);
+      return hh * 60 + mm > currentMinutes;
+    });
   });
 
   // Step 1 signals
@@ -1703,7 +1710,6 @@ export class ReservationsPageComponent {
 
     const fechaHoraInicio = ReservasMesaService.toInstant(this.selectedDate(), this.selectedTime());
 
-    // Calcular hora fin = inicio + 2 horas
     const [h, m] = this.selectedTime().split(':').map(Number);
     const horaFin = `${String(h + 2).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
     const fechaHoraFin = ReservasMesaService.toInstant(this.selectedDate(), horaFin);

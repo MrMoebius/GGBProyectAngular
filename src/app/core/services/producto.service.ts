@@ -26,7 +26,7 @@ export class ProductoService {
     return this.api.put<Producto>(`${this.endpoint}/${id}`, producto);
   }
 
-  delete(id: number): Observable<void> {
-    return this.api.delete<void>(`${this.endpoint}/${id}`);
+  delete(id: number): Observable<any> {
+    return this.api.delete<any>(`${this.endpoint}/${id}`);
   }
 }
