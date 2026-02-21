@@ -421,6 +421,68 @@ const DEFAULT_GENRE: GenreConfig = {
     .details-btn:hover i {
       transform: translateX(3px);
     }
+
+    /* ===== Responsive ===== */
+    @media (max-width: 768px) {
+      .card-image {
+        height: 150px;
+      }
+
+      .card-content {
+        padding: 0.85rem 1rem;
+        gap: 0.5rem;
+      }
+
+      .card-title {
+        font-size: 1rem;
+      }
+
+      .card-footer {
+        padding: 0.625rem 1rem;
+      }
+
+      .details-btn {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.8125rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .card-image {
+        height: 130px;
+      }
+
+      .card-content {
+        padding: 0.75rem 0.85rem;
+        gap: 0.4rem;
+      }
+
+      .card-title {
+        font-size: 0.925rem;
+      }
+
+      .genre-pill {
+        font-size: 0.575rem;
+        padding: 0.1rem 0.4rem;
+      }
+
+      .info-item {
+        font-size: 0.75rem;
+      }
+
+      .stars {
+        font-size: 0.75rem;
+      }
+
+      .card-footer {
+        padding: 0.5rem 0.85rem;
+      }
+
+      .details-btn {
+        padding: 0.35rem 0.65rem;
+        font-size: 0.75rem;
+      }
+    }
   `]
 })
 export class GameCardPublicComponent {

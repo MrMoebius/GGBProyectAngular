@@ -5,4 +5,5 @@ export interface Producto {
   precio: number;
   categoria: 'COMIDA' | 'BEBIDA' | 'ALCOHOL' | 'POSTRE' | 'SERVICIO';
   activo: boolean;
+  tipoIva: number;
 }

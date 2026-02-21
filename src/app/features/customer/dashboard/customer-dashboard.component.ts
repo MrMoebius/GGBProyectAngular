@@ -3,21 +3,25 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
 import { ClienteService } from '../../../core/services/cliente.service';
 import { GameHistoryService } from '../../../core/services/game-history.service';
-import { ReservasMesaService } from '../../../core/services/reservas-mesa.service';
+import { MockReservasService } from '../../../core/services/mock-reservas.service';
 import { EventService } from '../../../core/services/event.service';
 import { RecommendationService } from '../../../core/services/recommendation.service';
 import { FavoritesService } from '../../../core/services/favorites.service';
+import { SesionMesaService } from '../../../core/services/sesion-mesa.service';
+import { JuegoService } from '../../../core/services/juego.service';
+import { SesionMesa } from '../../../core/models/sesion-mesa.interface';
 import { RouterModule } from '@angular/router';
 import { GameSession } from '../../../core/models/game-session.interface';
 import { ReservasMesa } from '../../../core/models/reservas-mesa.interface';
 import { EventSubscription, GGBEvent } from '../../../core/models/evento.interface';
 import { JuegoExtended } from '../../../core/models/juego-extended.interface';
 import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer-loader.component';
+import { GameCardPublicComponent } from '../../../shared/components/game-card-public/game-card-public.component';
 
 @Component({
   selector: 'app-customer-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterModule, BeerLoaderComponent],
+  imports: [CommonModule, RouterModule, BeerLoaderComponent, GameCardPublicComponent],
   template: `
     <app-beer-loader [isLoading]="isLoading()" />
     <div class="dashboard">
@@ -38,9 +42,25 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
         <p class="welcome-sub">Aqui tienes un resumen de tu actividad en Giber Games Bar</p>
       </div>
 
+      <!-- Sesion Activa Banner -->
+      @if (sesionActiva()) {
+        <a class="active-session-banner" routerLink="/customer/mi-sesion">
+          <div class="session-banner-left">
+            <i class="fa-solid fa-utensils session-banner-icon"></i>
+            <div>
+              <h3 class="session-banner-title">Sesion Activa - Mesa {{ sesionActiva()!.idMesa }}</h3>
+              <p class="session-banner-sub">{{ sesionActiva()!.numComensales }} comensales</p>
+            </div>
+          </div>
+          <span class="session-banner-action">
+            <i class="fa-solid fa-receipt"></i> Gestionar Pedidos
+          </span>
+        </a>
+      }
+
       <!-- Stats cards -->
       <div class="stats-grid">
-        <div class="stat-card">
+        <a class="stat-card clickable" routerLink="/customer/historial">
           <div class="stat-icon icon-games">
             <i class="fa-solid fa-dice"></i>
           </div>
@@ -48,8 +68,8 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
             <span class="stat-value">{{ stats().totalGames }}</span>
             <span class="stat-label">Partidas jugadas</span>
           </div>
-        </div>
-        <div class="stat-card">
+        </a>
+        <a class="stat-card clickable" routerLink="/customer/historial">
           <div class="stat-icon icon-hours">
             <i class="fa-solid fa-clock"></i>
           </div>
@@ -57,8 +77,8 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
             <span class="stat-value">{{ stats().totalHours }}h</span>
             <span class="stat-label">Horas totales</span>
           </div>
-        </div>
-        <div class="stat-card">
+        </a>
+        <a class="stat-card clickable" routerLink="/public/juegos">
           <div class="stat-icon icon-genre">
             <i class="fa-solid fa-trophy"></i>
           </div>
@@ -66,8 +86,8 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
             <span class="stat-value">{{ stats().favoriteGenre }}</span>
             <span class="stat-label">Genero favorito</span>
           </div>
-        </div>
-        <div class="stat-card">
+        </a>
+        <a class="stat-card clickable" routerLink="/customer/historial">
           <div class="stat-icon icon-unique">
             <i class="fa-solid fa-gamepad"></i>
           </div>
@@ -75,7 +95,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
             <span class="stat-value">{{ stats().uniqueGames }}</span>
             <span class="stat-label">Juegos distintos</span>
           </div>
-        </div>
+        </a>
       </div>
 
       <!-- Content grid -->
@@ -118,23 +138,25 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
             <a class="card-action" routerLink="/customer/reservas">Ver todo</a>
           </div>
           <div class="card-body">
-            @if (activeReservations().length === 0) {
+            @if (futureReservations().length === 0) {
               <p class="empty-text">No tienes reservas activas.</p>
             } @else {
               <ul class="reservation-list">
-                @for (res of activeReservations(); track res.id) {
+                @for (res of futureReservations(); track res.id) {
                   <li class="reservation-item">
                     <div class="res-icon">
                       <i class="fa-solid fa-calendar"></i>
                     </div>
                     <div class="res-info">
-                      <span class="res-date">{{ formatDate(res.fechaHoraInicio) }} a las {{ formatTime(res.fechaHoraInicio) }}</span>
+                      <span class="res-date">{{ res.fechaReserva }} a las {{ res.horaInicio }}</span>
                       <span class="res-detail">Mesa {{ res.idMesa }} &middot; {{ res.numPersonas }} personas</span>
                       @if (res.notas) {
                         <span class="res-notes">{{ res.notas }}</span>
                       }
                     </div>
-                    <span class="status-badge badge-confirmed">Confirmada</span>
+                    <button class="btn-cancel-res" (click)="cancelReserva(res.id, $event)" title="Cancelar reserva">
+                      <i class="fa-solid fa-xmark"></i>
+                    </button>
                   </li>
                 }
               </ul>
@@ -147,30 +169,46 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
           <div class="card-header">
             <h2 class="card-title">
               <i class="fa-solid fa-ticket"></i>
-              Proximos eventos inscritos
+              Tus proximos eventos
             </h2>
             <a class="card-action" routerLink="/public/eventos">Ver eventos</a>
           </div>
           <div class="card-body">
-            @if (subscribedEvents().length === 0) {
+            @if (enrichedSubscriptions().length === 0) {
               <p class="empty-text">No estas inscrito en ningun evento.</p>
             } @else {
               <ul class="event-list">
-                @for (sub of subscribedEvents(); track sub.id) {
-                  <li class="event-item">
-                    <div class="event-icon">
-                      <i class="fa-solid fa-star"></i>
+                @for (sub of enrichedSubscriptions(); track sub.id) {
+                  <img class="event-img-probe" [src]="eventService.getImageUrl(sub.eventId)" (load)="onEventImageLoad(sub.eventId)" (error)="$event" />
+                  <a class="event-item" [class.event-item-with-bg]="eventHasImage(sub.eventId)" [routerLink]="'/public/eventos/' + sub.eventId"
+                     [style.background-image]="eventHasImage(sub.eventId) ? 'url(' + eventService.getImageUrl(sub.eventId) + ')' : ''">
+                    @if (eventHasImage(sub.eventId)) { <div class="event-item-overlay"></div> }
+                    <div class="event-item-content">
+                      <div class="event-icon" [class.event-icon-finished]="sub.finished">
+                        <i class="fa-solid" [class.fa-star]="!sub.finished" [class.fa-flag-checkered]="sub.finished"></i>
+                      </div>
+                      <div class="event-info">
+                        <span class="event-title">{{ sub.title }}</span>
+                        <span class="event-date">{{ sub.date }} a las {{ sub.time }}</span>
+                        <div class="event-meta">
+                          <span class="event-status" [class.event-status-finished]="sub.finished" [class.event-status-waitlist]="sub.status === 'WAITLIST'">
+                            @if (sub.finished) {
+                              Finalizado
+                            } @else {
+                              @switch (sub.status) {
+                                @case ('CONFIRMED') { Confirmado }
+                                @case ('WAITLIST') { Lista de espera }
+                              }
+                            }
+                          </span>
+                          <span class="event-capacity">
+                            <i class="fa-solid fa-users"></i> {{ sub.currentAttendees }}/{{ sub.capacity }}
+                          </span>
+                        </div>
+                      </div>
+                      <i class="fa-solid fa-chevron-right event-arrow"></i>
                     </div>
-                    <div class="event-info">
-                      <span class="event-title">Evento #{{ sub.eventId }}</span>
-                      <span class="event-status">
-                        @switch (sub.status) {
-                          @case ('CONFIRMED') { Confirmado }
-                          @case ('WAITLIST') { Lista de espera }
-                        }
-                      </span>
-                    </div>
-                  </li>
+                  </a>
                 }
               </ul>
             }
@@ -208,6 +246,28 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
           </div>
         </section>
       </div>
+
+      <section class="dashboard-section">
+        <div class="section-header">
+          <h2 class="section-heading">
+            <i class="fa-solid fa-heart"></i>
+            Tus Favoritos
+          </h2>
+          <a class="card-action" routerLink="/public/juegos">Explorar catalogo</a>
+        </div>
+        @if (favoriteGames().length === 0) {
+          <div class="empty-banner">
+            <i class="fa-regular fa-heart"></i>
+            <p>No tienes favoritos aun. <a routerLink="/public/juegos">Explora el catalogo!</a></p>
+          </div>
+        } @else {
+          <div class="favorites-grid">
+            @for (game of favoriteGames(); track game.id) {
+              <app-game-card-public [game]="game" />
+            }
+          </div>
+        }
+      </section>
 
       <!-- Personalized recommendations -->
       <section class="recommendations-section">
@@ -335,6 +395,12 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
     }
 
+    .clickable {
+      text-decoration: none;
+      cursor: pointer;
+      color: inherit;
+    }
+
     .stat-icon {
       width: 48px;
       height: 48px;
@@ -369,6 +435,51 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       font-size: 0.75rem;
       color: var(--text-muted, #94a3b8);
       margin-top: 0.15rem;
+    }
+
+    /* ===== Favorites section ===== */
+    .dashboard-section {
+      margin-bottom: 2rem;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    .favorites-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.25rem;
+    }
+
+    .empty-banner {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1.25rem;
+      background-color: var(--card-bg, #1E293B);
+      border: 1px solid var(--card-border, rgba(255,255,255,0.08));
+      border-radius: var(--radius-lg, 16px);
+      color: var(--text-muted, #94a3b8);
+      font-size: 0.875rem;
+    }
+
+    .empty-banner i {
+      font-size: 1.5rem;
+      opacity: 0.4;
+    }
+
+    .empty-banner a {
+      color: var(--neon-cyan, #00FFD1);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .empty-banner a:hover {
+      text-decoration: underline;
     }
 
     /* ===== Content grid ===== */
@@ -436,6 +547,25 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       text-align: center;
       padding: 1rem 0;
       margin: 0;
+    }
+
+    /* ===== Section heading ===== */
+    .section-heading {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin: 0;
+    }
+
+    .section-heading i {
+      color: var(--primary-coral);
+    }
+
+    :host-context([data-theme="dark"]) .section-heading i {
+      color: var(--neon-cyan, #00FFD1);
     }
 
     /* ===== Game list ===== */
@@ -545,20 +675,26 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       font-style: italic;
     }
 
-    .status-badge {
+    .btn-cancel-res {
       flex-shrink: 0;
-      padding: 0.2rem 0.6rem;
-      border-radius: 9999px;
-      font-size: 0.65rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      background: rgba(239, 68, 68, 0.08);
+      color: #EF4444;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      transition: all 0.2s;
+      align-self: center;
     }
 
-    .badge-confirmed {
-      background-color: var(--success-bg, rgba(34,197,94,0.12));
-      color: var(--success, #22C55E);
-      border: 1px solid var(--success, #22C55E);
+    .btn-cancel-res:hover {
+      background: rgba(239, 68, 68, 0.2);
+      border-color: #EF4444;
     }
 
     /* ===== Event list ===== */
@@ -571,10 +707,62 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       gap: 0.75rem;
     }
 
+    .event-img-probe {
+      display: none;
+    }
+
     .event-item {
+      display: block;
+      text-decoration: none;
+      padding: 0.5rem;
+      border-radius: var(--radius-md, 8px);
+      transition: background-color 0.2s, transform 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .event-item-content {
       display: flex;
       align-items: center;
       gap: 0.75rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .event-item:hover {
+      background-color: rgba(255, 255, 255, 0.04);
+    }
+
+    .event-item-with-bg {
+      background-size: cover;
+      background-position: center;
+      padding: 0.75rem;
+      min-height: 72px;
+    }
+
+    .event-item-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, rgba(15, 23, 42, 0.88) 0%, rgba(15, 23, 42, 0.7) 100%);
+      z-index: 0;
+      border-radius: var(--radius-md, 8px);
+    }
+
+    .event-item-with-bg .event-title {
+      color: #FFFFFF;
+    }
+
+    .event-item-with-bg .event-date {
+      color: #CBD5E1;
+    }
+
+    .event-item-with-bg .event-arrow {
+      color: rgba(255, 255, 255, 0.5);
+    }
+
+    .event-item-with-bg:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
     }
 
     .event-icon {
@@ -590,10 +778,17 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       flex-shrink: 0;
     }
 
+    .event-icon-finished {
+      background-color: rgba(148, 163, 184, 0.1);
+      color: var(--text-muted, #94a3b8);
+    }
+
     .event-info {
       display: flex;
       flex-direction: column;
       gap: 0.1rem;
+      flex: 1;
+      min-width: 0;
     }
 
     .event-title {
@@ -602,9 +797,50 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       color: var(--text-main);
     }
 
-    .event-status {
+    .event-date {
       font-size: 0.75rem;
       color: var(--text-muted, #94a3b8);
+    }
+
+    .event-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .event-status {
+      font-size: 0.7rem;
+      color: var(--neon-cyan, #00FFD1);
+      font-weight: 600;
+    }
+
+    .event-status-finished {
+      color: var(--text-muted, #94a3b8);
+    }
+
+    .event-status-waitlist {
+      color: #FACC15;
+    }
+
+    .event-capacity {
+      font-size: 0.7rem;
+      color: var(--text-muted, #94a3b8);
+    }
+
+    .event-capacity i {
+      font-size: 0.6rem;
+      margin-right: 0.15rem;
+    }
+
+    .event-arrow {
+      font-size: 0.65rem;
+      color: var(--text-muted, #94a3b8);
+      flex-shrink: 0;
+      transition: color 0.2s;
+    }
+
+    .event-item:hover .event-arrow {
+      color: var(--neon-cyan, #00FFD1);
     }
 
     /* ===== Daily pick ===== */
@@ -696,28 +932,11 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       margin-bottom: 2rem;
     }
 
-    .section-heading {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 1.15rem;
-      font-weight: 700;
-      color: var(--text-main);
-      margin: 0 0 1rem;
-    }
-
-    .section-heading i {
-      color: var(--primary-coral);
-    }
-
-    :host-context([data-theme="dark"]) .section-heading i {
-      color: var(--neon-cyan, #00FFD1);
-    }
-
     .recommendations-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 1rem;
+      margin-top: 1rem;
     }
 
     .rec-card {
@@ -809,25 +1028,128 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       .recommendations-grid {
         grid-template-columns: repeat(2, 1fr);
       }
+
+      .favorites-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
 
-    @media (max-width: 640px) {
-      .stats-grid {
-        grid-template-columns: 1fr;
-      }
+    @media (max-width: 768px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+      .content-grid { grid-template-columns: 1fr; gap: 1rem; }
+      .recommendations-grid { grid-template-columns: 1fr; }
+      .favorites-grid { grid-template-columns: repeat(2, 1fr); }
+      .welcome-title { font-size: 1.5rem; }
+      .welcome-sub { font-size: 0.825rem; }
+      .welcome-avatar { width: 80px; height: 80px; }
+      .welcome-avatar-initial { font-size: 2rem; }
+      .stat-card { padding: 0.875rem; }
+      .stat-value { font-size: 1.15rem; }
+      .stat-icon { width: 40px; height: 40px; font-size: 1.1rem; }
+      .card-header { padding: 0.75rem 1rem; }
+      .card-body { padding: 0.75rem 1rem; }
+      .section-heading { font-size: 1rem; }
+      .pick-name { font-size: 1.05rem; }
+      .pick-desc { font-size: 0.8rem; }
+      .pick-meta { flex-wrap: wrap; gap: 0.5rem; }
+      .rec-card { padding: 1rem; }
+      .rec-name { font-size: 0.95rem; }
+      .active-session-banner { flex-direction: column; gap: 0.75rem; align-items: flex-start; padding: 0.875rem 1rem; }
+      .session-banner-action { width: 100%; justify-content: center; }
+    }
 
-      .recommendations-grid {
-        grid-template-columns: 1fr;
-      }
+    @media (max-width: 480px) {
+      .stats-grid { grid-template-columns: 1fr; gap: 0.5rem; }
+      .recommendations-grid { grid-template-columns: 1fr; }
+      .favorites-grid { grid-template-columns: 1fr; }
+      .welcome-section { margin-bottom: 1.25rem; }
+      .welcome-title { font-size: 1.2rem; }
+      .welcome-sub { font-size: 0.8rem; }
+      .welcome-avatar { width: 64px; height: 64px; margin-bottom: 0.75rem; }
+      .welcome-avatar-initial { font-size: 1.6rem; }
+      .stat-card { padding: 0.75rem; gap: 0.75rem; }
+      .stat-value { font-size: 1.1rem; }
+      .stat-label { font-size: 0.7rem; }
+      .stat-icon { width: 36px; height: 36px; font-size: 1rem; }
+      .content-grid { gap: 0.75rem; margin-bottom: 1.25rem; }
+      .card-header { padding: 0.625rem 0.875rem; }
+      .card-title { font-size: 0.875rem; }
+      .card-body { padding: 0.625rem 0.875rem; }
+      .card-action { font-size: 0.75rem; }
+      .section-heading { font-size: 0.95rem; }
+      .game-name { font-size: 0.8125rem; }
+      .game-meta { font-size: 0.7rem; }
+      .game-duration { font-size: 0.75rem; }
+      .res-date { font-size: 0.8rem; }
+      .res-detail { font-size: 0.7rem; }
+      .event-title { font-size: 0.8rem; }
+      .event-date { font-size: 0.7rem; }
+      .pick-card { padding: 0.875rem; }
+      .pick-badge { font-size: 0.65rem; padding: 0.2rem 0.6rem; }
+      .pick-name { font-size: 1rem; }
+      .pick-desc { font-size: 0.775rem; line-height: 1.4; }
+      .pick-meta span { font-size: 0.75rem; }
+      .btn-pick { font-size: 0.8rem; padding: 0.5rem 1rem; width: 100%; justify-content: center; }
+      .rec-card { padding: 0.875rem; }
+      .rec-name { font-size: 0.925rem; }
+      .rec-meta span { font-size: 0.7rem; }
+      .empty-banner { padding: 1rem; font-size: 0.8125rem; }
+      .session-banner-title { font-size: 0.875rem; }
+      .session-banner-sub { font-size: 0.75rem; }
+      .session-banner-icon { font-size: 1.25rem; }
+      .session-banner-action { font-size: 0.75rem; padding: 0.4rem 0.875rem; }
+    }
 
-      .welcome-title {
-        font-size: 1.35rem;
-      }
-
-      .pick-meta {
-        flex-wrap: wrap;
-        gap: 0.5rem;
-      }
+    /* Active Session Banner */
+    .active-session-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.25rem;
+      background: linear-gradient(135deg, rgba(0, 255, 209, 0.08), rgba(0, 255, 209, 0.02));
+      border: 1px solid rgba(0, 255, 209, 0.25);
+      border-radius: var(--radius-lg, 16px);
+      margin-bottom: 1rem;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .active-session-banner:hover {
+      border-color: rgba(0, 255, 209, 0.5);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 16px rgba(0, 255, 209, 0.1);
+    }
+    .session-banner-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .session-banner-icon {
+      font-size: 1.5rem;
+      color: var(--neon-cyan, #00FFD1);
+    }
+    .session-banner-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin: 0;
+    }
+    .session-banner-sub {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+      margin: 0.125rem 0 0;
+    }
+    .session-banner-action {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-md, 8px);
+      background-color: var(--neon-cyan, #00FFD1);
+      color: #0F172A;
+      font-size: 0.8125rem;
+      font-weight: 700;
+      white-space: nowrap;
     }
   `]
 })
@@ -835,13 +1157,17 @@ export class CustomerDashboardComponent implements OnInit {
   authService = inject(AuthService);
   private clienteService = inject(ClienteService);
   private gameHistory = inject(GameHistoryService);
-  private reservasService = inject(ReservasMesaService);
-  private eventService = inject(EventService);
+  private reservasService = inject(MockReservasService);
+  protected eventService = inject(EventService);
+  private loadedEventImages = signal<Set<number>>(new Set());
   private recommendationService = inject(RecommendationService);
   private favoritesService = inject(FavoritesService);
+  private sesionMesaService = inject(SesionMesaService);
+  private juegoService = inject(JuegoService);
 
   isLoading = signal(true);
   userName = signal('Usuario');
+  sesionActiva = signal<SesionMesa | null>(null);
   private imageVersion = signal(Date.now());
   hasProfilePhoto = signal(false);
 
@@ -869,8 +1195,50 @@ export class CustomerDashboardComponent implements OnInit {
   recentGames = signal<GameSession[]>([]);
   activeReservations = signal<ReservasMesa[]>([]);
   subscribedEvents = signal<EventSubscription[]>([]);
+  allEvents = signal<GGBEvent[]>([]);
   dailyPick = signal<JuegoExtended | null>(null);
   recommendations = signal<JuegoExtended[]>([]);
+  allGames = signal<JuegoExtended[]>([]);
+
+  enrichedSubscriptions = computed(() => {
+    const subs = this.subscribedEvents();
+    const events = this.allEvents();
+    const now = new Date();
+    return subs.map(sub => {
+      const event = events.find(e => e.id === sub.eventId);
+      let finished = false;
+      if (event) {
+        const endStr = event.date + 'T' + (event.endTime ?? event.time) + ':00';
+        finished = new Date(endStr) < now;
+      }
+      return {
+        ...sub,
+        title: event?.title ?? `Evento #${sub.eventId}`,
+        date: event?.date ?? '',
+        time: event?.time ?? '',
+        capacity: event?.capacity ?? 0,
+        currentAttendees: event?.currentAttendees ?? 0,
+        finished
+      };
+    });
+  });
+
+  favoriteGames = computed(() => {
+    const favIds = this.favoritesService.favorites();
+    return this.allGames().filter(g => favIds.includes(g.id));
+  });
+
+  futureReservations = computed(() => {
+    const now = new Date();
+    const today = now.toISOString().split('T')[0];
+    return this.activeReservations().filter(r => {
+      if (r.fechaReserva > today) return true;
+      if (r.fechaReserva === today) {
+        return r.horaInicio >= now.toTimeString().slice(0, 5);
+      }
+      return false;
+    });
+  });
 
   ngOnInit(): void {
     // User name & profile photo
@@ -891,12 +1259,17 @@ export class CustomerDashboardComponent implements OnInit {
     this.recentGames.set(this.gameHistory.getRecent(5));
 
     // Active reservations
-    this.reservasService.getByCliente().subscribe(reservas => {
-      this.activeReservations.set(reservas.filter(r => r.estado === 'CONFIRMADA' || r.estado === 'PENDIENTE'));
+    this.reservasService.getByCliente(1).subscribe(reservas => {
+      this.activeReservations.set(reservas.filter(r => r.estado === 'CONFIRMADA'));
+    });
+
+    this.eventService.getAll().subscribe(events => {
+      this.allEvents.set(events);
     });
 
     // Subscribed events
-    this.eventService.getSubscriptionsByUser('current_user').subscribe(subs => {
+    const userEmail = user?.email ?? 'anonymous';
+    this.eventService.getSubscriptionsByUser(userEmail).subscribe(subs => {
       this.subscribedEvents.set(subs);
     });
 
@@ -910,6 +1283,23 @@ export class CustomerDashboardComponent implements OnInit {
     this.recommendationService.getPersonalized(gameIds, 3).subscribe(games => {
       this.recommendations.set(games);
       this.isLoading.set(false);
+    });
+
+    // Active session
+    this.sesionMesaService.getMiSesion().subscribe({
+      next: (sesion) => this.sesionActiva.set(sesion),
+      error: () => {}
+    });
+
+    this.juegoService.getAll().subscribe(games => {
+      this.allGames.set(games);
+    });
+  }
+
+  cancelReserva(id: number, event: Event): void {
+    event.stopPropagation();
+    this.reservasService.cancel(id).subscribe(() => {
+      this.activeReservations.update(list => list.filter(r => r.id !== id));
     });
   }
 
@@ -938,11 +1328,15 @@ export class CustomerDashboardComponent implements OnInit {
     return m > 0 ? `${h}h ${m}m` : `${h}h`;
   }
 
-  formatDate(isoStr: string): string {
-    return ReservasMesaService.extractDate(isoStr);
+  onEventImageLoad(eventId: number): void {
+    this.loadedEventImages.update(set => {
+      const copy = new Set(set);
+      copy.add(eventId);
+      return copy;
+    });
   }
 
-  formatTime(isoStr: string): string {
-    return ReservasMesaService.extractTime(isoStr);
+  eventHasImage(eventId: number): boolean {
+    return this.loadedEventImages().has(eventId);
   }
 }

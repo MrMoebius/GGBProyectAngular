@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, OnDestroy, signal, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { JuegoService } from '../../../core/services/juego.service';
@@ -89,13 +89,29 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
           <h2 class="section-title">Juegos Destacados</h2>
           <p class="section-subtitle">Los favoritos de nuestros jugadores</p>
         </div>
-        <a routerLink="/public/juegos" class="btn btn-ghost">
-          Ver todos <i class="fa-solid fa-arrow-right"></i>
-        </a>
+        <div class="section-header-actions">
+          <button class="btn btn-ghost" (click)="startRoulette()" [disabled]="rouletteActive()">
+            <i class="fa-solid fa-shuffle"></i> Modo Ruleta
+          </button>
+          <a routerLink="/public/juegos" class="btn btn-ghost">
+            Ver todos <i class="fa-solid fa-arrow-right"></i>
+          </a>
+        </div>
       </div>
-      <div class="games-scroll">
-        @for (game of featuredGames(); track game.id) {
-          <app-game-card-public [game]="game" />
+      <div class="games-showcase" #gamesScroll>
+        @for (game of featuredGames(); track game.id; let i = $index) {
+          <div
+            class="games-showcase-item"
+            [class.center]="getGameState(i) === 'center'"
+            [class.peek-left]="getGameState(i) === 'peek-left'"
+            [class.peek-right]="getGameState(i) === 'peek-right'"
+            [class.far-left]="getGameState(i) === 'far-left'"
+            [class.far-right]="getGameState(i) === 'far-right'"
+            [class.roulette-highlight]="rouletteActive() && rouletteIndex() === i"
+            (click)="onGameCardClick(i)"
+          >
+            <app-game-card-public [game]="game" />
+          </div>
         }
       </div>
     </section>
@@ -109,7 +125,10 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
               <i class="fa-solid fa-star"></i> Juego del dia
             </span>
             <h2 class="daily-title">{{ dailyPick()!.nombre }}</h2>
-            <p class="daily-desc">{{ dailyPick()!.descripcion }}</p>
+            <p class="daily-desc" [class.clamped]="!dailyDescExpanded()">{{ dailyPick()!.descripcion }}</p>
+            <button class="daily-read-more" (click)="dailyDescExpanded.set(!dailyDescExpanded())">
+              {{ dailyDescExpanded() ? 'Ver menos' : 'Ver más' }}
+            </button>
             <div class="daily-meta">
               <span><i class="fa-solid fa-users"></i> {{ dailyPick()!.minJugadores }}-{{ dailyPick()!.maxJugadores }} jugadores</span>
               <span><i class="fa-solid fa-clock"></i> {{ dailyPick()!.duracionMediaMin }} min</span>
@@ -170,7 +189,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
         @for (slide of foodSlides; track slide; let i = $index) {
           <button
             class="food-dot"
-            [class.active]="i >= currentFoodSlide() && i < currentFoodSlide() + 3"
+            [class.active]="i === currentFoodSlide()"
             (click)="goToFoodSlide(i)"
             [attr.aria-label]="'Imagen ' + (i + 1)"
           ></button>
@@ -193,30 +212,37 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
           </div>
           <div class="grid-3">
             @for (event of upcomingEvents(); track event.id) {
-              <a [routerLink]="['/public/eventos', event.id]" class="event-card card">
-                <div class="event-card-header">
-                  <span class="event-type-badge" [class]="'type-' + event.type.toLowerCase()">
-                    @switch (event.type) {
-                      @case ('TORNEO') { <i class="fa-solid fa-trophy"></i> Torneo }
-                      @case ('NOCHE_TEMATICA') { <i class="fa-solid fa-moon"></i> Noche Tematica }
-                      @case ('TALLER') { <i class="fa-solid fa-palette"></i> Taller }
-                      @case ('EVENTO_ESPECIAL') { <i class="fa-solid fa-star"></i> Especial }
-                    }
-                  </span>
-                  <span class="event-date">
-                    <i class="fa-solid fa-calendar"></i> {{ formatDate(event.date) }}
-                  </span>
-                </div>
-                <h3 class="event-card-title">{{ event.title }}</h3>
-                <p class="event-card-desc">{{ event.description | slice:0:100 }}...</p>
-                <div class="event-card-footer">
-                  <div class="event-capacity">
-                    <div class="capacity-bar">
-                      <div class="capacity-fill" [style.width.%]="(event.currentAttendees / event.capacity) * 100"></div>
-                    </div>
-                    <span class="capacity-text">{{ event.currentAttendees }}/{{ event.capacity }} plazas</span>
+              <img class="event-img-probe" [src]="eventService.getImageUrl(event.id)" (load)="onEventImageLoad(event.id)" (error)="$event" />
+              <a [routerLink]="['/public/eventos', event.id]"
+                 class="event-card card"
+                 [class.event-card-with-bg]="eventHasImage(event.id)"
+                 [style.background-image]="eventHasImage(event.id) ? 'url(' + eventService.getImageUrl(event.id) + ')' : ''">
+                @if (eventHasImage(event.id)) { <div class="event-card-overlay"></div> }
+                <div class="event-card-content">
+                  <div class="event-card-header">
+                    <span class="event-type-badge" [class]="'type-' + event.type.toLowerCase()">
+                      @switch (event.type) {
+                        @case ('TORNEO') { <i class="fa-solid fa-trophy"></i> Torneo }
+                        @case ('NOCHE_TEMATICA') { <i class="fa-solid fa-moon"></i> Noche Tematica }
+                        @case ('TALLER') { <i class="fa-solid fa-palette"></i> Taller }
+                        @case ('EVENTO_ESPECIAL') { <i class="fa-solid fa-star"></i> Especial }
+                      }
+                    </span>
+                    <span class="event-date">
+                      <i class="fa-solid fa-calendar"></i> {{ formatDate(event.date) }}
+                    </span>
                   </div>
-                  <span class="event-time"><i class="fa-solid fa-clock"></i> {{ event.time }}</span>
+                  <h3 class="event-card-title">{{ event.title }}</h3>
+                  <p class="event-card-desc">{{ event.description | slice:0:100 }}...</p>
+                  <div class="event-card-footer">
+                    <div class="event-capacity">
+                      <div class="capacity-bar">
+                        <div class="capacity-fill" [style.width.%]="(event.currentAttendees / event.capacity) * 100"></div>
+                      </div>
+                      <span class="capacity-text">{{ event.currentAttendees }}/{{ event.capacity }} plazas</span>
+                    </div>
+                    <span class="event-time"><i class="fa-solid fa-clock"></i> {{ event.time }}</span>
+                  </div>
                 </div>
               </a>
             }
@@ -466,36 +492,107 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       gap: 1rem;
     }
 
-    /* GAMES SCROLL */
-    .games-scroll {
+    .section-header-actions {
       display: flex;
-      gap: 1.25rem;
-      overflow-x: auto;
-      padding-bottom: 1rem;
-      scroll-snap-type: x mandatory;
+      gap: 0.75rem;
+      align-items: center;
     }
 
-    .games-scroll > * {
-      min-width: 280px;
-      max-width: 280px;
-      scroll-snap-align: start;
+    /* GAMES COVERFLOW */
+    .games-showcase {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      overflow: clip;
     }
 
-    .games-scroll::-webkit-scrollbar {
-      height: 6px;
+    .games-showcase-item {
+      position: absolute;
+      min-width: 320px;
+      max-width: 320px;
+      top: 0;
+      left: 50%;
+      margin-left: -160px;
+      opacity: 0;
+      transform: scale(0.8);
+      transition: opacity 0.5s ease, transform 0.5s ease, filter 0.5s ease;
+      pointer-events: none;
+      filter: blur(4px);
     }
 
-    .games-scroll::-webkit-scrollbar-track {
-      background: transparent;
+    .games-showcase-item.center {
+      position: relative;
+      left: auto;
+      margin-left: 0;
+      transform: scale(1);
+      opacity: 1;
+      z-index: 2;
+      pointer-events: auto;
+      filter: none;
     }
 
-    .games-scroll::-webkit-scrollbar-thumb {
-      background: var(--input-border);
-      border-radius: 3px;
+    .games-showcase-item.peek-left,
+    .games-showcase-item.peek-right {
+      opacity: 0.4;
+      filter: blur(2px);
+      z-index: 1;
+      cursor: pointer;
+      pointer-events: auto;
+    }
+
+    .games-showcase-item.peek-left {
+      transform: translateX(-85%) scale(0.82);
+    }
+
+    .games-showcase-item.peek-right {
+      transform: translateX(85%) scale(0.82);
+    }
+
+    .games-showcase-item.far-left,
+    .games-showcase-item.far-right {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    @media (min-width: 1025px) {
+      .games-showcase-item.far-left,
+      .games-showcase-item.far-right {
+        opacity: 0.2;
+        filter: blur(4px);
+        z-index: 0;
+        cursor: pointer;
+        pointer-events: auto;
+      }
+      .games-showcase-item.far-left {
+        transform: translateX(-170%) scale(0.68);
+      }
+      .games-showcase-item.far-right {
+        transform: translateX(170%) scale(0.68);
+      }
+    }
+
+    .roulette-highlight {
+      box-shadow: 0 0 20px rgba(0, 255, 209, 0.5), 0 0 40px rgba(0, 255, 209, 0.25);
+      outline: 2px solid var(--neon-cyan);
+      outline-offset: 2px;
+      border-radius: var(--radius-lg);
+    }
+
+    @keyframes rouletteGlow {
+      0%, 100% { box-shadow: 0 0 20px rgba(0, 255, 209, 0.5), 0 0 40px rgba(0, 255, 209, 0.25); }
+      50% { box-shadow: 0 0 30px rgba(0, 255, 209, 0.7), 0 0 60px rgba(0, 255, 209, 0.4); }
+    }
+
+    .roulette-winner {
+      animation: rouletteGlow 1s ease-in-out infinite;
     }
 
     /* DAILY PICK */
     .daily-section {
+      background: var(--secondary-bg);
+    }
+
+    :host-context([data-theme="dark"]) .daily-section {
       background: linear-gradient(135deg, var(--hero-gradient-start), var(--hero-gradient-end));
     }
 
@@ -511,39 +608,86 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       align-items: center;
       gap: 0.5rem;
       padding: 0.375rem 1rem;
-      background: rgba(255, 209, 102, 0.15);
-      color: #FFD166;
-      border: 1px solid rgba(255, 209, 102, 0.3);
+      background: rgba(217, 119, 6, 0.12);
+      color: #D97706;
+      border: 1px solid rgba(217, 119, 6, 0.25);
       border-radius: 9999px;
       font-size: 0.8125rem;
       font-weight: 600;
       margin-bottom: 1rem;
     }
 
+    :host-context([data-theme="dark"]) .daily-badge {
+      background: rgba(255, 209, 102, 0.15);
+      color: #FFD166;
+      border-color: rgba(255, 209, 102, 0.3);
+    }
+
     .daily-title {
       font-size: 2rem;
       font-weight: 700;
-      color: #FFFFFF;
+      color: var(--text-main);
       margin-bottom: 0.75rem;
     }
 
+    :host-context([data-theme="dark"]) .daily-title {
+      color: #FFFFFF;
+    }
+
     .daily-desc {
-      color: #94A3B8;
+      color: var(--text-muted);
       font-size: 1rem;
       line-height: 1.6;
-      margin-bottom: 1.25rem;
+      margin-bottom: 0.5rem;
+      text-align: justify;
+    }
+
+    @media (max-width: 480px) {
+      .daily-desc.clamped {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+    }
+
+    .daily-read-more {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--primary-coral, #FF6B6B);
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 0;
+      margin-bottom: 1rem;
+      transition: opacity 0.2s;
+    }
+
+    .daily-read-more:hover { opacity: 0.7; }
+
+    :host-context([data-theme="dark"]) .daily-read-more {
+      color: var(--neon-cyan, #00FFD1);
+    }
+
+    @media (max-width: 480px) {
+      .daily-read-more { display: inline-block; }
     }
 
     .daily-meta {
       display: flex;
       gap: 1.5rem;
-      color: #94A3B8;
+      color: var(--text-muted);
       font-size: 0.875rem;
       margin-bottom: 1.5rem;
     }
 
     .daily-meta i {
       margin-right: 0.375rem;
+      color: var(--primary-coral);
+    }
+
+    :host-context([data-theme="dark"]) .daily-meta i {
       color: var(--neon-cyan);
     }
 
@@ -551,6 +695,16 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       display: flex;
       gap: 1rem;
       flex-wrap: wrap;
+    }
+
+    :host-context([data-theme="dark"]) .daily-actions .btn-outline {
+      color: #FFFFFF;
+      border-color: rgba(255, 255, 255, 0.3);
+    }
+
+    :host-context([data-theme="dark"]) .daily-actions .btn-outline:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.6);
     }
 
     .daily-visual {
@@ -562,25 +716,40 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
     .daily-card-large {
       width: 250px;
       height: 300px;
-      background: linear-gradient(135deg, rgba(0, 255, 209, 0.1), rgba(255, 107, 157, 0.1));
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: linear-gradient(135deg, rgba(255, 107, 157, 0.08), rgba(255, 107, 107, 0.08));
+      border: 1px solid var(--card-border);
       border-radius: var(--radius-lg);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       gap: 1rem;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    :host-context([data-theme="dark"]) .daily-card-large {
+      background: linear-gradient(135deg, rgba(0, 255, 209, 0.1), rgba(255, 107, 157, 0.1));
+      border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .daily-card-large:hover {
+      transform: scale(1.05);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
     }
 
     .daily-card-large i {
       font-size: 4rem;
-      color: var(--neon-cyan);
+      color: var(--primary-coral);
       opacity: 0.6;
+    }
+
+    :host-context([data-theme="dark"]) .daily-card-large i {
+      color: var(--neon-cyan);
     }
 
     .daily-genre {
       font-size: 0.875rem;
-      color: #94A3B8;
+      color: var(--text-muted);
       text-transform: uppercase;
       letter-spacing: 0.1em;
     }
@@ -590,8 +759,19 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       height: 300px;
       object-fit: cover;
       border-radius: var(--radius-lg);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--card-border);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    :host-context([data-theme="dark"]) .daily-img {
+      border-color: rgba(255, 255, 255, 0.1);
       box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .daily-img:hover {
+      transform: scale(1.05);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
     }
 
     /* FOOD CAROUSEL */
@@ -612,7 +792,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
     }
 
     .food-slide-item {
-      flex: 0 0 calc(100% / 3);
+      flex: 0 0 100%;
       padding: 0 0.5rem;
       box-sizing: border-box;
     }
@@ -704,6 +884,56 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
     .event-card:hover {
       transform: translateY(-4px);
       box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .event-img-probe {
+      display: none;
+    }
+
+    .event-card-with-bg {
+      position: relative;
+      background-size: cover;
+      background-position: center;
+      overflow: hidden;
+    }
+
+    .event-card-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.6) 0%, rgba(15, 23, 42, 0.85) 100%);
+      z-index: 0;
+    }
+
+    .event-card-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .event-card-with-bg .event-card-title {
+      color: #FFFFFF;
+    }
+
+    .event-card-with-bg .event-card-desc {
+      color: #CBD5E1;
+    }
+
+    .event-card-with-bg .event-date {
+      color: #CBD5E1;
+    }
+
+    .event-card-with-bg .capacity-text {
+      color: #CBD5E1;
+    }
+
+    .event-card-with-bg .event-time {
+      color: #CBD5E1;
+    }
+
+    .event-card-with-bg .capacity-bar {
+      background: rgba(255, 255, 255, 0.2);
     }
 
     .event-card-header {
@@ -878,6 +1108,10 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
 
     /* CTA SECTION */
     .cta-section {
+      background: var(--secondary-bg);
+    }
+
+    :host-context([data-theme="dark"]) .cta-section {
       background: linear-gradient(135deg, var(--hero-gradient-start), var(--hero-gradient-end));
     }
 
@@ -888,12 +1122,16 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
     .cta-title {
       font-size: 2.25rem;
       font-weight: 700;
-      color: #FFFFFF;
+      color: var(--text-main);
       margin-bottom: 1rem;
     }
 
+    :host-context([data-theme="dark"]) .cta-title {
+      color: #FFFFFF;
+    }
+
     .cta-text {
-      color: #94A3B8;
+      color: var(--text-muted);
       font-size: 1.125rem;
       max-width: 600px;
       margin: 0 auto 2rem;
@@ -912,11 +1150,19 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      color: #CBD5E1;
+      color: var(--text-muted);
       font-size: 0.9375rem;
     }
 
+    :host-context([data-theme="dark"]) .cta-info-item {
+      color: #CBD5E1;
+    }
+
     .cta-info-item i {
+      color: var(--primary-coral);
+    }
+
+    :host-context([data-theme="dark"]) .cta-info-item i {
       color: var(--neon-cyan);
     }
 
@@ -927,25 +1173,83 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       flex-wrap: wrap;
     }
 
-    .cta-actions .btn-outline {
+    :host-context([data-theme="dark"]) .cta-actions .btn-outline {
       color: #FFFFFF;
       border-color: rgba(255, 255, 255, 0.3);
     }
 
-    .cta-actions .btn-outline:hover {
+    :host-context([data-theme="dark"]) .cta-actions .btn-outline:hover {
       background-color: rgba(255, 255, 255, 0.1);
       border-color: rgba(255, 255, 255, 0.6);
       color: #FFFFFF;
     }
 
-    /* RESPONSIVE */
-    @media (max-width: 768px) {
+    /* RESPONSIVE - TABLET */
+    @media (max-width: 1024px) {
       .hero-title {
-        font-size: 2.25rem;
+        font-size: 2.75rem;
       }
 
       .hero-subtitle {
+        font-size: 1.1rem;
+      }
+
+      .hero-content {
+        padding: 1.5rem;
+      }
+
+      .daily-inner {
+        grid-template-columns: 1fr 240px;
+        gap: 2rem;
+      }
+
+      .daily-card-large {
+        width: 200px;
+        height: 250px;
+      }
+
+      .daily-img {
+        width: 200px;
+        height: 250px;
+      }
+
+      .games-showcase-item { min-width: 290px; max-width: 290px; margin-left: -145px; }
+
+      .cta-title {
+        font-size: 1.85rem;
+      }
+
+      .cta-text {
         font-size: 1rem;
+      }
+
+      .section-header-actions {
+        flex-wrap: wrap;
+      }
+    }
+
+    /* RESPONSIVE - MOBILE */
+    @media (max-width: 768px) {
+      .hero-title {
+        font-size: 2rem;
+      }
+
+      .hero-subtitle {
+        font-size: 0.95rem;
+        margin-bottom: 2rem;
+      }
+
+      .hero-content {
+        padding: 1.25rem;
+      }
+
+      .hero-actions {
+        margin-bottom: 2rem;
+      }
+
+      .hero-actions .btn-lg {
+        padding: 0.6rem 1.25rem;
+        font-size: 0.875rem;
       }
 
       .hero-stats {
@@ -954,9 +1258,32 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
         padding: 1rem;
       }
 
+      .hero-stat-number {
+        font-size: 1.5rem;
+      }
+
       .hero-stat-divider {
         width: 3rem;
         height: 1px;
+      }
+
+      .hero-dots {
+        bottom: 3.5rem;
+      }
+
+      .hero-scroll-indicator {
+        bottom: 1.25rem;
+      }
+
+      .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+      }
+
+      .section-header-actions {
+        width: 100%;
+        justify-content: flex-start;
       }
 
       .daily-inner {
@@ -964,20 +1291,69 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       }
 
       .daily-visual {
-        display: none;
+        order: -1;
+        display: flex;
+        justify-content: center;
       }
 
-      .food-slide-item {
-        flex: 0 0 100%;
+      .daily-img {
+        width: 100%;
+        max-width: 280px;
+        height: auto;
+        max-height: 200px;
+        object-fit: contain;
+      }
+
+      .daily-card-large {
+        width: 160px;
+        height: 180px;
+      }
+
+      .daily-title {
+        font-size: 1.5rem;
+      }
+
+      .daily-meta {
+        flex-wrap: wrap;
+        gap: 0.75rem;
       }
 
       .food-slide-item img {
         height: 220px;
       }
 
-      .section-header {
-        flex-direction: column;
-        align-items: flex-start;
+      .food-arrow {
+        width: 34px;
+        height: 34px;
+        font-size: 0.85rem;
+      }
+
+      .games-showcase-item { min-width: 260px; max-width: 260px; margin-left: -130px; }
+
+      .event-card {
+        padding: 1.25rem;
+      }
+
+      .event-card-title {
+        font-size: 1rem;
+      }
+
+      .sala-grid {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 0.5rem;
+      }
+
+      .sala-legend {
+        gap: 0.75rem;
+        font-size: 0.75rem;
+      }
+
+      .cta-title {
+        font-size: 1.5rem;
+      }
+
+      .cta-text {
+        font-size: 0.95rem;
       }
 
       .cta-info {
@@ -986,8 +1362,104 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
         gap: 0.75rem;
       }
 
-      .cta-title {
-        font-size: 1.75rem;
+      .cta-info-item {
+        font-size: 0.85rem;
+        text-align: center;
+      }
+
+      .cta-actions {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .cta-actions .btn {
+        text-align: center;
+      }
+    }
+
+    /* RESPONSIVE - SMALL PHONE */
+    @media (max-width: 480px) {
+      .hero {
+        min-height: 85vh;
+      }
+
+      .hero-title {
+        font-size: 1.6rem;
+      }
+
+      .hero-subtitle {
+        font-size: 0.875rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .hero-actions {
+        flex-direction: column;
+        align-items: stretch;
+        margin-bottom: 1.5rem;
+      }
+
+      .hero-actions .btn-lg {
+        justify-content: center;
+      }
+
+      .hero-stats {
+        padding: 0.75rem;
+        gap: 0.75rem;
+      }
+
+      .hero-stat-number {
+        font-size: 1.25rem;
+      }
+
+      .hero-stat-label {
+        font-size: 0.7rem;
+      }
+
+      .food-slide-item img {
+        height: 180px;
+      }
+
+      .food-arrow {
+        width: 30px;
+        height: 30px;
+        font-size: 0.75rem;
+      }
+
+      .food-arrow-left {
+        left: 0.25rem;
+      }
+
+      .food-arrow-right {
+        right: 0.25rem;
+      }
+
+      .games-showcase-item { min-width: 230px; max-width: 230px; margin-left: -115px; }
+      .games-showcase-item.peek-left { transform: translateX(-68%) scale(0.82); }
+      .games-showcase-item.peek-right { transform: translateX(68%) scale(0.82); }
+
+      .daily-meta {
+        font-size: 0.8rem;
+        gap: 0.5rem;
+      }
+
+      .mesa-box {
+        padding: 0.65rem 0.35rem;
+      }
+
+      .mesa-box i {
+        font-size: 1rem;
+      }
+
+      .mesa-name {
+        font-size: 0.65rem;
+      }
+
+      .mesa-cap {
+        font-size: 0.6rem;
+      }
+
+      .legend-item {
+        font-size: 0.7rem;
       }
     }
   `]
@@ -996,17 +1468,46 @@ export class LandingComponent implements OnInit, OnDestroy {
   private mockJuegos = inject(JuegoService);
   private recommendation = inject(RecommendationService);
   private mesaService = inject(MesaService);
-  private eventService = inject(EventService);
+  protected eventService = inject(EventService);
   private authService = inject(AuthService);
 
   isCliente = computed(() => this.authService.currentRole() === 'CLIENTE' || !this.authService.isAuthenticated());
 
+  @ViewChild('gamesScroll') gamesScrollRef!: ElementRef<HTMLElement>;
+
   isLoading = signal(true);
+  rouletteActive = signal(false);
+  rouletteIndex = signal(-1);
+  private rouletteTimers: ReturnType<typeof setTimeout>[] = [];
   featuredGames = signal<JuegoExtended[]>([]);
+
+  dailyDescExpanded = signal(false);
+
+  // Games coverflow
+  currentGameSlide = signal(0);
+  private gamesInterval: ReturnType<typeof setInterval> | null = null;
+
+  /** Determines the visual state of each game card */
+  getGameState(i: number): 'center' | 'peek-left' | 'peek-right' | 'far-left' | 'far-right' | 'hidden' {
+    const total = this.featuredGames().length;
+    if (total === 0) return 'hidden';
+    const current = this.currentGameSlide();
+    if (i === current) return 'center';
+    if (total >= 3) {
+      if (i === (current - 1 + total) % total) return 'peek-left';
+      if (i === (current + 1) % total) return 'peek-right';
+    }
+    if (total >= 5) {
+      if (i === (current - 2 + total) % total) return 'far-left';
+      if (i === (current + 2) % total) return 'far-right';
+    }
+    return 'hidden';
+  }
   dailyPick = signal<JuegoExtended | null>(null);
   mesas = signal<Mesa[]>([]);
   upcomingEvents = signal<GGBEvent[]>([]);
   mesaStats = signal<{ total: number; libres: number }>({ total: 0, libres: 0 });
+  private loadedEventImages = signal<Set<number>>(new Set());
 
   // Carousel
   readonly heroSlides = [
@@ -1044,10 +1545,9 @@ export class LandingComponent implements OnInit, OnDestroy {
   ];
   currentFoodSlide = signal(0);
   foodTrackTransform = computed(() => {
-    const slidePercent = 100 / this.foodSlides.length;
-    return `translateX(-${this.currentFoodSlide() * slidePercent}%)`;
+    return `translateX(-${this.currentFoodSlide() * 100}%)`;
   });
-  private maxFoodSlide = this.foodSlides.length - 3;
+  private maxFoodSlide = this.foodSlides.length - 1;
   private foodInterval: ReturnType<typeof setInterval> | null = null;
 
   ngOnInit(): void {
@@ -1056,6 +1556,7 @@ export class LandingComponent implements OnInit, OnDestroy {
     this.mockJuegos.getFeatured().subscribe(games => {
       this.featuredGames.set(games);
       this.isLoading.set(false);
+      this.startGamesCarousel();
     });
     this.recommendation.getDailyPick().subscribe(game => this.dailyPick.set(game));
 
@@ -1076,6 +1577,18 @@ export class LandingComponent implements OnInit, OnDestroy {
   formatDate(dateStr: string): string {
     const date = new Date(dateStr);
     return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+  }
+
+  onEventImageLoad(eventId: number): void {
+    this.loadedEventImages.update(set => {
+      const copy = new Set(set);
+      copy.add(eventId);
+      return copy;
+    });
+  }
+
+  eventHasImage(eventId: number): boolean {
+    return this.loadedEventImages().has(eventId);
   }
 
   // Carousel methods
@@ -1123,8 +1636,82 @@ export class LandingComponent implements OnInit, OnDestroy {
     this.startFoodCarousel();
   }
 
+  // Games carousel methods
+  private startGamesCarousel(): void {
+    this.stopGamesCarousel();
+    this.gamesInterval = setInterval(() => {
+      if (this.rouletteActive()) return;
+      this.advanceGameSlide();
+    }, 3000);
+  }
+
+  private stopGamesCarousel(): void {
+    if (this.gamesInterval) {
+      clearInterval(this.gamesInterval);
+      this.gamesInterval = null;
+    }
+  }
+
+  private advanceGameSlide(): void {
+    const total = this.featuredGames().length;
+    if (total === 0) return;
+    this.currentGameSlide.update(i => (i + 1) % total);
+  }
+
+  onGameCardClick(i: number): void {
+    if (this.rouletteActive()) return;
+    const state = this.getGameState(i);
+    if (state === 'peek-left' || state === 'peek-right' || state === 'far-left' || state === 'far-right') {
+      this.currentGameSlide.set(i);
+      this.stopGamesCarousel();
+      this.startGamesCarousel();
+    }
+  }
+
+  startRoulette(): void {
+    if (this.rouletteActive()) return;
+    const total = this.featuredGames().length;
+    if (total === 0) return;
+
+    this.stopGamesCarousel();
+    this.rouletteActive.set(true);
+    this.rouletteTimers.forEach(t => clearTimeout(t));
+    this.rouletteTimers = [];
+
+    const target = Math.floor(Math.random() * total);
+    const totalSteps = 30 + total + (target >= 0 ? target : 0);
+    let currentDelay = 50;
+    let accumulated = 0;
+
+    for (let step = 0; step < totalSteps; step++) {
+      const idx = step % total;
+      const timer = setTimeout(() => {
+        this.currentGameSlide.set(idx);
+        this.rouletteIndex.set(idx);
+        if (step === totalSteps - 1) {
+          setTimeout(() => {
+            const el = this.gamesScrollRef?.nativeElement?.children[idx] as HTMLElement;
+            if (el) el.classList.add('roulette-winner');
+            setTimeout(() => {
+              if (el) el.classList.remove('roulette-winner');
+              this.rouletteActive.set(false);
+              this.rouletteIndex.set(-1);
+              this.startGamesCarousel();
+            }, 3000);
+          }, 100);
+        }
+      }, accumulated);
+      this.rouletteTimers.push(timer);
+      const progress = step / totalSteps;
+      currentDelay = 50 + (progress * progress) * 250;
+      accumulated += currentDelay;
+    }
+  }
+
   ngOnDestroy(): void {
     if (this.slideInterval) clearInterval(this.slideInterval);
     if (this.foodInterval) clearInterval(this.foodInterval);
+    this.stopGamesCarousel();
+    this.rouletteTimers.forEach(t => clearTimeout(t));
   }
 }

@@ -5,6 +5,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { JuegoService } from '../../../core/services/juego.service';
 import { MesaService } from '../../../core/services/mesa.service';
 import { ToastService } from '../../../core/services/toast.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { JuegoExtended } from '../../../core/models/juego-extended.interface';
 import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer-loader.component';
 
@@ -87,16 +88,28 @@ interface ContactInfo {
                 <i class="fa-solid fa-clock"></i>
                 Hora
               </label>
-              <div class="time-slots">
-                @for (slot of allTimeSlots; track slot) {
-                  <button
-                    class="time-pill"
-                    [class.selected]="selectedTime() === slot"
-                    (click)="selectedTime.set(slot)">
-                    {{ slot }}
-                  </button>
-                }
-              </div>
+              @if (isDayClosed()) {
+                <div class="closed-banner">
+                  <i class="fa-solid fa-door-closed"></i>
+                  <span>Los lunes estamos cerrados. Selecciona otro dia.</span>
+                </div>
+              } @else if (availableTimeSlots().length === 0 && selectedDate()) {
+                <div class="closed-banner">
+                  <i class="fa-solid fa-circle-info"></i>
+                  <span>Selecciona una fecha para ver los horarios disponibles.</span>
+                </div>
+              } @else {
+                <div class="time-slots">
+                  @for (slot of availableTimeSlots(); track slot) {
+                    <button
+                      class="time-pill"
+                      [class.selected]="selectedTime() === slot"
+                      (click)="selectedTime.set(slot)">
+                      {{ slot }}
+                    </button>
+                  }
+                </div>
+              }
             </div>
 
             <!-- Party Size -->
@@ -716,6 +729,31 @@ interface ContactInfo {
       color: var(--primary-coral);
     }
 
+    /* === Date input dark mode fix === */
+    :host-context([data-theme="dark"]) input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(1) brightness(0.8);
+      cursor: pointer;
+    }
+
+    /* === Closed banner === */
+    .closed-banner {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.85rem 1.1rem;
+      background: rgba(239, 68, 68, 0.08);
+      border: 1px solid rgba(239, 68, 68, 0.25);
+      border-radius: var(--radius-md, 0.5rem);
+      font-size: 0.88rem;
+      color: var(--text-main);
+    }
+
+    .closed-banner i {
+      color: #ef4444;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
     /* === Time Slots === */
     .time-slots {
       display: flex;
@@ -1304,77 +1342,89 @@ interface ContactInfo {
     }
 
     /* === Responsive === */
-    @media (max-width: 640px) {
-      .reservations-wizard {
-        padding: 1rem 0.75rem 3rem;
-      }
+    @media (max-width: 1024px) {
+      .reservations-wizard { padding: 2rem 1.5rem 3rem; }
+      .wizard-title { font-size: 1.75rem; }
+      .step-content { padding: 1.5rem 1.25rem; }
+      .games-grid { grid-template-columns: repeat(2, 1fr); }
+    }
 
-      .wizard-title {
-        font-size: 1.5rem;
-      }
-
-      .progress-bar {
-        padding: 0 0.25rem;
-      }
-
-      .step-circle {
-        width: 34px;
-        height: 34px;
-        font-size: 0.8rem;
-      }
-
-      .step-label {
-        font-size: 0.6rem;
-      }
-
-      .step-connector {
-        min-width: 16px;
-      }
-
-      .step-content {
-        padding: 1.25rem 1rem;
-      }
-
-      .step-title {
-        font-size: 1.1rem;
-      }
-
-      .time-slots {
-        gap: 0.375rem;
-      }
-
-      .time-pill {
-        padding: 0.4rem 0.75rem;
-        font-size: 0.8rem;
-      }
-
-      .step-actions {
-        flex-direction: column-reverse;
-        gap: 0.5rem;
-      }
-
+    @media (max-width: 768px) {
+      .reservations-wizard { padding: 1.25rem 0.75rem 3rem; }
+      .wizard-title { font-size: 1.5rem; gap: 0.5rem; }
+      .wizard-subtitle { font-size: 0.9rem; }
+      .progress-bar { padding: 0 0.25rem; margin-bottom: 2rem; }
+      .step-circle { width: 36px; height: 36px; font-size: 0.8rem; }
+      .step-label { font-size: 0.6rem; }
+      .step-connector { min-width: 20px; }
+      .step-content { padding: 1.5rem 1.25rem; }
+      .step-title { font-size: 1.15rem; gap: 0.5rem; margin-bottom: 1.25rem; padding-bottom: 0.75rem; }
+      .form-input { font-size: 16px; padding: 0.65rem 0.85rem; }
+      .form-textarea { font-size: 16px; }
+      .time-slots { gap: 0.4rem; }
+      .time-pill { padding: 0.45rem 0.85rem; font-size: 0.82rem; }
+      .games-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); max-height: 350px; gap: 0.6rem; }
+      .game-card { padding: 0.85rem; }
+      .game-name { font-size: 0.88rem; }
+      .step-actions { flex-direction: column-reverse; gap: 0.5rem; margin-top: 1.5rem; padding-top: 1.25rem; }
       .step-actions .btn-primary,
       .step-actions .btn-secondary,
-      .step-actions .btn-confirm {
-        width: 100%;
-        justify-content: center;
-      }
+      .step-actions .btn-confirm { width: 100%; justify-content: center; }
+      .btn-primary, .btn-secondary, .btn-confirm { padding: 0.65rem 1.25rem; font-size: 0.88rem; }
+      .summary-card { padding: 1rem; }
+      .summary-row { flex-direction: column; align-items: flex-start; gap: 0.15rem; }
+      .game-toggle .toggle-label { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+      .availability-banner { padding: 0.85rem 1rem; font-size: 0.85rem; }
+      .success-title { font-size: 1.35rem; }
+      .success-subtitle { font-size: 0.9rem; }
+      .confirmation-value { font-size: 1.5rem; }
+      .qr-placeholder { width: 150px; height: 150px; }
+      .qr-placeholder i { font-size: 2.5rem; }
+    }
 
-      .games-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .summary-row {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.15rem;
-      }
-
-      .game-toggle .toggle-label {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.75rem;
-      }
+    @media (max-width: 480px) {
+      .reservations-wizard { padding: 1rem 0.5rem 2.5rem; }
+      .wizard-header { margin-bottom: 1.5rem; }
+      .wizard-title { font-size: 1.3rem; gap: 0.4rem; }
+      .wizard-title i { font-size: 0.9em; }
+      .wizard-subtitle { font-size: 0.82rem; }
+      .progress-bar { margin-bottom: 1.5rem; }
+      .step-circle { width: 30px; height: 30px; font-size: 0.7rem; }
+      .step-label { font-size: 0.5rem; }
+      .step-connector { min-width: 12px; margin-bottom: 1.25rem; }
+      .step-content { padding: 1rem 0.85rem; }
+      .step-title { font-size: 1rem; margin-bottom: 1rem; padding-bottom: 0.6rem; }
+      .form-label { font-size: 0.8rem; }
+      .form-input { font-size: 16px; padding: 0.6rem 0.75rem; }
+      .form-section-title { font-size: 1rem; }
+      .size-display { font-size: 1.5rem; min-width: 40px; }
+      .size-btn { width: 38px; height: 38px; }
+      .time-slots { gap: 0.3rem; }
+      .time-pill { padding: 0.35rem 0.65rem; font-size: 0.75rem; }
+      .closed-banner { padding: 0.7rem 0.85rem; font-size: 0.82rem; }
+      .games-grid { grid-template-columns: 1fr; max-height: 300px; }
+      .game-card-meta { gap: 0.4rem; }
+      .game-meta-item { font-size: 0.72rem; }
+      .summary-heading { font-size: 0.9rem; }
+      .summary-label { font-size: 0.82rem; }
+      .summary-value { font-size: 0.85rem; }
+      .toggle-text { font-size: 0.88rem; }
+      .success-container { padding: 0.5rem 0; }
+      .success-icon-wrap { width: 64px; height: 64px; }
+      .success-icon-wrap i { font-size: 2rem; }
+      .success-title { font-size: 1.2rem; }
+      .success-subtitle { font-size: 0.85rem; margin-bottom: 1.5rem; }
+      .confirmation-card { max-width: 100%; }
+      .confirmation-id { padding: 0.85rem; }
+      .confirmation-label { font-size: 0.65rem; }
+      .confirmation-value { font-size: 1.35rem; }
+      .confirmation-details { padding: 1rem; }
+      .confirmation-row { font-size: 0.85rem; }
+      .qr-placeholder { width: 130px; height: 130px; margin-bottom: 1.5rem; }
+      .qr-placeholder i { font-size: 2rem; }
+      .qr-placeholder span { font-size: 0.75rem; }
+      .btn-home { padding: 0.65rem 1.5rem; font-size: 0.85rem; }
+      .field-error { font-size: 0.72rem; }
     }
 
     /* === Availability Banners === */
@@ -1432,6 +1482,7 @@ export class ReservationsPageComponent {
   private juegosService = inject(JuegoService);
   private mesaService = inject(MesaService);
   private toastService = inject(ToastService);
+  private authService = inject(AuthService);
 
   // Progress steps
   readonly steps = [
@@ -1446,11 +1497,39 @@ export class ReservationsPageComponent {
   // Today's date string for min attribute
   readonly todayStr = new Date().toISOString().split('T')[0];
 
-  // All time slots
-  readonly allTimeSlots = [
-    '12:00', '13:00', '14:00', '15:00', '16:00',
-    '17:00', '18:00', '19:00', '20:00', '21:00', '22:00'
-  ];
+  // Horarios por dia (0=Dom, 1=Lun, 2=Mar, 3=Mie, 4=Jue, 5=Vie, 6=Sab)
+  private readonly schedule: Record<number, { open: number; lastSlot: number } | null> = {
+    0: { open: 12, lastSlot: 21 },     // Dom  12:00-22:00 → ultima reserva 21:00
+    1: null,                             // Lun  Cerrado
+    2: { open: 17, lastSlot: 22 },      // Mar  17:00-23:00
+    3: { open: 17, lastSlot: 22 },      // Mie  17:00-23:00
+    4: { open: 17, lastSlot: 22 },      // Jue  17:00-23:00
+    5: { open: 17, lastSlot: 23 },      // Vie  17:00-00:00
+    6: { open: 12, lastSlot: 23 },      // Sab  12:00-00:00
+  };
+
+  readonly isDayClosed = computed(() => {
+    const dateStr = this.selectedDate();
+    if (!dateStr) return false;
+    const day = new Date(dateStr + 'T12:00:00').getDay();
+    return this.schedule[day] === null;
+  });
+
+  readonly availableTimeSlots = computed(() => {
+    const dateStr = this.selectedDate();
+    if (!dateStr) return [];
+    const day = new Date(dateStr + 'T12:00:00').getDay();
+    const hours = this.schedule[day];
+    if (!hours) return [];
+    const slots: string[] = [];
+    for (let h = hours.open; h <= hours.lastSlot; h++) {
+      slots.push(`${h.toString().padStart(2, '0')}:00`);
+      if (h < hours.lastSlot) {
+        slots.push(`${h.toString().padStart(2, '0')}:30`);
+      }
+    }
+    return slots;
+  });
 
   // Step 1 signals
   readonly selectedDate = signal('');
@@ -1458,7 +1537,7 @@ export class ReservationsPageComponent {
   readonly partySize = signal(2);
 
   readonly step1Valid = computed(() =>
-    this.selectedDate() !== '' && this.selectedTime() !== '' && this.partySize() >= 1
+    this.selectedDate() !== '' && this.selectedTime() !== '' && this.partySize() >= 1 && !this.isDayClosed()
   );
 
   // Availability check signals
@@ -1497,11 +1576,19 @@ export class ReservationsPageComponent {
   isLoading = signal(true);
 
   constructor() {
-    // Pre-load games
     this.juegosService.getAll().subscribe(games => {
       this.allGames.set(games);
       this.isLoading.set(false);
     });
+
+    const user = this.authService.currentUser();
+    if (user) {
+      this.contactInfo.set({
+        nombre: user.nombre || '',
+        telefono: user.telefono || '',
+        email: user.email || ''
+      });
+    }
   }
 
   // Navigation
@@ -1513,6 +1600,10 @@ export class ReservationsPageComponent {
   onDateChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     this.selectedDate.set(input.value);
+    const slots = this.availableTimeSlots();
+    if (!slots.includes(this.selectedTime())) {
+      this.selectedTime.set('');
+    }
   }
 
   incrementParty(): void {

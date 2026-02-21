@@ -112,6 +112,28 @@ import { AuthService } from '../../../core/services/auth.service';
             </div>
             <h3 class="success-title">Cuenta creada</h3>
             <p class="success-message">{{ successMessage() }}</p>
+
+            @if (reenvioMessage()) {
+              <div class="reenvio-banner" [class.reenvio-error]="reenvioError()">
+                <i [class]="reenvioError() ? 'fa-solid fa-triangle-exclamation' : 'fa-solid fa-check-circle'"></i>
+                {{ reenvioMessage() }}
+              </div>
+            }
+
+            <button
+              class="btn-reenviar"
+              (click)="reenviarVerificacion()"
+              [disabled]="reenvioLoading()"
+            >
+              @if (reenvioLoading()) {
+                <i class="fa-solid fa-spinner fa-spin"></i>
+                Reenviando...
+              } @else {
+                <i class="fa-solid fa-paper-plane"></i>
+                Reenviar email de verificación
+              }
+            </button>
+
             <a class="btn-submit" routerLink="/auth/login" style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
               <i class="fa-solid fa-right-to-bracket"></i>
               Ir al login
@@ -355,8 +377,76 @@ import { AuthService } from '../../../core/services/auth.service';
     .back-link i { font-size: 0.75rem; transition: transform 0.2s; }
     .back-link:hover i { transform: translateX(-3px); }
 
+    .btn-reenviar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
+      padding: 0.7rem 1.5rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text-main);
+      background-color: transparent;
+      border: 1px solid var(--card-border, #E5E7EB);
+      border-radius: var(--radius-md, 8px);
+      cursor: pointer;
+      transition: background-color 0.25s, border-color 0.25s;
+      margin-bottom: 0.75rem;
+    }
+
+    .btn-reenviar:hover:not(:disabled) {
+      background-color: var(--hover-bg, rgba(0, 0, 0, 0.04));
+      border-color: var(--primary-coral, #FF6B6B);
+    }
+
+    :host-context([data-theme="dark"]) .btn-reenviar:hover:not(:disabled) {
+      background-color: rgba(255, 255, 255, 0.05);
+      border-color: var(--neon-cyan, #00FFD1);
+    }
+
+    .btn-reenviar:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .reenvio-banner {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.65rem 1rem;
+      border-radius: var(--radius-md, 8px);
+      background-color: rgba(16, 185, 129, 0.1);
+      border: 1px solid var(--success, #10B981);
+      color: var(--success, #10B981);
+      font-size: 0.8rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .reenvio-banner.reenvio-error {
+      background-color: var(--danger-bg, rgba(239, 68, 68, 0.1));
+      border-color: var(--danger, #EF4444);
+      color: var(--danger-text, #FCA5A5);
+    }
+
+    @media (max-width: 1024px) {
+      .registro-page { padding: 1.5rem 1rem; }
+    }
+    @media (max-width: 768px) {
+      .registro-page { padding: 1.25rem 0.75rem; }
+      .registro-card { max-width: min(420px, 90vw); padding: 2rem 1.5rem; }
+      .form-input { font-size: 16px; padding: 0.7rem 0.875rem; }
+      .btn-submit { padding: 0.75rem 1.25rem; font-size: 0.9rem; }
+      .registro-logo-img { height: 50px; }
+    }
     @media (max-width: 480px) {
-      .registro-card { padding: 2rem 1.25rem; }
+      .registro-page { padding: 1rem 0.5rem; }
+      .registro-card { max-width: min(420px, 94vw); padding: 1.5rem 1.25rem; }
+      .registro-form { gap: 1rem; }
+      .form-label { font-size: 0.775rem; }
+      .form-input { font-size: 16px; padding: 0.65rem 0.75rem; }
+      .btn-submit { padding: 0.7rem 1rem; font-size: 0.875rem; }
+      .registro-logo-img { height: 45px; }
+      .login-link-text { font-size: 0.8rem; }
+      .back-link { font-size: 0.8rem; }
+      .error-banner { font-size: 0.8rem; padding: 0.625rem 0.875rem; }
     }
   `]
 })
@@ -375,6 +465,9 @@ export class RegistroComponent {
   successMessage = signal('');
   isLoading = signal(false);
   registroExitoso = signal(false);
+  reenvioLoading = signal(false);
+  reenvioMessage = signal('');
+  reenvioError = signal(false);
 
   isFieldInvalid(field: string): boolean {
     const control = this.registroForm.get(field);
@@ -407,6 +500,28 @@ export class RegistroComponent {
         } else {
           this.errorMessage.set('Ocurrió un error. Inténtalo más tarde.');
         }
+      }
+    });
+  }
+
+  reenviarVerificacion() {
+    const email = this.registroForm.value.email;
+    if (!email) return;
+
+    this.reenvioLoading.set(true);
+    this.reenvioMessage.set('');
+    this.reenvioError.set(false);
+
+    this.authService.reenviarVerificacion(email).subscribe({
+      next: () => {
+        this.reenvioLoading.set(false);
+        this.reenvioMessage.set('Email de verificación reenviado. Revisa tu bandeja de entrada.');
+        this.reenvioError.set(false);
+      },
+      error: (err) => {
+        this.reenvioLoading.set(false);
+        this.reenvioError.set(true);
+        this.reenvioMessage.set(err.error?.mensaje || 'No se pudo reenviar el email. Inténtalo más tarde.');
       }
     });
   }

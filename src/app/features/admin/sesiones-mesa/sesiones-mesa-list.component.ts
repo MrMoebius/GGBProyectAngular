@@ -1,0 +1,459 @@
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { SesionMesaService } from '../../../core/services/sesion-mesa.service';
+import { MesaService } from '../../../core/services/mesa.service';
+import { ClienteService } from '../../../core/services/cliente.service';
+import { ToastService } from '../../../core/services/toast.service';
+import { MockReservasService } from '../../../core/services/mock-reservas.service';
+import { SesionMesa } from '../../../core/models/sesion-mesa.interface';
+import { Mesa } from '../../../core/models/mesa.interface';
+import { Cliente } from '../../../core/models/cliente.interface';
+import { ReservasMesa } from '../../../core/models/reservas-mesa.interface';
+import { EntityFormModalComponent } from '../../../shared/components/entity-form-modal/entity-form-modal.component';
+import { StatusBadgeComponent } from '../../../shared/components/status-badge/status-badge.component';
+import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
+import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer-loader.component';
+
+@Component({
+  selector: 'app-sesiones-mesa-list',
+  standalone: true,
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    EntityFormModalComponent,
+    StatusBadgeComponent,
+    ConfirmModalComponent,
+    BeerLoaderComponent
+  ],
+  template: `
+    <app-beer-loader [isLoading]="isLoading()" />
+    <div class="page-wrapper">
+      <!-- Header -->
+      <div class="page-header">
+        <div class="header-left">
+          <h1 class="page-title">Sesiones de Mesa</h1>
+          <span class="record-count">{{ filteredSesiones().length }} registros</span>
+        </div>
+        <button class="btn btn-primary" (click)="openAbrir()">
+          <i class="fa-solid fa-door-open"></i>
+          Abrir Sesion
+        </button>
+      </div>
+
+      <!-- Filtros -->
+      <div class="filter-bar">
+        <div class="search-input-wrapper">
+          <i class="fa-solid fa-magnifying-glass search-icon"></i>
+          <input
+            type="text"
+            class="form-input search-input"
+            placeholder="Buscar por mesa o cliente..."
+            [value]="searchTerm()"
+            (input)="searchTerm.set($any($event.target).value)"
+          />
+        </div>
+        <div class="estado-filters">
+          @for (f of estadoFilters; track f.value) {
+            <button
+              class="filter-pill"
+              [class.active]="estadoFilter() === f.value"
+              (click)="estadoFilter.set(f.value)"
+            >
+              {{ f.label }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Grid -->
+      <div class="sesiones-grid">
+        @for (s of filteredSesiones(); track s.id) {
+          <div class="sesion-card" [class.stale]="isStale(s)" (click)="navigateToDetail(s.id)">
+            <div class="card-top">
+              <span class="card-mesa">{{ getMesaNombre(s.idMesa) }}</span>
+              <app-status-badge [status]="s.estado" />
+            </div>
+            <div class="card-body">
+              @if (isStale(s)) {
+                <div class="stale-alert">
+                  <i class="fa-solid fa-triangle-exclamation"></i>
+                  Abierta hace {{ getElapsedTime(s) }}
+                </div>
+              }
+              <div class="card-field">
+                <i class="fa-solid fa-users"></i>
+                <span>{{ s.numComensales ?? '-' }} comensales</span>
+              </div>
+              @if (getClienteNombre(s.idCliente) !== '-') {
+                <div class="card-field">
+                  <i class="fa-solid fa-user"></i>
+                  <span>{{ getClienteNombre(s.idCliente) }}</span>
+                </div>
+              }
+              <div class="card-field">
+                <i class="fa-solid fa-clock"></i>
+                <span>{{ formatDateTime(s.fechaHoraApertura) }}</span>
+              </div>
+              @if (s.usaLudoteca) {
+                <div class="card-field ludo-tag">
+                  <i class="fa-solid fa-puzzle-piece"></i>
+                  <span>Ludoteca</span>
+                </div>
+              }
+            </div>
+            <div class="card-bottom" (click)="$event.stopPropagation()">
+              @if (s.estado === 'ACTIVA') {
+                <button class="btn btn-ghost btn-sm" (click)="navigateToDetail(s.id)" title="Ver detalle">
+                  <i class="fa-solid fa-eye"></i> Detalle
+                </button>
+                <button class="btn btn-danger btn-sm" (click)="openCerrar(s.id)" title="Cerrar sesion">
+                  <i class="fa-solid fa-door-closed"></i> Cerrar
+                </button>
+                <button class="btn btn-ghost btn-sm btn-cancel" (click)="openCancelar(s.id)" title="Cancelar sin factura">
+                  <i class="fa-solid fa-ban"></i> Cancelar
+                </button>
+              } @else {
+                <button class="btn btn-ghost btn-sm" (click)="navigateToDetail(s.id)" title="Ver detalle">
+                  <i class="fa-solid fa-eye"></i> Ver detalle
+                </button>
+              }
+            </div>
+          </div>
+        } @empty {
+          <div class="empty-state-full">
+            <i class="fa-solid fa-door-open empty-icon"></i>
+            <p>No se encontraron sesiones</p>
+          </div>
+        }
+      </div>
+
+      <!-- Modal Abrir Sesion -->
+      <app-entity-form-modal
+        [isOpen]="showAbrirModal()"
+        title="Abrir Sesion"
+        [isEditing]="false"
+        [formValid]="abrirForm.valid"
+        (onClose)="showAbrirModal.set(false)"
+        (onSubmit)="submitAbrir()"
+      >
+        <form [formGroup]="abrirForm">
+          <div class="form-group">
+            <label class="form-label">Reserva (opcional)</label>
+            <select class="form-input" formControlName="idReserva" (change)="onReservaChange($event)">
+              <option [ngValue]="null">Sin reserva</option>
+              @for (r of reservasPendientes(); track r.id) {
+                <option [ngValue]="r.id">{{ r.fechaReserva }} {{ r.horaInicio }} - Mesa #{{ r.idMesa }} ({{ r.numPersonas }} pax)</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Mesa *</label>
+            <select class="form-input" formControlName="idMesa">
+              <option [ngValue]="null" disabled>Seleccionar mesa...</option>
+              @for (m of mesasLibres(); track m.id) {
+                <option [ngValue]="m.id">#{{ m.numeroMesa }} - {{ m.nombreMesa }} ({{ m.capacidad }} pax)</option>
+              }
+            </select>
+            @if (abrirForm.get('idMesa')?.invalid && abrirForm.get('idMesa')?.touched) {
+              <span class="form-error">La mesa es obligatoria</span>
+            }
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Cliente (opcional)</label>
+            <select class="form-input" formControlName="idCliente">
+              <option [ngValue]="null">Sin cliente registrado</option>
+              @for (c of clientes(); track c.id) {
+                <option [ngValue]="c.id">{{ c.nombre }} ({{ c.email }})</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Comensales *</label>
+            <input type="number" class="form-input" formControlName="numComensales" min="1" placeholder="Numero de personas" />
+            @if (abrirForm.get('numComensales')?.invalid && abrirForm.get('numComensales')?.touched) {
+              <span class="form-error">Minimo 1 comensal</span>
+            }
+          </div>
+        </form>
+      </app-entity-form-modal>
+
+      <!-- Confirm Cerrar -->
+      <app-confirm-modal
+        [isOpen]="showCerrarModal()"
+        title="Cerrar Sesion"
+        message="Se verificaran pagos y comandas. Si todo esta correcto, se generara la factura automaticamente."
+        (onConfirm)="submitCerrar()"
+        (onCancel)="showCerrarModal.set(false)"
+      />
+
+      <!-- Confirm Cancelar -->
+      <app-confirm-modal
+        [isOpen]="showCancelarModal()"
+        title="Cancelar Sesion"
+        message="Se cancelara la sesion sin generar factura. Esta accion no se puede deshacer."
+        (onConfirm)="submitCancelar()"
+        (onCancel)="showCancelarModal.set(false)"
+      />
+    </div>
+  `,
+  styles: [`
+    .page-wrapper { padding: var(--spacing-xl); }
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--spacing-lg); }
+    .header-left { display: flex; align-items: baseline; gap: var(--spacing-md); }
+    .page-title { font-size: 1.75rem; font-weight: 700; color: var(--text-main); margin: 0; }
+    .record-count { font-size: 0.875rem; color: var(--text-muted); }
+
+    .filter-bar { display: flex; align-items: center; gap: var(--spacing-md); margin-bottom: var(--spacing-lg); flex-wrap: wrap; }
+    .search-input-wrapper { position: relative; }
+    .search-icon { position: absolute; left: 0.75rem; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.875rem; }
+    .search-input { padding-left: 2.25rem; width: 260px; }
+    .estado-filters { display: flex; gap: 0.5rem; }
+    .filter-pill { padding: 0.375rem 1rem; border-radius: 9999px; border: 1px solid var(--input-border); background-color: var(--card-bg); color: var(--text-muted); font-size: 0.8125rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+    .filter-pill:hover { border-color: var(--primary-coral); color: var(--primary-coral); }
+    .filter-pill.active { background-color: var(--primary-coral); border-color: var(--primary-coral); color: var(--text-white); }
+
+    .sesiones-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+    .sesion-card { background-color: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius-md, 8px); padding: 1rem 1.25rem; cursor: pointer; transition: border-color 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; gap: 0.75rem; }
+    .sesion-card:hover { border-color: var(--primary-coral); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .card-top { display: flex; align-items: center; justify-content: space-between; }
+    .card-mesa { font-weight: 700; font-size: 1rem; color: var(--text-main); }
+    .card-body { display: flex; flex-direction: column; gap: 0.375rem; }
+    .card-field { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8125rem; color: var(--text-muted); }
+    .card-field i { width: 14px; text-align: center; font-size: 0.75rem; }
+    .ludo-tag { color: var(--success); font-weight: 600; }
+    .card-bottom { display: flex; gap: 0.5rem; border-top: 1px solid var(--card-border); padding-top: 0.75rem; }
+    .sesion-card.stale { border-color: var(--danger); border-left: 3px solid var(--danger); }
+    .stale-alert { display: flex; align-items: center; gap: 0.4rem; font-size: 0.75rem; font-weight: 600; color: var(--danger); background: rgba(239,68,68,0.1); padding: 0.3rem 0.6rem; border-radius: var(--radius-md, 8px); }
+    .stale-alert i { font-size: 0.7rem; }
+    .btn-cancel { color: var(--danger); }
+    .btn-cancel:hover { background-color: rgba(239,68,68,0.1); }
+
+    .empty-state-full { grid-column: 1 / -1; text-align: center; padding: 3rem 1rem; color: var(--text-muted); }
+    .empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; opacity: 0.5; display: block; }
+
+    @media (max-width: 768px) {
+      .page-wrapper { padding: var(--spacing-md); }
+      .page-header { flex-direction: column; align-items: flex-start; gap: var(--spacing-md); }
+      .filter-bar { flex-direction: column; align-items: flex-start; }
+      .search-input { width: 100%; }
+      .form-row { flex-direction: column; gap: 0; }
+    }
+  `]
+})
+export class SesionesMesaListComponent implements OnInit {
+  private sesionService = inject(SesionMesaService);
+  private mesaService = inject(MesaService);
+  private clienteService = inject(ClienteService);
+  private reservasService = inject(MockReservasService);
+  private toastService = inject(ToastService);
+  private fb = inject(FormBuilder);
+  private router = inject(Router);
+
+  sesiones = signal<SesionMesa[]>([]);
+  mesas = signal<Mesa[]>([]);
+  clientes = signal<Cliente[]>([]);
+  reservasPendientes = signal<ReservasMesa[]>([]);
+  searchTerm = signal('');
+  estadoFilter = signal('ACTIVA');
+  showAbrirModal = signal(false);
+  showCerrarModal = signal(false);
+  cerrarId = signal<number | null>(null);
+  showCancelarModal = signal(false);
+  cancelarId = signal<number | null>(null);
+  isLoading = signal(true);
+
+  estadoFilters = [
+    { label: 'Todas', value: '' },
+    { label: 'Activas', value: 'ACTIVA' },
+    { label: 'Cerradas', value: 'CERRADA' },
+    { label: 'Canceladas', value: 'CANCELADA' }
+  ];
+
+  mesasLibres = computed(() => this.mesas().filter(m => m.estado === 'LIBRE' || m.estado === 'RESERVADA'));
+
+  filteredSesiones = computed(() => {
+    const term = this.searchTerm().toLowerCase().trim();
+    const estado = this.estadoFilter();
+    let list = this.sesiones();
+
+    if (estado) {
+      list = list.filter(s => s.estado === estado);
+    }
+
+    if (term) {
+      list = list.filter(s => {
+        const mesaNombre = this.getMesaNombre(s.idMesa).toLowerCase();
+        const clienteNombre = this.getClienteNombre(s.idCliente).toLowerCase();
+        return mesaNombre.includes(term) || clienteNombre.includes(term) || s.id.toString().includes(term);
+      });
+    }
+
+    return list.sort((a, b) => new Date(b.fechaHoraApertura).getTime() - new Date(a.fechaHoraApertura).getTime());
+  });
+
+  abrirForm = this.fb.group({
+    idReserva: [null as number | null],
+    idMesa: [null as number | null, Validators.required],
+    idCliente: [null as number | null],
+    numComensales: [1, [Validators.required, Validators.min(1)]]
+  });
+
+  ngOnInit(): void {
+    this.loadData();
+  }
+
+  loadData(): void {
+    this.sesionService.getAll().subscribe({
+      next: (data) => { this.sesiones.set(data); this.isLoading.set(false); },
+      error: () => { this.toastService.error('Error al cargar sesiones'); this.isLoading.set(false); }
+    });
+    this.mesaService.getAll().subscribe({
+      next: (data) => this.mesas.set(data),
+      error: () => {}
+    });
+    this.clienteService.getAll().subscribe({
+      next: (data) => this.clientes.set(data),
+      error: () => {}
+    });
+    this.reservasService.getAll().subscribe({
+      next: (data) => this.reservasPendientes.set(data.filter(r => r.estado === 'CONFIRMADA')),
+      error: () => {}
+    });
+  }
+
+  getMesaNombre(idMesa: number): string {
+    const mesa = this.mesas().find(m => m.id === idMesa);
+    return mesa ? `#${mesa.numeroMesa} ${mesa.nombreMesa}` : `Mesa ${idMesa}`;
+  }
+
+  getClienteNombre(idCliente?: number): string {
+    if (!idCliente) return '-';
+    const cliente = this.clientes().find(c => c.id === idCliente);
+    return cliente ? cliente.nombre : `Cliente ${idCliente}`;
+  }
+
+  navigateToDetail(id: number): void {
+    const currentUrl = this.router.url;
+    const base = currentUrl.startsWith('/staff') ? '/staff' : '/admin';
+    this.router.navigate([`${base}/sesiones-mesa`, id]);
+  }
+
+  openAbrir(): void {
+    this.abrirForm.reset({ idReserva: null, idMesa: null, idCliente: null, numComensales: 1 });
+    this.showAbrirModal.set(true);
+  }
+
+  onReservaChange(event: Event): void {
+    const reservaId = (event.target as HTMLSelectElement).value;
+    if (!reservaId || reservaId === 'null') {
+      return;
+    }
+    const reserva = this.reservasPendientes().find(r => r.id === +reservaId);
+    if (reserva) {
+      this.abrirForm.patchValue({
+        idMesa: reserva.idMesa ?? null,
+        idCliente: reserva.idCliente,
+        numComensales: reserva.numPersonas
+      });
+    }
+  }
+
+  submitAbrir(): void {
+    if (this.abrirForm.invalid) return;
+    const raw = this.abrirForm.getRawValue();
+    const mockReservaId = raw.idReserva;
+
+    const payload: any = {
+      idMesa: raw.idMesa,
+      idCliente: raw.idCliente,
+      numComensales: raw.numComensales
+    };
+
+    this.sesionService.abrir(payload).subscribe({
+      next: (sesion) => {
+        if (mockReservaId) {
+          this.reservasService.changeEstado(mockReservaId, 'COMPLETADA').subscribe();
+        }
+        this.toastService.success('Sesion abierta correctamente');
+        this.showAbrirModal.set(false);
+        this.navigateToDetail(sesion.id);
+      },
+      error: (err) => {
+        const msg = err?.error?.message || err?.error || 'Error al abrir sesion';
+        this.toastService.error(msg);
+      }
+    });
+  }
+
+  openCerrar(id: number): void {
+    this.cerrarId.set(id);
+    this.showCerrarModal.set(true);
+  }
+
+  submitCerrar(): void {
+    const id = this.cerrarId();
+    if (!id) return;
+    this.sesionService.cerrar(id).subscribe({
+      next: () => {
+        this.toastService.success('Sesion cerrada y factura generada');
+        this.showCerrarModal.set(false);
+        this.loadData();
+      },
+      error: (err) => {
+        const msg = err?.error?.message || err?.error || 'Error al cerrar sesion';
+        this.toastService.error(msg);
+        this.showCerrarModal.set(false);
+      }
+    });
+  }
+
+  openCancelar(id: number): void {
+    this.cancelarId.set(id);
+    this.showCancelarModal.set(true);
+  }
+
+  submitCancelar(): void {
+    const id = this.cancelarId();
+    if (!id) return;
+    this.sesionService.update(id, { estado: 'CANCELADA' } as any).subscribe({
+      next: () => {
+        this.toastService.success('Sesion cancelada');
+        this.showCancelarModal.set(false);
+        this.loadData();
+      },
+      error: (err) => {
+        const msg = err?.error?.message || err?.error || 'Error al cancelar sesion';
+        this.toastService.error(msg);
+        this.showCancelarModal.set(false);
+      }
+    });
+  }
+
+  isStale(s: SesionMesa): boolean {
+    if (s.estado !== 'ACTIVA') return false;
+    const opened = new Date(s.fechaHoraApertura).getTime();
+    return Date.now() - opened > 24 * 60 * 60 * 1000;
+  }
+
+  getElapsedTime(s: SesionMesa): string {
+    const ms = Date.now() - new Date(s.fechaHoraApertura).getTime();
+    const hours = Math.floor(ms / (1000 * 60 * 60));
+    if (hours < 24) return `${hours} horas`;
+    const days = Math.floor(hours / 24);
+    const remHours = hours % 24;
+    return remHours > 0 ? `${days}d ${remHours}h` : `${days} dias`;
+  }
+
+  formatDateTime(iso: string): string {
+    if (!iso) return '-';
+    const dt = new Date(iso);
+    if (isNaN(dt.getTime())) return iso;
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    return `${pad(dt.getDate())}/${pad(dt.getMonth() + 1)}/${dt.getFullYear()} ${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
+  }
+}

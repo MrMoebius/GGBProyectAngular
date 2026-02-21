@@ -47,13 +47,22 @@ import { NotificationService } from '../../../core/services/notification.service
             <i [ngClass]="themeService.isDark() ? 'fa-solid fa-sun' : 'fa-solid fa-moon'"></i>
           </button>
 
+          <!-- Staff button (visible for EMPLEADO) -->
+          @if (currentRole() === 'EMPLEADO') {
+            <a class="btn btn-sm staff-btn" routerLink="/staff/dashboard">
+              <i class="fa-solid fa-id-badge"></i> Panel Staff
+            </a>
+          }
+
           <!-- Notification bell -->
-          <a class="action-btn notification-btn" routerLink="/customer/notificaciones">
-            <i class="fa-solid fa-bell"></i>
-            @if (notificationService.unreadCount() > 0) {
-              <span class="badge">{{ notificationService.unreadCount() }}</span>
-            }
-          </a>
+          @if (authService.isAuthenticated()) {
+            <a class="action-btn notification-btn" routerLink="/customer/notificaciones">
+              <i class="fa-solid fa-bell"></i>
+              @if (notificationService.unreadCount() > 0) {
+                <span class="badge">{{ notificationService.unreadCount() }}</span>
+              }
+            </a>
+          }
 
           <!-- User avatar or Login button -->
           @if (authService.isAuthenticated()) {
@@ -64,8 +73,11 @@ import { NotificationService } from '../../../core/services/notification.service
               @if (userMenuOpen()) {
                 <div class="user-dropdown">
                   <a class="user-dropdown-item" [routerLink]="profileRoute()" (click)="closeUserMenu()">
-                    <i [ngClass]="isAdmin() ? 'fa-solid fa-shield-halved' : 'fa-solid fa-user'"></i>
-                    {{ isAdmin() ? 'Panel de administración' : 'Ver perfil' }}
+                    @switch (currentRole()) {
+                      @case ('ADMIN') { <i class="fa-solid fa-shield-halved"></i> Panel Admin }
+                      @case ('EMPLEADO') { <i class="fa-solid fa-id-badge"></i> Panel Staff }
+                      @default { <i class="fa-solid fa-user"></i> Mi Panel }
+                    }
                   </a>
                   <div class="user-dropdown-divider"></div>
                   <button class="user-dropdown-item logout-item" (click)="confirmLogout()">
@@ -120,8 +132,11 @@ import { NotificationService } from '../../../core/services/notification.service
                 [routerLink]="profileRoute()"
                 (click)="closeMobileMenu()"
               >
-                <i [ngClass]="isAdmin() ? 'fa-solid fa-shield-halved' : 'fa-solid fa-user'"></i>
-                {{ isAdmin() ? 'Panel de administración' : 'Ver perfil' }}
+                @switch (currentRole()) {
+                  @case ('ADMIN') { <i class="fa-solid fa-shield-halved"></i> Panel Admin }
+                  @case ('EMPLEADO') { <i class="fa-solid fa-id-badge"></i> Panel Staff }
+                  @default { <i class="fa-solid fa-user"></i> Mi Panel }
+                }
               </a>
               <button
                 class="mobile-link mobile-logout"
@@ -608,6 +623,29 @@ import { NotificationService } from '../../../core/services/notification.service
       font-size: 0.8125rem;
     }
 
+    /* ===== Staff button ===== */
+    .staff-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      text-decoration: none;
+      white-space: nowrap;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      padding: 0.375rem 0.875rem;
+      border-radius: var(--radius-md, 8px);
+      background-color: var(--info, #3B82F6);
+      color: #fff;
+      transition: background-color 0.2s, transform 0.15s;
+    }
+
+    .staff-btn:hover {
+      background-color: #2563EB;
+      transform: scale(1.03);
+    }
+
+    .staff-btn i { font-size: 0.75rem; }
+
     /* ===== Hamburger (hidden on desktop) ===== */
     .hamburger {
       display: none;
@@ -703,7 +741,40 @@ import { NotificationService } from '../../../core/services/notification.service
       margin-left: auto;
     }
 
-    /* ===== Responsive ===== */
+    /* ===== Responsive - Tablet ===== */
+    @media (max-width: 1024px) and (min-width: 769px) {
+      .navbar-inner {
+        padding: 0 1rem;
+      }
+
+      .nav-link {
+        padding: 0.4rem 0.65rem;
+        font-size: 0.8rem;
+      }
+
+      .action-btn {
+        width: 36px;
+        height: 36px;
+      }
+
+      .user-avatar {
+        width: 34px;
+        height: 34px;
+        font-size: 0.8rem;
+      }
+
+      .staff-btn {
+        padding: 0.3rem 0.7rem;
+        font-size: 0.75rem;
+      }
+
+      .login-btn {
+        font-size: 0.75rem;
+        padding: 0.35rem 0.75rem;
+      }
+    }
+
+    /* ===== Responsive - Mobile ===== */
     @media (max-width: 768px) {
       .nav-links {
         display: none;
@@ -729,6 +800,74 @@ import { NotificationService } from '../../../core/services/notification.service
       .navbar-inner {
         padding: 0 1rem;
       }
+
+      .logo-img {
+        height: 36px;
+      }
+
+      .action-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+      }
+
+      .mobile-menu {
+        padding: 0.75rem 1rem 1rem;
+      }
+
+      .mobile-link {
+        padding: 0.65rem 0.85rem;
+        font-size: 0.9rem;
+      }
+
+      .staff-btn {
+        padding: 0.3rem 0.7rem;
+        font-size: 0.75rem;
+      }
+
+      .modal-card {
+        max-width: min(360px, 90vw);
+        padding: 1.5rem;
+      }
+    }
+
+    /* ===== Responsive - Small Phone ===== */
+    @media (max-width: 480px) {
+      .navbar-inner {
+        padding: 0 0.75rem;
+        gap: 0.25rem;
+      }
+
+      .logo-img {
+        height: 32px;
+      }
+
+      .action-btn {
+        width: 34px;
+        height: 34px;
+        font-size: 0.95rem;
+      }
+
+      .nav-actions {
+        gap: 0.25rem;
+      }
+
+      .mobile-link {
+        padding: 0.55rem 0.75rem;
+        font-size: 0.85rem;
+      }
+
+      .modal-card {
+        padding: 1.25rem;
+      }
+
+      .modal-title {
+        font-size: 1rem;
+      }
+
+      .modal-text {
+        font-size: 0.85rem;
+      }
     }
 
     @media (min-width: 769px) {
@@ -752,12 +891,12 @@ export class PublicNavbarComponent {
   showLogoutConfirm = signal(false);
 
   // ---------- Computed ----------
-  isAdmin = computed(() => this.authService.currentRole() === 'ADMIN');
+  currentRole = computed(() => this.authService.currentRole());
 
   profileRoute = computed(() => {
-    switch (this.authService.currentRole()) {
+    switch (this.currentRole()) {
       case 'ADMIN': return '/admin/dashboard';
-      case 'EMPLEADO': return '/staff/sala';
+      case 'EMPLEADO': return '/staff/dashboard';
       default: return '/customer/dashboard';
     }
   });
@@ -780,6 +919,7 @@ export class PublicNavbarComponent {
     { label: 'Eventos', path: '/public/eventos' },
     { label: 'Reservar', path: '/public/reservas' },
     { label: 'Nosotros', path: '/public/nosotros' },
+    { label: 'Contacto', path: '/public/contacto' },
   ];
 
   // ---------- Scroll listener ----------

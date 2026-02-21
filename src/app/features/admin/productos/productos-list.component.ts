@@ -63,6 +63,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
               <th>Descripcion</th>
               <th>Categoria</th>
               <th>Precio</th>
+              <th>IVA</th>
               <th>Activo</th>
               <th>Acciones</th>
             </tr>
@@ -77,6 +78,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
                   <app-status-badge [status]="producto.categoria" />
                 </td>
                 <td class="price-cell">{{ formatPrice(producto.precio) }}</td>
+                <td>{{ producto.tipoIva }}%</td>
                 <td>
                   <app-status-badge [status]="producto.activo ? 'ACTIVO' : 'INACTIVO'" />
                 </td>
@@ -91,7 +93,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
               </tr>
             } @empty {
               <tr>
-                <td colspan="7" class="empty-state">
+                <td colspan="8" class="empty-state">
                   <i class="fa-solid fa-utensils empty-icon"></i>
                   <p>No se encontraron productos</p>
                 </td>
@@ -176,6 +178,14 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
                 <option value="SERVICIO">Servicio</option>
               </select>
             </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Tipo IVA</label>
+            <select class="form-input" formControlName="tipoIva">
+              <option [ngValue]="10">10% (Alimentos)</option>
+              <option [ngValue]="21">21% (Bebidas / Servicios)</option>
+            </select>
           </div>
 
           <div class="form-group form-check">
@@ -474,6 +484,7 @@ export class ProductosListComponent implements OnInit {
     descripcion: [''],
     precio: [0, [Validators.required, Validators.min(0)]],
     categoria: ['COMIDA' as string],
+    tipoIva: [21 as number],
     activo: [true]
   });
 
@@ -504,6 +515,7 @@ export class ProductosListComponent implements OnInit {
       descripcion: '',
       precio: 0,
       categoria: 'COMIDA',
+      tipoIva: 21,
       activo: true
     });
     this.showFormModal.set(true);
@@ -517,6 +529,7 @@ export class ProductosListComponent implements OnInit {
       descripcion: producto.descripcion || '',
       precio: producto.precio,
       categoria: producto.categoria,
+      tipoIva: producto.tipoIva,
       activo: producto.activo
     });
     this.showFormModal.set(true);

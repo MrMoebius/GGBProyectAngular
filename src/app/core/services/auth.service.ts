@@ -53,6 +53,16 @@ export class AuthService {
     });
   }
 
+  solicitarRecuperacion(email: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/solicitar-recuperacion`, null, {
+      params: { email }
+    });
+  }
+
+  recuperarPassword(data: { token: string; password: string }): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/recuperar-password`, data);
+  }
+
   login(credentials: { email: string; password: string }): Observable<any> {
     this.logout();
     return this.http.post<any>(`${this.apiUrl}/login`, credentials).pipe(
