@@ -124,6 +124,17 @@ import { AuthService } from '../../../core/services/auth.service';
       color: var(--danger, #EF4444);
       border-color: var(--danger, #EF4444);
     }
+
+    @media (max-width: 1024px) {
+      .header { margin-left: 0 !important; padding: 0 1rem; }
+      .header-title { display: none; }
+    }
+    @media (max-width: 480px) {
+      .header { padding: 0 0.75rem; }
+      .user-label { display: none; }
+      .user-badge { padding: 0.375rem 0.5rem; }
+      .header-right { gap: 0.5rem; }
+    }
   `]
 })
 export class StaffHeaderComponent {
