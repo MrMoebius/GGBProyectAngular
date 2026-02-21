@@ -126,14 +126,16 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
             <input type="text" class="form-input" formControlName="telefono" placeholder="Telefono de contacto" />
           </div>
 
-          <div class="form-group">
-            <label class="form-label">{{ isEditing() ? 'Nueva Contrasena' : 'Contrasena' }}</label>
-            <input type="password" class="form-input" formControlName="password"
-              [placeholder]="isEditing() ? 'Dejar vacio para mantener la actual' : 'Minimo 6 caracteres (opcional)'" />
-            @if (form.get('password')?.invalid && form.get('password')?.touched) {
-              <span class="form-error">La contrasena debe tener al menos 6 caracteres</span>
-            }
-          </div>
+          @if (!isEditing()) {
+            <div class="form-group">
+              <label class="form-label">Contrasena</label>
+              <input type="password" class="form-input" formControlName="password"
+                placeholder="Minimo 6 caracteres (opcional)" />
+              @if (form.get('password')?.invalid && form.get('password')?.touched) {
+                <span class="form-error">La contrasena debe tener al menos 6 caracteres</span>
+              }
+            </div>
+          }
 
           <div class="form-group">
             <label class="form-label">Notas</label>

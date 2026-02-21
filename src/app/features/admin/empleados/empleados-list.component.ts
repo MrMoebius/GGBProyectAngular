@@ -2,6 +2,7 @@ import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { EmpleadoService } from '../../../core/services/empleado.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { Empleado } from '../../../core/models/empleado.interface';
 import { EntityFormModalComponent } from '../../../shared/components/entity-form-modal/entity-form-modal.component';
@@ -328,8 +329,10 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
 })
 export class EmpleadosListComponent implements OnInit {
   private empleadoService = inject(EmpleadoService);
+  private authService = inject(AuthService);
   private toastService = inject(ToastService);
   private fb = inject(FormBuilder);
+  isSelfEdit = signal(false);
 
   // Signals
   empleados = signal<Empleado[]>([]);
@@ -382,8 +385,10 @@ export class EmpleadosListComponent implements OnInit {
 
   openCreate(): void {
     this.isEditing.set(false);
+    this.isSelfEdit.set(false);
     this.currentId.set(null);
     this.form.reset({ idRol: 2, estado: 'ACTIVO', fechaIngreso: '' });
+    this.form.get('estado')?.enable();
     this.form.get('password')?.setValidators([Validators.required, Validators.minLength(6)]);
     this.form.get('password')?.updateValueAndValidity();
     this.showFormModal.set(true);
@@ -402,6 +407,13 @@ export class EmpleadosListComponent implements OnInit {
     });
     this.form.get('password')?.clearValidators();
     this.form.get('password')?.updateValueAndValidity();
+    const currentEmail = this.authService.currentUser()?.email;
+    this.isSelfEdit.set(emp.email === currentEmail);
+    if (this.isSelfEdit()) {
+      this.form.get('estado')?.disable();
+    } else {
+      this.form.get('estado')?.enable();
+    }
     this.showFormModal.set(true);
   }
 
