@@ -79,12 +79,9 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
                   <div class="res-center">
                     <div class="res-time">
                       <i class="fa-solid fa-clock"></i>
-                      {{ getTime(res.fechaHoraInicio) }}@if (res.fechaHoraFin) { - {{ getTime(res.fechaHoraFin) }} }
+                      {{ extractTime(res.fechaHoraInicio) }}@if (res.fechaHoraFin) { - {{ extractTime(res.fechaHoraFin) }} }
                     </div>
                     <div class="res-details">
-                      <span class="res-detail-item">
-                        <i class="fa-solid fa-chair"></i> Mesa {{ res.idMesa }}
-                      </span>
                       <span class="res-detail-item">
                         <i class="fa-solid fa-users"></i> {{ res.numPersonas }} personas
                       </span>
@@ -126,12 +123,9 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
                   <div class="res-center">
                     <div class="res-time">
                       <i class="fa-solid fa-clock"></i>
-                      {{ getTime(res.fechaHoraInicio) }}@if (res.fechaHoraFin) { - {{ getTime(res.fechaHoraFin) }} }
+                      {{ extractTime(res.fechaHoraInicio) }}@if (res.fechaHoraFin) { - {{ extractTime(res.fechaHoraFin) }} }
                     </div>
                     <div class="res-details">
-                      <span class="res-detail-item">
-                        <i class="fa-solid fa-chair"></i> Mesa {{ res.idMesa }}
-                      </span>
                       <span class="res-detail-item">
                         <i class="fa-solid fa-users"></i> {{ res.numPersonas }} personas
                       </span>
@@ -170,12 +164,9 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
                   <div class="res-center">
                     <div class="res-time">
                       <i class="fa-solid fa-clock"></i>
-                      {{ getTime(res.fechaHoraInicio) }}@if (res.fechaHoraFin) { - {{ getTime(res.fechaHoraFin) }} }
+                      {{ extractTime(res.fechaHoraInicio) }}@if (res.fechaHoraFin) { - {{ extractTime(res.fechaHoraFin) }} }
                     </div>
                     <div class="res-details">
-                      <span class="res-detail-item">
-                        <i class="fa-solid fa-chair"></i> Mesa {{ res.idMesa }}
-                      </span>
                       <span class="res-detail-item">
                         <i class="fa-solid fa-users"></i> {{ res.numPersonas }} personas
                       </span>
@@ -558,30 +549,45 @@ export class MyReservationsComponent implements OnInit {
   }
 
   private loadReservations(): void {
-    this.reservasService.getByCliente().subscribe(reservas => {
-      this.allReservations.set(reservas);
-      this.isLoading.set(false);
+    this.reservasService.getMisReservas().subscribe({
+      next: reservas => {
+        this.allReservations.set(reservas);
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.toastService.error('Error al cargar reservas');
+        this.isLoading.set(false);
+      }
     });
   }
 
   cancelReservation(id: number): void {
-    this.reservasService.cancel(id).subscribe(() => {
-      this.toastService.success('Reserva cancelada correctamente');
-      this.loadReservations();
+    this.reservasService.cancelCliente(id).subscribe({
+      next: () => {
+        this.toastService.success('Reserva cancelada correctamente');
+        this.loadReservations();
+      },
+      error: () => this.toastService.error('Error al cancelar reserva')
     });
   }
 
-  getDay(isoStr: string): string {
-    if (!isoStr) return '';
-    return new Date(isoStr).getUTCDate().toString();
+  extractDate(iso: string): string {
+    return ReservasMesaService.extractDate(iso);
   }
 
-  getMonth(isoStr: string): string {
-    if (!isoStr) return '';
-    return new Date(isoStr).toLocaleDateString('es-ES', { month: 'short', timeZone: 'UTC' });
+  extractTime(iso: string): string {
+    return ReservasMesaService.extractTime(iso);
   }
 
-  getTime(isoStr: string): string {
-    return ReservasMesaService.extractTime(isoStr);
+  getDay(iso: string): string {
+    const d = ReservasMesaService.extractDate(iso);
+    if (!d) return '-';
+    return new Date(d + 'T12:00:00').getDate().toString();
+  }
+
+  getMonth(iso: string): string {
+    const d = ReservasMesaService.extractDate(iso);
+    if (!d) return '';
+    return new Date(d + 'T12:00:00').toLocaleDateString('es-ES', { month: 'short' });
   }
 }

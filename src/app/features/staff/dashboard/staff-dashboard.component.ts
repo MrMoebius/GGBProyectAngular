@@ -8,7 +8,7 @@ import { ClienteService } from '../../../core/services/cliente.service';
 import { ComandaService } from '../../../core/services/comanda.service';
 import { SesionMesaService } from '../../../core/services/sesion-mesa.service';
 import { FacturaService } from '../../../core/services/factura.service';
-import { MockReservasService } from '../../../core/services/mock-reservas.service';
+import { ReservasMesaService } from '../../../core/services/reservas-mesa.service';
 import { Comanda } from '../../../core/models/comanda.interface';
 import { ReservasMesa } from '../../../core/models/reservas-mesa.interface';
 import { SesionMesa } from '../../../core/models/sesion-mesa.interface';
@@ -116,7 +116,7 @@ export class StaffDashboardComponent implements OnInit {
   private comandaService = inject(ComandaService);
   private sesionMesaService = inject(SesionMesaService);
   private facturaService = inject(FacturaService);
-  private reservasService = inject(MockReservasService);
+  private reservasService = inject(ReservasMesaService);
 
   mesasCount = signal(0);
   reservasCount = signal(0);
@@ -157,7 +157,7 @@ export class StaffDashboardComponent implements OnInit {
   private buildReservaActivity(reservas: ReservasMesa[]): void {
     const pendientes = reservas.filter(r => r.estado === 'PENDIENTE');
     const hoy = new Date().toISOString().split('T')[0];
-    const confirmadaHoy = reservas.filter(r => r.estado === 'CONFIRMADA' && r.fechaHoraInicio?.startsWith(hoy));
+    const confirmadaHoy = reservas.filter(r => r.estado === 'CONFIRMADA' && ReservasMesaService.extractDate(r.fechaHoraInicio) === hoy);
     const items: ActivityItem[] = [];
     if (pendientes.length > 0) {
       items.push({ icon: 'fa-calendar-plus', color: 'var(--neon-purple, #A78BFA)', title: `${pendientes.length} reserva${pendientes.length > 1 ? 's' : ''} por confirmar`, detail: 'Solicitudes pendientes de aprobacion', link: '/staff/reservas' });

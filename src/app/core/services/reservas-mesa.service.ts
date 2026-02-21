@@ -1,54 +1,61 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, of, tap, catchError, throwError } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { ApiService } from './api.service';
-import { LocalStorageService } from './local-storage.service';
+import { Observable } from 'rxjs';
 import { ReservasMesa } from '../models/reservas-mesa.interface';
+import { ApiService } from './api.service';
 
 @Injectable({ providedIn: 'root' })
 export class ReservasMesaService {
   private api = inject(ApiService);
-  private storage = inject(LocalStorageService);
   private endpoint = 'reservas-mesa';
 
-  /** Crea una reserva en el backend real. Guarda en localStorage para vista del cliente. */
+  getAll(): Observable<ReservasMesa[]> {
+    return this.api.getAll<ReservasMesa>(this.endpoint);
+  }
+
+  getById(id: number): Observable<ReservasMesa> {
+    return this.api.get<ReservasMesa>(`${this.endpoint}/${id}`);
+  }
+
   create(reserva: Partial<ReservasMesa>): Observable<ReservasMesa> {
-    return this.api.post<ReservasMesa>(this.endpoint, reserva).pipe(
-      tap(saved => {
-        const cached = this.storage.load<ReservasMesa[]>('reservas', []);
-        cached.push(saved);
-        this.storage.save('reservas', cached);
-      })
-    );
+    return this.api.post<ReservasMesa>(this.endpoint, reserva);
   }
 
-  /** Obtiene reservas del cliente desde localStorage (el backend no tiene endpoint GET para clientes). */
-  getByCliente(): Observable<ReservasMesa[]> {
-    return of(this.storage.load<ReservasMesa[]>('reservas', []));
+  update(id: number, reserva: Partial<ReservasMesa>): Observable<ReservasMesa> {
+    return this.api.put<ReservasMesa>(`${this.endpoint}/${id}`, reserva);
   }
 
-  /** Cancela una reserva localmente. Solo actualiza localStorage (clientes no tienen PUT en el backend). */
-  cancel(id: number): Observable<void> {
-    const reservas = this.storage.load<ReservasMesa[]>('reservas', []);
-    const updated = reservas.map(r => r.id === id ? { ...r, estado: 'CANCELADA' } : r);
-    this.storage.save('reservas', updated);
-    return of(void 0);
+  delete(id: number): Observable<void> {
+    return this.api.delete<void>(`${this.endpoint}/${id}`);
   }
 
-  /** Helpers para extraer fecha y hora de un ISO instant */
-  static extractDate(iso: string): string {
-    if (!iso) return '';
-    return iso.substring(0, 10); // "2026-03-01"
+  getMisReservas(): Observable<ReservasMesa[]> {
+    return this.api.get<ReservasMesa[]>(`${this.endpoint}/mis-reservas`);
   }
 
-  static extractTime(iso: string): string {
-    if (!iso) return '';
-    const d = new Date(iso);
-    return d.getUTCHours().toString().padStart(2, '0') + ':' + d.getUTCMinutes().toString().padStart(2, '0');
+  cancelCliente(id: number): Observable<ReservasMesa> {
+    return this.api.post<ReservasMesa>(`${this.endpoint}/${id}/cancelar-cliente`, {});
   }
 
-  /** Combina fecha (YYYY-MM-DD) y hora (HH:mm) en un ISO instant string */
+  changeEstado(id: number, estado: string): Observable<ReservasMesa> {
+    return this.api.patch<ReservasMesa>(`${this.endpoint}/${id}/estado`, { estado });
+  }
+
+  static extractDate(isoStr: string): string {
+    if (!isoStr) return '';
+    return isoStr.substring(0, 10);
+  }
+
+  static extractTime(isoStr: string): string {
+    if (!isoStr) return '';
+    const d = new Date(isoStr);
+    return d.getHours().toString().padStart(2, '0') + ':' + d.getMinutes().toString().padStart(2, '0');
+  }
+
   static toInstant(date: string, time: string): string {
-    return `${date}T${time}:00Z`;
+    return date + 'T' + time + ':00Z';
+  }
+
+  static buildInstant(date: string, time: string): string {
+    return ReservasMesaService.toInstant(date, time);
   }
 }

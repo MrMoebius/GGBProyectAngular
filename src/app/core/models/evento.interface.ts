@@ -1,25 +1,24 @@
 export interface GGBEvent {
   id: number;
-  title: string;
-  description: string;
-  date: string;
-  time: string;
-  endTime?: string;
-  imageUrl?: string;
-  location: string;
-  capacity: number;
-  currentAttendees: number;
-  waitlistCount: number;
-  type: 'TORNEO' | 'NOCHE_TEMATICA' | 'TALLER' | 'EVENTO_ESPECIAL';
-  status: 'PROXIMO' | 'EN_CURSO' | 'FINALIZADO' | 'CANCELADO';
+  titulo: string;
+  descripcion: string;
+  fecha: string;
+  hora: string;
+  horaFin?: string;
+  ubicacion: string;
+  capacidad: number;
+  inscritos: number;
+  listaEspera: number;
+  tipo: 'TORNEO' | 'NOCHE_TEMATICA' | 'TALLER' | 'EVENTO_ESPECIAL';
+  estado: 'PROXIMO' | 'EN_CURSO' | 'FINALIZADO' | 'CANCELADO';
   tags: string[];
-  createdBy?: string;
+  creadoPor?: string;
 }
 
 export interface EventSubscription {
   id: number;
-  eventId: number;
-  userId: string;
-  status: 'CONFIRMED' | 'WAITLIST' | 'CANCELLED';
-  subscribedAt: string;
+  idEvento: number;
+  emailUsuario: string;
+  estado: 'CONFIRMADA' | 'LISTA_ESPERA' | 'CANCELADA';
+  fechaInscripcion: string;
 }
