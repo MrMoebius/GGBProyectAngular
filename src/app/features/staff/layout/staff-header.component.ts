@@ -131,23 +131,14 @@ import { AuthService } from '../../../core/services/auth.service';
     }
 
     @media (max-width: 1024px) {
-      .header, .header.sidebar-collapsed { margin-left: var(--sidebar-collapsed-width); }
-    }
-
-    @media (max-width: 768px) {
-      .header, .header.sidebar-collapsed { margin-left: 56px; padding: 0 1rem; }
-      .header-title { font-size: 1rem; }
-      .user-label { max-width: 120px; }
-    }
-
-    @media (max-width: 480px) {
-      .header, .header.sidebar-collapsed { margin-left: 0; padding: 0 0.75rem; }
+      .header { margin-left: 0 !important; padding: 0 1rem; }
       .header-title { display: none; }
+    }
+    @media (max-width: 480px) {
+      .header { padding: 0 0.75rem; }
       .user-label { display: none; }
-      .header-left { gap: 0.5rem; }
+      .user-badge { padding: 0.375rem 0.5rem; }
       .header-right { gap: 0.5rem; }
-      .header-btn { width: 34px; height: 34px; font-size: 0.9rem; }
-      .user-badge { padding: 0.25rem 0.5rem; }
     }
   `]
 })
