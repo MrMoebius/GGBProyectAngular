@@ -544,8 +544,12 @@ export class ProductosListComponent implements OnInit {
     const id = this.deleteId();
     if (id === null) return;
     this.productoService.delete(id).subscribe({
-      next: () => {
-        this.toastService.success('Producto eliminado correctamente');
+      next: (res: any) => {
+        if (res?.softDelete) {
+          this.toastService.show('Producto desactivado porque tiene comandas asociadas', 'info');
+        } else {
+          this.toastService.success('Producto eliminado correctamente');
+        }
         this.loadProductos();
         this.showDeleteModal.set(false);
       },
