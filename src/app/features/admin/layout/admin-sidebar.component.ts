@@ -337,7 +337,6 @@ export class AdminSidebarComponent {
     { label: 'Productos',       icon: 'fa-utensils',      route: '/admin/productos' },
     { label: 'Mesas',           icon: 'fa-chair',         route: '/admin/mesas' },
     { label: 'Juegos',          icon: 'fa-puzzle-piece',  route: '/admin/juegos' },
-    { label: 'Ludoteca',        icon: 'fa-children',      route: '/admin/ludoteca-sesiones' },
     // Personas
     { label: 'Empleados',       icon: 'fa-users-gear',    route: '/admin/empleados' },
     { label: 'Clientes',        icon: 'fa-people-group',  route: '/admin/clientes' },

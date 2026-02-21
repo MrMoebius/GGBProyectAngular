@@ -331,7 +331,6 @@ export class StaffSidebarComponent {
     { label: 'Productos',       icon: 'fa-utensils',      route: '/staff/productos' },
     { label: 'Mesas',           icon: 'fa-chair',         route: '/staff/mesas' },
     { label: 'Juegos',          icon: 'fa-puzzle-piece',  route: '/staff/juegos' },
-    { label: 'Ludoteca',        icon: 'fa-children',      route: '/staff/ludoteca-sesiones' },
     // Personas
     { label: 'Clientes',        icon: 'fa-people-group',  route: '/staff/clientes' },
     // Otros

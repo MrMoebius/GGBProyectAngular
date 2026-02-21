@@ -45,15 +45,6 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
         </div>
       </div>
 
-      <!-- Hidden file input -->
-      <input
-        #fileInput
-        type="file"
-        accept="image/jpeg,image/png,image/webp"
-        style="display:none"
-        (change)="onFileSelected($event)"
-      />
-
       <!-- Table -->
       <div class="card table-container">
         <table class="data-table">
@@ -108,9 +99,6 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
                   <app-status-badge [status]="juego.activo !== false ? 'ACTIVO' : 'INACTIVO'" />
                 </td>
                 <td class="actions-cell">
-                  <button class="btn btn-ghost btn-sm" title="Subir imagen" (click)="triggerUpload(juego.id)">
-                    <i class="fa-solid fa-camera"></i>
-                  </button>
                   <button class="btn btn-ghost btn-sm" title="Editar" (click)="openEdit(juego)">
                     <i class="fa-solid fa-pen-to-square"></i>
                   </button>
@@ -236,57 +224,100 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
 
           <div class="form-row">
             <div class="form-group form-col">
-              <label class="form-label">Min. Jugadores</label>
-              <input type="number" class="form-input" formControlName="minJugadores" min="1" />
+              <label class="form-label">Min. Jugadores *</label>
+              <input type="number" class="form-input" formControlName="minJugadores" min="1" (keydown)="blockNegative($event)" />
+              @if (form.get('minJugadores')?.invalid && form.get('minJugadores')?.touched) {
+                <span class="form-error">{{ form.get('minJugadores')?.hasError('required') ? 'Obligatorio' : 'Debe ser al menos 1' }}</span>
+              }
             </div>
             <div class="form-group form-col">
-              <label class="form-label">Max. Jugadores</label>
-              <input type="number" class="form-input" formControlName="maxJugadores" min="1" />
+              <label class="form-label">Max. Jugadores *</label>
+              <input type="number" class="form-input" formControlName="maxJugadores" min="1" (keydown)="blockNegative($event)" />
+              @if (form.get('maxJugadores')?.invalid && form.get('maxJugadores')?.touched) {
+                <span class="form-error">{{ form.get('maxJugadores')?.hasError('required') ? 'Obligatorio' : 'Debe ser al menos 1' }}</span>
+              }
             </div>
             <div class="form-group form-col">
-              <label class="form-label">Duracion (min)</label>
-              <input type="number" class="form-input" formControlName="duracionMediaMin" min="1" />
+              <label class="form-label">Duración (minutos) *</label>
+              <input type="number" class="form-input" formControlName="duracionMediaMin" min="1" (keydown)="blockNegative($event)" />
+              @if (form.get('duracionMediaMin')?.invalid && form.get('duracionMediaMin')?.touched) {
+                <span class="form-error">{{ form.get('duracionMediaMin')?.hasError('required') ? 'Obligatorio' : 'Debe ser al menos 1' }}</span>
+              }
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group form-col">
-              <label class="form-label">Complejidad</label>
+              <label class="form-label">Complejidad *</label>
               <select class="form-input" formControlName="complejidad">
-                <option value="">-- Seleccionar --</option>
+                <option value="" disabled>-- Seleccionar --</option>
                 <option value="BAJA">Baja</option>
                 <option value="MEDIA">Media</option>
                 <option value="ALTA">Alta</option>
               </select>
+              @if (form.get('complejidad')?.invalid && form.get('complejidad')?.touched) {
+                <span class="form-error">Obligatorio</span>
+              }
             </div>
             <div class="form-group form-col">
-              <label class="form-label">Idioma</label>
+              <label class="form-label">Idioma *</label>
               <select class="form-input" formControlName="idioma">
-                <option value="">-- Seleccionar --</option>
+                <option value="" disabled>-- Seleccionar --</option>
                 <option value="ESPANOL">Espanol</option>
                 <option value="INGLES">Ingles</option>
                 <option value="FRANCES">Frances</option>
                 <option value="ALEMAN">Aleman</option>
                 <option value="INDEPENDIENTE">Independiente</option>
               </select>
+              @if (form.get('idioma')?.invalid && form.get('idioma')?.touched) {
+                <span class="form-error">Obligatorio</span>
+              }
             </div>
             <div class="form-group form-col">
-              <label class="form-label">Ubicacion</label>
+              <label class="form-label">Ubicacion *</label>
               <select class="form-input" formControlName="ubicacion">
-                <option value="">-- Seleccionar --</option>
+                <option value="" disabled>-- Seleccionar --</option>
                 <option value="ENTRADA">Entrada</option>
                 <option value="PASILLO">Pasillo</option>
                 <option value="SALON">Salon</option>
                 <option value="ALMACEN">Almacen</option>
                 <option value="MOSTRADOR">Mostrador</option>
               </select>
+              @if (form.get('ubicacion')?.invalid && form.get('ubicacion')?.touched) {
+                <span class="form-error">Obligatorio</span>
+              }
             </div>
           </div>
 
           <div class="form-group">
-            <label class="form-label">Genero</label>
-            <input type="text" class="form-input" formControlName="genero" placeholder="ESTRATEGIA, FAMILIAR, CARTAS..." />
-            <span class="form-hint">Separar multiples generos por coma</span>
+            <label class="form-label">Genero *</label>
+            <div class="multiselect" [class.open]="generoDropdownOpen()">
+              <button type="button" class="multiselect-trigger form-input" (click)="toggleGeneroDropdown()">
+                @if (selectedGeneros().length === 0) {
+                  <span class="multiselect-placeholder">-- Seleccionar generos --</span>
+                } @else {
+                  <span class="multiselect-tags">
+                    @for (g of selectedGeneros(); track g) {
+                      <span class="multiselect-tag">{{ g }}</span>
+                    }
+                  </span>
+                }
+                <i class="fa-solid fa-chevron-down multiselect-arrow"></i>
+              </button>
+              @if (generoDropdownOpen()) {
+                <div class="multiselect-dropdown">
+                  @for (g of allGeneros; track g) {
+                    <label class="multiselect-option">
+                      <input type="checkbox" [checked]="selectedGeneros().includes(g)" (change)="toggleGenero(g)" />
+                      {{ g }}
+                    </label>
+                  }
+                </div>
+              }
+            </div>
+            @if (form.get('genero')?.invalid && form.get('genero')?.touched) {
+              <span class="form-error">Selecciona al menos un genero</span>
+            }
           </div>
 
           <div class="form-row">
@@ -312,6 +343,63 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
           <div class="form-group">
             <label class="form-label">Observaciones</label>
             <textarea class="form-input" formControlName="observaciones" rows="2" placeholder="Notas internas..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Imagen</label>
+            <input
+              #fileInput
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              style="display:none"
+              (change)="onFileSelected($event)"
+            />
+            <div class="imagen-section">
+              @if (isEditing() && currentId() !== null) {
+                @if (!failedImages().has($any(currentId()))) {
+                  <img
+                    class="imagen-preview"
+                    [src]="getImageSrc($any(currentId()))"
+                    (error)="onImgError($any(currentId()))"
+                  />
+                } @else {
+                  <div class="imagen-placeholder">
+                    <i class="fa-solid fa-image"></i>
+                    <span>Sin imagen</span>
+                  </div>
+                }
+              } @else {
+                @if (pendingImagePreview()) {
+                  <img class="imagen-preview" [src]="pendingImagePreview()" />
+                } @else {
+                  <div class="imagen-placeholder">
+                    <i class="fa-solid fa-image"></i>
+                    <span>Sin imagen</span>
+                  </div>
+                }
+              }
+              <div class="imagen-actions">
+                @if (isEditing() && currentId() !== null) {
+                  <button type="button" class="btn btn-ghost btn-sm" (click)="triggerUpload($any(currentId()))">
+                    <i class="fa-solid fa-camera"></i> Subir imagen
+                  </button>
+                  @if (!failedImages().has($any(currentId()))) {
+                    <button type="button" class="btn btn-ghost btn-sm btn-delete-img" (click)="deleteImagen($any(currentId()))">
+                      <i class="fa-solid fa-trash"></i> Eliminar imagen
+                    </button>
+                  }
+                } @else {
+                  <button type="button" class="btn btn-ghost btn-sm" (click)="selectPendingImage()">
+                    <i class="fa-solid fa-camera"></i> {{ pendingImageFile() ? 'Cambiar imagen' : 'Seleccionar imagen' }}
+                  </button>
+                  @if (pendingImageFile()) {
+                    <button type="button" class="btn btn-ghost btn-sm btn-delete-img" (click)="clearPendingImage()">
+                      <i class="fa-solid fa-trash"></i> Quitar imagen
+                    </button>
+                  }
+                }
+              </div>
+            </div>
           </div>
         </form>
       </app-entity-form-modal>
@@ -571,6 +659,135 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       cursor: pointer;
     }
 
+    /* Multi-select dropdown */
+    .multiselect {
+      position: relative;
+    }
+
+    .multiselect-trigger {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      min-height: 2.5rem;
+      text-align: left;
+    }
+
+    .multiselect-placeholder {
+      color: var(--text-muted);
+    }
+
+    .multiselect-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem;
+      flex: 1;
+    }
+
+    .multiselect-tag {
+      display: inline-block;
+      padding: 0.125rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      background: rgba(255, 107, 107, 0.12);
+      color: var(--primary-coral, #ff6b6b);
+    }
+
+    :host-context([data-theme="dark"]) .multiselect-tag {
+      background: rgba(0, 255, 209, 0.12);
+      color: var(--neon-cyan, #00FFD1);
+    }
+
+    .multiselect-arrow {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-left: 0.5rem;
+      transition: transform 0.2s;
+    }
+
+    .multiselect.open .multiselect-arrow {
+      transform: rotate(180deg);
+    }
+
+    .multiselect-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      z-index: 10;
+      background: var(--card-bg, #fff);
+      border: 1px solid var(--card-border, #e5e7eb);
+      border-radius: var(--radius-md, 0.5rem);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      max-height: 200px;
+      overflow-y: auto;
+      margin-top: 0.25rem;
+    }
+
+    .multiselect-option {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.85rem;
+      color: var(--text-main);
+      cursor: pointer;
+      transition: background-color 0.15s;
+    }
+
+    .multiselect-option:hover {
+      background-color: var(--table-row-hover, #f9fafb);
+    }
+
+    .multiselect-option input[type="checkbox"] {
+      accent-color: var(--primary-coral);
+      cursor: pointer;
+    }
+
+    /* Image section in modal */
+    .imagen-section {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-md);
+    }
+
+    .imagen-preview {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: var(--radius-sm, 0.25rem);
+      border: 1px solid var(--card-border, #e5e7eb);
+    }
+
+    .imagen-placeholder {
+      width: 80px;
+      height: 80px;
+      border-radius: var(--radius-sm, 0.25rem);
+      border: 1px dashed var(--card-border, #d1d5db);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      gap: 0.25rem;
+    }
+
+    .imagen-placeholder i {
+      font-size: 1.25rem;
+    }
+
+    .imagen-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.375rem;
+    }
+
+    .btn-delete-img {
+      color: var(--text-main);
+    }
+
     /* BGG Search Panel */
     .bgg-section { margin-bottom: 0.25rem; }
 
@@ -737,6 +954,16 @@ export class JuegosListComponent implements OnInit {
   copiasExtra = signal(1);
   originalId = signal<number | null>(null);
 
+  pendingImageFile = signal<File | null>(null);
+  pendingImagePreview = signal<string | null>(null);
+  generoDropdownOpen = signal(false);
+  selectedGeneros = signal<string[]>([]);
+  readonly allGeneros = [
+    'ESTRATEGIA', 'FAMILIAR', 'PARTY', 'COOPERATIVO', 'ROL', 'CARTAS',
+    'DADOS', 'ACCION', 'AVENTURA', 'MISTERIO', 'INFANTIL', 'PUZZLE',
+    'TERROR', 'SOLITARIO', 'MAZOS', 'MINIATURAS', 'ROLESOCULTOS', 'CARRERAS'
+  ];
+
   readonly pageSize = 25;
   protected readonly Math = Math;
 
@@ -760,13 +987,13 @@ export class JuegosListComponent implements OnInit {
 
   form = this.fb.group({
     nombre: ['', Validators.required],
-    minJugadores: [null as number | null],
-    maxJugadores: [null as number | null],
-    duracionMediaMin: [null as number | null],
-    complejidad: [''],
-    genero: [''],
-    idioma: [''],
-    ubicacion: [''],
+    minJugadores: [null as number | null, [Validators.required, Validators.min(1)]],
+    maxJugadores: [null as number | null, [Validators.required, Validators.min(1)]],
+    duracionMediaMin: [null as number | null, [Validators.required, Validators.min(1)]],
+    complejidad: ['', Validators.required],
+    genero: ['', Validators.required],
+    idioma: ['', Validators.required],
+    ubicacion: ['', Validators.required],
     recomendadoDosJugadores: [false],
     activo: [true],
     descripcion: [''],
@@ -777,6 +1004,32 @@ export class JuegosListComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadJuegos();
+  }
+
+  toggleGeneroDropdown(): void {
+    this.generoDropdownOpen.update(v => !v);
+  }
+
+  toggleGenero(genero: string): void {
+    const current = this.selectedGeneros();
+    const updated = current.includes(genero)
+      ? current.filter(g => g !== genero)
+      : [...current, genero];
+    this.selectedGeneros.set(updated);
+    const value = updated.join(', ');
+    this.form.patchValue({ genero: value });
+    this.form.get('genero')?.markAsTouched();
+  }
+
+  private syncGenerosFromString(value: string): void {
+    const generos = value ? value.split(',').map(g => g.trim()).filter(g => g) : [];
+    this.selectedGeneros.set(generos);
+  }
+
+  blockNegative(event: KeyboardEvent): void {
+    if (event.key === '-' || event.key === 'e') {
+      event.preventDefault();
+    }
   }
 
   onSearch(value: string): void {
@@ -813,11 +1066,30 @@ export class JuegosListComponent implements OnInit {
     this.fileInput.nativeElement.click();
   }
 
+  selectPendingImage(): void {
+    this.uploadTargetId.set(null);
+    this.fileInput.nativeElement.value = '';
+    this.fileInput.nativeElement.click();
+  }
+
+  clearPendingImage(): void {
+    this.pendingImageFile.set(null);
+    this.pendingImagePreview.set(null);
+  }
+
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
+    if (!file) return;
+
     const id = this.uploadTargetId();
-    if (!file || id === null) return;
+    if (id === null) {
+      this.pendingImageFile.set(file);
+      const reader = new FileReader();
+      reader.onload = () => this.pendingImagePreview.set(reader.result as string);
+      reader.readAsDataURL(file);
+      return;
+    }
 
     this.juegoService.uploadImagen(id, file).subscribe({
       next: () => {
@@ -826,6 +1098,17 @@ export class JuegosListComponent implements OnInit {
         this.imageVersion.update(v => v + 1);
       },
       error: () => this.toastService.error('Error al subir la imagen')
+    });
+  }
+
+  deleteImagen(id: number): void {
+    this.juegoService.deleteImagen(id).subscribe({
+      next: () => {
+        this.toastService.success('Imagen eliminada correctamente');
+        this.failedImages.update(set => { const s = new Set(set); s.add(id); return s; });
+        this.imageVersion.update(v => v + 1);
+      },
+      error: () => this.toastService.error('Error al eliminar la imagen')
     });
   }
 
@@ -841,6 +1124,10 @@ export class JuegosListComponent implements OnInit {
     this.nombreDuplicado.set(false);
     this.copiasExtra.set(1);
     this.originalId.set(null);
+    this.pendingImageFile.set(null);
+    this.pendingImagePreview.set(null);
+    this.selectedGeneros.set([]);
+    this.generoDropdownOpen.set(false);
     this.form.reset({ activo: true, recomendadoDosJugadores: false });
     this.showFormModal.set(true);
   }
@@ -862,6 +1149,8 @@ export class JuegosListComponent implements OnInit {
       descripcion: juego.descripcion || '',
       observaciones: juego.observaciones || ''
     });
+    this.syncGenerosFromString(juego.genero || '');
+    this.generoDropdownOpen.set(false);
     this.showFormModal.set(true);
   }
 
@@ -924,6 +1213,7 @@ export class JuegosListComponent implements OnInit {
           genero: details.genero || '',
           descripcion: details.descripcion || '',
         });
+        this.syncGenerosFromString(details.genero || '');
         this.bggSelectedId.set(details.bggId);
         this.bggSearchMode.set(false);
         this.bggResults.set([]);
@@ -965,6 +1255,7 @@ export class JuegosListComponent implements OnInit {
         descripcion: original.descripcion || '',
         observaciones: original.observaciones || ''
       });
+      this.syncGenerosFromString(original.genero || '');
     } else {
       this.nombreDuplicado.set(false);
       this.originalId.set(null);
@@ -1024,7 +1315,17 @@ export class JuegosListComponent implements OnInit {
               error: () => {}
             });
           }
+        } else if (this.pendingImageFile() && results[0]?.id) {
+          this.juegoService.uploadImagen(results[0].id, this.pendingImageFile()!).subscribe({
+            next: () => {
+              this.imageVersion.update(v => v + 1);
+              this.failedImages.update(set => { const s = new Set(set); s.delete(results[0].id); return s; });
+            },
+            error: () => {}
+          });
         }
+        this.pendingImageFile.set(null);
+        this.pendingImagePreview.set(null);
         this.bggSelectedId.set(null);
         this.copiasExtra.set(1);
         this.originalId.set(null);

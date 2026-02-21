@@ -55,6 +55,10 @@ export class JuegoService {
     return this.http.post(`${this.apiUrl}/${id}/imagen`, formData);
   }
 
+  deleteImagen(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}/imagen`);
+  }
+
   getImagenUrl(id: number): string {
     return `${this.apiUrl}/${id}/imagen`;
   }
