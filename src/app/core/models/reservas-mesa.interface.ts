@@ -9,4 +9,6 @@ export interface ReservasMesa {
   estado?: string;           // 'PENDIENTE', 'CONFIRMADA', 'CANCELADA', 'COMPLETADA', 'NO_PRESENTADO'
   notas?: string;
   fechaSolicitud?: string;
+  nombreManual?: string;
+  telefonoManual?: string;
 }

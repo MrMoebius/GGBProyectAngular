@@ -144,7 +144,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
             <select class="form-input" formControlName="idReserva" (change)="onReservaChange($event)">
               <option [ngValue]="null">Sin reserva</option>
               @for (r of reservasPendientes(); track r.id) {
-                <option [ngValue]="r.id">{{ r.fechaReserva }} {{ r.horaInicio }} - Mesa #{{ r.idMesa }} ({{ r.numPersonas }} pax)</option>
+                <option [ngValue]="r.id">{{ r.fechaHoraInicio?.substring(0,10) }} {{ r.fechaHoraInicio?.substring(11,16) }} - Mesa #{{ r.idMesa }} ({{ r.numPersonas }} pax)</option>
               }
             </select>
           </div>

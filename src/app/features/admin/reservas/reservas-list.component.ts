@@ -6,6 +6,7 @@ import { MockReservasService } from '../../../core/services/mock-reservas.servic
 import { ClienteService } from '../../../core/services/cliente.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ReservasMesa } from '../../../core/models/reservas-mesa.interface';
+import { ReservasMesaService } from '../../../core/services/reservas-mesa.service';
 import { Cliente } from '../../../core/models/cliente.interface';
 import { EntityFormModalComponent } from '../../../shared/components/entity-form-modal/entity-form-modal.component';
 import { ConfirmModalComponent } from '../../../shared/components/confirm-modal/confirm-modal.component';
@@ -49,10 +50,10 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
           <div class="reserva-card">
             <div class="card-top">
               <div class="card-datetime">
-                <span class="card-fecha">{{ formatDate(r.fechaReserva) }}</span>
-                <span class="card-hora">{{ r.horaInicio }}</span>
+                <span class="card-fecha">{{ formatDate(getDate(r)) }}</span>
+                <span class="card-hora">{{ getTime(r) }}</span>
               </div>
-              <span class="estado-badge" [attr.data-estado]="r.estado">{{ getEstadoLabel(r.estado) }}</span>
+              <span class="estado-badge" [attr.data-estado]="r.estado">{{ getEstadoLabel(r.estado || '') }}</span>
             </div>
 
             <div class="card-body">
@@ -331,7 +332,7 @@ export class ReservasListComponent implements OnInit {
     let list = this.reservas();
 
     if (estado) list = list.filter(r => r.estado === estado);
-    if (date) list = list.filter(r => r.fechaReserva === date);
+    if (date) list = list.filter(r => this.getDate(r) === date);
     if (term) {
       list = list.filter(r => {
         const clientName = this.getReservaCliente(r).toLowerCase();
@@ -340,9 +341,7 @@ export class ReservasListComponent implements OnInit {
     }
 
     return list.sort((a, b) => {
-      const dateComp = b.fechaReserva.localeCompare(a.fechaReserva);
-      if (dateComp !== 0) return dateComp;
-      return b.horaInicio.localeCompare(a.horaInicio);
+      return (b.fechaHoraInicio || '').localeCompare(a.fechaHoraInicio || '');
     });
   });
 
@@ -406,14 +405,15 @@ export class ReservasListComponent implements OnInit {
   openEdit(r: ReservasMesa): void {
     this.editingReserva.set(r);
     const tipo = r.nombreManual ? 'manual' : 'registrado';
-    this.recalcSlots(r.fechaReserva);
+    const fecha = this.getDate(r);
+    this.recalcSlots(fecha);
     this.reservaForm.patchValue({
       tipoCliente: tipo,
       idCliente: r.idCliente || null,
       nombreManual: r.nombreManual || '',
       telefonoManual: r.telefonoManual || '',
-      fechaReserva: r.fechaReserva,
-      horaInicio: r.horaInicio,
+      fechaReserva: fecha,
+      horaInicio: this.getTime(r),
       numPersonas: r.numPersonas,
       notas: r.notas || ''
     });
@@ -429,8 +429,7 @@ export class ReservasListComponent implements OnInit {
       idCliente: isManual ? 0 : (raw.idCliente ?? 0),
       nombreManual: isManual ? raw.nombreManual || undefined : undefined,
       telefonoManual: isManual ? raw.telefonoManual || undefined : undefined,
-      fechaReserva: raw.fechaReserva!,
-      horaInicio: raw.horaInicio!,
+      fechaHoraInicio: ReservasMesaService.toInstant(raw.fechaReserva!, raw.horaInicio!),
       numPersonas: raw.numPersonas!,
       notas: raw.notas || undefined
     };
@@ -475,7 +474,7 @@ export class ReservasListComponent implements OnInit {
   submitCancel(): void {
     const id = this.cancelId();
     if (!id) return;
-    this.reservasService.cancel(id).subscribe({
+    this.reservasService.changeEstado(id, 'CANCELADA').subscribe({
       next: () => {
         this.toastService.success('Reserva cancelada');
         this.showCancelModal.set(false);
@@ -483,5 +482,13 @@ export class ReservasListComponent implements OnInit {
       },
       error: () => this.toastService.error('Error al cancelar reserva')
     });
+  }
+
+  getDate(r: ReservasMesa): string {
+    return ReservasMesaService.extractDate(r.fechaHoraInicio);
+  }
+
+  getTime(r: ReservasMesa): string {
+    return ReservasMesaService.extractTime(r.fechaHoraInicio);
   }
 }

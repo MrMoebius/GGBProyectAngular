@@ -55,7 +55,7 @@ export class MockReservasService {
     let changed = false;
     const result = reservas.map(r => {
       if (r.estado !== 'CONFIRMADA') return r;
-      const reservaTime = new Date(r.fechaReserva + 'T' + r.horaInicio + ':00');
+      const reservaTime = new Date(r.fechaHoraInicio);
       const deadline = new Date(reservaTime.getTime() + 60 * 60 * 1000); // +1 hora
       if (now > deadline) {
         changed = true;
@@ -89,8 +89,8 @@ export class MockReservasService {
   }
 
   create(reserva: Partial<ReservasMesa>): Observable<ReservasMesa> {
-    const fecha = reserva.fechaReserva || '';
-    const hora = reserva.horaInicio || '';
+    const fecha = reserva.fechaHoraInicio ? reserva.fechaHoraInicio.substring(0, 10) : '';
+    const hora = reserva.fechaHoraInicio ? reserva.fechaHoraInicio.substring(11, 16) : '';
 
     if (fecha) {
       const day = new Date(fecha + 'T12:00:00').getDay();
