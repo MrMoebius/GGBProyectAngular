@@ -549,8 +549,9 @@ export class ProductosListComponent implements OnInit {
         this.loadProductos();
         this.showDeleteModal.set(false);
       },
-      error: () => {
-        this.toastService.error('Error al eliminar el producto');
+      error: (err) => {
+        const msg = err?.error?.message || err?.error?.error || 'Error al eliminar el producto';
+        this.toastService.error(msg);
         this.showDeleteModal.set(false);
       }
     });
@@ -564,6 +565,11 @@ export class ProductosListComponent implements OnInit {
 
     const formValue = this.productoForm.getRawValue() as any;
 
+    const handleError = (err: any) => {
+      const msg = err?.error?.message || err?.error?.error || 'Error al guardar el producto';
+      this.toastService.error(msg);
+    };
+
     if (this.isEditing() && this.currentId() !== null) {
       this.productoService.update(this.currentId()!, formValue).subscribe({
         next: () => {
@@ -571,7 +577,7 @@ export class ProductosListComponent implements OnInit {
           this.loadProductos();
           this.showFormModal.set(false);
         },
-        error: () => this.toastService.error('Error al actualizar el producto')
+        error: handleError
       });
     } else {
       this.productoService.create(formValue).subscribe({
@@ -580,7 +586,7 @@ export class ProductosListComponent implements OnInit {
           this.loadProductos();
           this.showFormModal.set(false);
         },
-        error: () => this.toastService.error('Error al crear el producto')
+        error: handleError
       });
     }
   }

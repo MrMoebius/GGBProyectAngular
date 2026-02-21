@@ -1,10 +1,16 @@
-// MOCK: Replace with real ReservasService when /api/reservas 401 bug is fixed
+// DEPRECADO: Usar ReservasMesaService en su lugar.
+// Este archivo se mantiene solo como referencia.
 import { Injectable, inject, signal } from '@angular/core';
 import { Observable, of, throwError } from 'rxjs';
 import { LocalStorageService } from './local-storage.service';
 import { ReservasMesa } from '../models/reservas-mesa.interface';
 
-const SEED_RESERVAS: ReservasMesa[] = [];
+const SEED_RESERVAS: ReservasMesa[] = [
+  { id: 1, idCliente: 1, idMesa: 3, fechaHoraInicio: '2026-02-08T17:00:00Z', fechaHoraFin: '2026-02-08T19:00:00Z', numPersonas: 4, estado: 'CONFIRMADA', notas: 'Cumpleanos' },
+  { id: 2, idCliente: 2, idMesa: 5, fechaHoraInicio: '2026-02-10T18:00:00Z', fechaHoraFin: '2026-02-10T20:00:00Z', numPersonas: 6, estado: 'CONFIRMADA' },
+  { id: 3, idCliente: 1, idMesa: 1, fechaHoraInicio: '2026-01-25T16:00:00Z', fechaHoraFin: '2026-01-25T18:00:00Z', numPersonas: 2, estado: 'COMPLETADA' },
+  { id: 4, idCliente: 3, idMesa: 7, fechaHoraInicio: '2026-02-14T19:00:00Z', fechaHoraFin: '2026-02-14T21:00:00Z', numPersonas: 2, estado: 'CONFIRMADA', notas: 'San Valentin' },
+];
 
 @Injectable({ providedIn: 'root' })
 export class MockReservasService {
@@ -110,9 +116,8 @@ export class MockReservasService {
       nombreManual: reserva.nombreManual,
       telefonoManual: reserva.telefonoManual,
       idMesa: reserva.idMesa,
-      fechaReserva: reserva.fechaReserva || '',
-      horaInicio: reserva.horaInicio || '',
-      horaFin: reserva.horaFin,
+      fechaHoraInicio: reserva.fechaHoraInicio || '',
+      fechaHoraFin: reserva.fechaHoraFin,
       numPersonas: reserva.numPersonas || 1,
       estado: reserva.idMesa ? 'CONFIRMADA' : 'PENDIENTE',
       notas: reserva.notas,
@@ -151,15 +156,5 @@ export class MockReservasService {
     return of(void 0);
   }
 
-  cancel(id: number): Observable<void> {
-    return this.changeEstado(id, 'CANCELADA');
-  }
 
-  getAvailableSlots(date: string, mesaId: number): Observable<string[]> {
-    const allSlots = this.getSlotsForDate(date);
-    const booked = this._reservas()
-      .filter(r => r.fechaReserva === date && r.idMesa === mesaId && r.estado !== 'CANCELADA')
-      .map(r => r.horaInicio);
-    return of(allSlots.filter(s => !booked.includes(s)));
-  }
 }
