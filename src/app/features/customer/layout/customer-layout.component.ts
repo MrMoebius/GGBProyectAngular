@@ -359,15 +359,8 @@ import { ClienteService } from '../../../core/services/cliente.service';
 
       .sidebar-nav {
         flex-direction: row;
-        overflow-x: auto;
+        flex-wrap: wrap;
         gap: 0.25rem;
-        padding-bottom: 0.25rem;
-        -webkit-overflow-scrolling: touch;
-        scrollbar-width: none;
-      }
-
-      .sidebar-nav::-webkit-scrollbar {
-        display: none;
       }
 
       .sidebar-link {
