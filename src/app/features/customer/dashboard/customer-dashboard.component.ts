@@ -1230,13 +1230,9 @@ export class CustomerDashboardComponent implements OnInit {
 
   futureReservations = computed(() => {
     const now = new Date();
-    const today = now.toISOString().split('T')[0];
     return this.activeReservations().filter(r => {
-      if (r.fechaReserva > today) return true;
-      if (r.fechaReserva === today) {
-        return r.horaInicio >= now.toTimeString().slice(0, 5);
-      }
-      return false;
+      if (!r.fechaHoraInicio) return false;
+      return new Date(r.fechaHoraInicio) >= now;
     });
   });
 

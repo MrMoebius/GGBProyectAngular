@@ -162,7 +162,7 @@ export class AdminDashboardComponent implements OnInit {
   private buildReservaActivity(reservas: ReservasMesa[]): void {
     const pendientes = reservas.filter(r => r.estado === 'PENDIENTE');
     const hoy = new Date().toISOString().split('T')[0];
-    const confirmadaHoy = reservas.filter(r => r.estado === 'CONFIRMADA' && r.fechaReserva === hoy);
+    const confirmadaHoy = reservas.filter(r => r.estado === 'CONFIRMADA' && r.fechaHoraInicio?.startsWith(hoy));
     const items: ActivityItem[] = [];
     if (pendientes.length > 0) {
       items.push({ icon: 'fa-calendar-plus', color: 'var(--neon-purple, #A78BFA)', title: `${pendientes.length} reserva${pendientes.length > 1 ? 's' : ''} por confirmar`, detail: 'Solicitudes pendientes de aprobacion', link: '/admin/reservas' });

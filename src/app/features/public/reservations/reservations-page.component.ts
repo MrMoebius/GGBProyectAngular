@@ -5,7 +5,6 @@ import { AuthService } from '../../../core/services/auth.service';
 import { JuegoService } from '../../../core/services/juego.service';
 import { MesaService } from '../../../core/services/mesa.service';
 import { ToastService } from '../../../core/services/toast.service';
-import { AuthService } from '../../../core/services/auth.service';
 import { JuegoExtended } from '../../../core/models/juego-extended.interface';
 import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer-loader.component';
 
@@ -1482,7 +1481,6 @@ export class ReservationsPageComponent {
   private juegosService = inject(JuegoService);
   private mesaService = inject(MesaService);
   private toastService = inject(ToastService);
-  private authService = inject(AuthService);
 
   // Progress steps
   readonly steps = [
