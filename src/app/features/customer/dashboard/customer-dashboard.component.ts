@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../core/services/auth.service';
 import { ClienteService } from '../../../core/services/cliente.service';
 import { GameHistoryService } from '../../../core/services/game-history.service';
-import { MockReservasService } from '../../../core/services/mock-reservas.service';
+import { ReservasMesaService } from '../../../core/services/reservas-mesa.service';
 import { EventService } from '../../../core/services/event.service';
 import { RecommendationService } from '../../../core/services/recommendation.service';
 import { FavoritesService } from '../../../core/services/favorites.service';
@@ -148,7 +148,7 @@ import { GameCardPublicComponent } from '../../../shared/components/game-card-pu
                       <i class="fa-solid fa-calendar"></i>
                     </div>
                     <div class="res-info">
-                      <span class="res-date">{{ res.fechaReserva }} a las {{ res.horaInicio }}</span>
+                      <span class="res-date">{{ formatDate(res.fechaHoraInicio) }} a las {{ formatTime(res.fechaHoraInicio) }}</span>
                       <span class="res-detail">Mesa {{ res.idMesa }} &middot; {{ res.numPersonas }} personas</span>
                       @if (res.notas) {
                         <span class="res-notes">{{ res.notas }}</span>
@@ -1157,7 +1157,7 @@ export class CustomerDashboardComponent implements OnInit {
   authService = inject(AuthService);
   private clienteService = inject(ClienteService);
   private gameHistory = inject(GameHistoryService);
-  private reservasService = inject(MockReservasService);
+  private reservasService = inject(ReservasMesaService);
   protected eventService = inject(EventService);
   private loadedEventImages = signal<Set<number>>(new Set());
   private recommendationService = inject(RecommendationService);
@@ -1259,8 +1259,8 @@ export class CustomerDashboardComponent implements OnInit {
     this.recentGames.set(this.gameHistory.getRecent(5));
 
     // Active reservations
-    this.reservasService.getByCliente(1).subscribe(reservas => {
-      this.activeReservations.set(reservas.filter(r => r.estado === 'CONFIRMADA'));
+    this.reservasService.getByCliente().subscribe(reservas => {
+      this.activeReservations.set(reservas.filter(r => r.estado === 'CONFIRMADA' || r.estado === 'PENDIENTE'));
     });
 
     this.eventService.getAll().subscribe(events => {
@@ -1338,5 +1338,13 @@ export class CustomerDashboardComponent implements OnInit {
 
   eventHasImage(eventId: number): boolean {
     return this.loadedEventImages().has(eventId);
+  }
+
+  formatDate(isoStr: string): string {
+    return ReservasMesaService.extractDate(isoStr);
+  }
+
+  formatTime(isoStr: string): string {
+    return ReservasMesaService.extractTime(isoStr);
   }
 }

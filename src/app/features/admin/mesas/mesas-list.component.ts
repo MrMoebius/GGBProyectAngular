@@ -444,8 +444,9 @@ export class MesasListComponent implements OnInit {
         this.loadMesas();
         this.showDeleteModal.set(false);
       },
-      error: () => {
-        this.toastService.error('Error al eliminar la mesa');
+      error: (err) => {
+        const msg = err?.error?.message || err?.error?.error || 'Error al eliminar la mesa';
+        this.toastService.error(msg);
         this.showDeleteModal.set(false);
       }
     });
@@ -459,6 +460,11 @@ export class MesasListComponent implements OnInit {
 
     const formValue = this.mesaForm.getRawValue() as any;
 
+    const handleError = (err: any) => {
+      const msg = err?.error?.message || err?.error?.error || 'Error al guardar la mesa';
+      this.toastService.error(msg);
+    };
+
     if (this.isEditing() && this.currentId() !== null) {
       this.mesaService.update(this.currentId()!, formValue).subscribe({
         next: () => {
@@ -466,7 +472,7 @@ export class MesasListComponent implements OnInit {
           this.loadMesas();
           this.showFormModal.set(false);
         },
-        error: () => this.toastService.error('Error al actualizar la mesa')
+        error: handleError
       });
     } else {
       this.mesaService.create(formValue).subscribe({
@@ -475,7 +481,7 @@ export class MesasListComponent implements OnInit {
           this.loadMesas();
           this.showFormModal.set(false);
         },
-        error: () => this.toastService.error('Error al crear la mesa')
+        error: handleError
       });
     }
   }

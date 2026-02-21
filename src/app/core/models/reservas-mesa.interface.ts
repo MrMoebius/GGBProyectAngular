@@ -1,14 +1,12 @@
 export interface ReservasMesa {
   id: number;
-  idCliente: number;
-  nombreManual?: string;
-  telefonoManual?: string;
+  idCliente?: number;
   idMesa?: number;
-  fechaReserva: string;
-  horaInicio: string;
-  horaFin?: string;
+  fechaHoraInicio: string;  // ISO 8601 instant (e.g. "2026-03-01T19:00:00Z")
+  fechaHoraFin?: string;    // ISO 8601 instant
   numPersonas: number;
-  estado: string;
+  idJuegoDeseado?: number;
+  estado?: string;           // 'PENDIENTE', 'CONFIRMADA', 'CANCELADA', 'COMPLETADA', 'NO_PRESENTADO'
   notas?: string;
   fechaSolicitud?: string;
 }
