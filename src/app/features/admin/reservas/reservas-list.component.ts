@@ -2,7 +2,7 @@ import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { MockReservasService } from '../../../core/services/mock-reservas.service';
+import { ReservasMesaService } from '../../../core/services/reservas-mesa.service';
 import { ClienteService } from '../../../core/services/cliente.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ReservasMesa } from '../../../core/models/reservas-mesa.interface';
@@ -49,8 +49,8 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
           <div class="reserva-card">
             <div class="card-top">
               <div class="card-datetime">
-                <span class="card-fecha">{{ formatDate(r.fechaReserva) }}</span>
-                <span class="card-hora">{{ r.horaInicio }}</span>
+                <span class="card-fecha">{{ formatDate(extractDate(r.fechaHoraInicio)) }}</span>
+                <span class="card-hora">{{ extractTime(r.fechaHoraInicio) }}</span>
               </div>
               <span class="estado-badge" [attr.data-estado]="r.estado">{{ getEstadoLabel(r.estado) }}</span>
             </div>
@@ -60,12 +60,6 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
                 <i class="fa-solid fa-user"></i>
                 <span>{{ getReservaCliente(r) }}</span>
               </div>
-              @if (r.telefonoManual) {
-                <div class="card-field">
-                  <i class="fa-solid fa-phone"></i>
-                  <span>{{ r.telefonoManual }}</span>
-                </div>
-              }
               <div class="card-field">
                 <i class="fa-solid fa-users"></i>
                 <span>{{ r.numPersonas }} personas</span>
@@ -74,12 +68,6 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
                 <div class="card-field notas">
                   <i class="fa-solid fa-note-sticky"></i>
                   <span>{{ r.notas }}</span>
-                </div>
-              }
-              @if (r.fechaSolicitud) {
-                <div class="card-field solicitud">
-                  <i class="fa-solid fa-clock-rotate-left"></i>
-                  <span>Solicitada el {{ formatSolicitud(r.fechaSolicitud) }}</span>
                 </div>
               }
             </div>
@@ -99,7 +87,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
                 <button class="btn btn-sm btn-primary" (click)="changeEstado(r.id, 'COMPLETADA')">
                   <i class="fa-solid fa-circle-check"></i> Completar
                 </button>
-                <button class="btn btn-sm btn-ghost" (click)="changeEstado(r.id, 'NO_SHOW')">
+                <button class="btn btn-sm btn-ghost" (click)="changeEstado(r.id, 'NO_PRESENTADO')">
                   <i class="fa-solid fa-user-slash"></i> No-show
                 </button>
                 <button class="btn btn-sm btn-ghost" (click)="openEdit(r)">
@@ -130,42 +118,23 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       >
         <form [formGroup]="reservaForm">
           <div class="form-group">
-            <label class="form-label">Tipo de cliente</label>
-            <select class="form-input" formControlName="tipoCliente">
-              <option value="registrado">Cliente registrado</option>
-              <option value="manual">Sin registro</option>
+            <label class="form-label">Cliente</label>
+            <select class="form-input" formControlName="idCliente">
+              <option [ngValue]="null">Sin cliente registrado</option>
+              @for (c of clientes(); track c.id) {
+                <option [ngValue]="c.id">{{ c.nombre }} ({{ c.email }})</option>
+              }
             </select>
           </div>
-
-          @if (reservaForm.get('tipoCliente')?.value === 'registrado') {
-            <div class="form-group">
-              <label class="form-label">Cliente *</label>
-              <select class="form-input" formControlName="idCliente">
-                <option [ngValue]="null" disabled>Seleccionar cliente...</option>
-                @for (c of clientes(); track c.id) {
-                  <option [ngValue]="c.id">{{ c.nombre }} ({{ c.email }})</option>
-                }
-              </select>
-            </div>
-          } @else {
-            <div class="form-group">
-              <label class="form-label">Nombre *</label>
-              <input type="text" class="form-input" formControlName="nombreManual" placeholder="Nombre del cliente" />
-            </div>
-            <div class="form-group">
-              <label class="form-label">Telefono</label>
-              <input type="tel" class="form-input" formControlName="telefonoManual" placeholder="Telefono de contacto" />
-            </div>
-          }
 
           <div class="form-row">
             <div class="form-group">
               <label class="form-label">Fecha *</label>
-              <input type="date" class="form-input" formControlName="fechaReserva" />
+              <input type="date" class="form-input" formControlName="fecha" />
             </div>
             <div class="form-group">
               <label class="form-label">Hora inicio *</label>
-              <select class="form-input" formControlName="horaInicio">
+              <select class="form-input" formControlName="hora">
                 <option value="" disabled>Seleccionar...</option>
                 @for (slot of availableSlots(); track slot) {
                   <option [value]="slot">{{ slot }}</option>
@@ -228,7 +197,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
     .estado-badge[data-estado="PENDIENTE"] { background: rgba(250,204,21,0.15); color: #FACC15; }
     .estado-badge[data-estado="CANCELADA"] { background: rgba(239,68,68,0.15); color: #EF4444; }
     .estado-badge[data-estado="COMPLETADA"] { background: rgba(59,130,246,0.15); color: #3B82F6; }
-    .estado-badge[data-estado="NO_SHOW"] { background: rgba(107,114,128,0.15); color: #9CA3AF; }
+    .estado-badge[data-estado="NO_PRESENTADO"] { background: rgba(107,114,128,0.15); color: #9CA3AF; }
 
     .card-body { display: flex; flex-direction: column; gap: 0.375rem; }
     .card-field { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8125rem; color: var(--text-muted); }
@@ -260,7 +229,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
   `]
 })
 export class ReservasListComponent implements OnInit {
-  private reservasService = inject(MockReservasService);
+  private reservasService = inject(ReservasMesaService);
   private clienteService = inject(ClienteService);
   private toastService = inject(ToastService);
   private fb = inject(FormBuilder);
@@ -283,7 +252,7 @@ export class ReservasListComponent implements OnInit {
     { label: 'Confirmadas', value: 'CONFIRMADA' },
     { label: 'Completadas', value: 'COMPLETADA' },
     { label: 'Canceladas', value: 'CANCELADA' },
-    { label: 'No-show', value: 'NO_SHOW' },
+    { label: 'No-show', value: 'NO_PRESENTADO' },
   ];
 
   private readonly schedule: Record<number, { open: number; lastSlot: number } | null> = {
@@ -297,12 +266,9 @@ export class ReservasListComponent implements OnInit {
   };
 
   reservaForm = this.fb.group({
-    tipoCliente: ['registrado'],
     idCliente: [null as number | null],
-    nombreManual: [''],
-    telefonoManual: [''],
-    fechaReserva: ['', Validators.required],
-    horaInicio: ['', Validators.required],
+    fecha: ['', Validators.required],
+    hora: ['', Validators.required],
     numPersonas: [2, [Validators.required, Validators.min(1)]],
     notas: ['']
   });
@@ -324,6 +290,14 @@ export class ReservasListComponent implements OnInit {
     this.availableSlots.set(slots);
   }
 
+  extractDate(iso: string): string {
+    return ReservasMesaService.extractDate(iso);
+  }
+
+  extractTime(iso: string): string {
+    return ReservasMesaService.extractTime(iso);
+  }
+
   filteredReservas = computed(() => {
     const term = this.searchTerm().toLowerCase().trim();
     const estado = this.estadoFilter();
@@ -331,7 +305,7 @@ export class ReservasListComponent implements OnInit {
     let list = this.reservas();
 
     if (estado) list = list.filter(r => r.estado === estado);
-    if (date) list = list.filter(r => r.fechaReserva === date);
+    if (date) list = list.filter(r => ReservasMesaService.extractDate(r.fechaHoraInicio) === date);
     if (term) {
       list = list.filter(r => {
         const clientName = this.getReservaCliente(r).toLowerCase();
@@ -340,16 +314,14 @@ export class ReservasListComponent implements OnInit {
     }
 
     return list.sort((a, b) => {
-      const dateComp = b.fechaReserva.localeCompare(a.fechaReserva);
-      if (dateComp !== 0) return dateComp;
-      return b.horaInicio.localeCompare(a.horaInicio);
+      return new Date(b.fechaHoraInicio).getTime() - new Date(a.fechaHoraInicio).getTime();
     });
   });
 
   ngOnInit(): void {
     this.loadData();
-    this.reservaForm.get('fechaReserva')?.valueChanges.subscribe((fecha) => {
-      this.reservaForm.get('horaInicio')?.setValue('');
+    this.reservaForm.get('fecha')?.valueChanges.subscribe((fecha) => {
+      this.reservaForm.get('hora')?.setValue('');
       this.recalcSlots(fecha || '');
     });
   }
@@ -370,19 +342,18 @@ export class ReservasListComponent implements OnInit {
       const c = this.clientes().find(cl => cl.id === r.idCliente);
       if (c) return c.nombre;
     }
-    if (r.nombreManual) return r.nombreManual;
     return 'Sin identificar';
   }
 
-  getEstadoLabel(estado: string): string {
+  getEstadoLabel(estado?: string): string {
     const labels: Record<string, string> = {
       CONFIRMADA: 'Confirmada',
       PENDIENTE: 'Pendiente',
       CANCELADA: 'Cancelada',
       COMPLETADA: 'Completada',
-      NO_SHOW: 'No-show'
+      NO_PRESENTADO: 'No-show'
     };
-    return labels[estado] ?? estado;
+    return labels[estado ?? ''] ?? (estado ?? '-');
   }
 
   formatDate(dateStr: string): string {
@@ -391,29 +362,22 @@ export class ReservasListComponent implements OnInit {
     return d.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
   }
 
-  formatSolicitud(isoStr: string): string {
-    const d = new Date(isoStr);
-    return d.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' }) + ' a las ' + d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-  }
-
   openCreate(): void {
     this.editingReserva.set(null);
-    this.reservaForm.reset({ tipoCliente: 'registrado', idCliente: null, nombreManual: '', telefonoManual: '', fechaReserva: '', horaInicio: '', numPersonas: 2, notas: '' });
+    this.reservaForm.reset({ idCliente: null, fecha: '', hora: '', numPersonas: 2, notas: '' });
     this.availableSlots.set([]);
     this.showFormModal.set(true);
   }
 
   openEdit(r: ReservasMesa): void {
     this.editingReserva.set(r);
-    const tipo = r.nombreManual ? 'manual' : 'registrado';
-    this.recalcSlots(r.fechaReserva);
+    const fecha = ReservasMesaService.extractDate(r.fechaHoraInicio);
+    const hora = ReservasMesaService.extractTime(r.fechaHoraInicio);
+    this.recalcSlots(fecha);
     this.reservaForm.patchValue({
-      tipoCliente: tipo,
       idCliente: r.idCliente || null,
-      nombreManual: r.nombreManual || '',
-      telefonoManual: r.telefonoManual || '',
-      fechaReserva: r.fechaReserva,
-      horaInicio: r.horaInicio,
+      fecha,
+      hora,
       numPersonas: r.numPersonas,
       notas: r.notas || ''
     });
@@ -423,14 +387,10 @@ export class ReservasListComponent implements OnInit {
   submitForm(): void {
     if (this.reservaForm.invalid) return;
     const raw = this.reservaForm.getRawValue();
-    const isManual = raw.tipoCliente === 'manual';
 
     const payload: Partial<ReservasMesa> = {
-      idCliente: isManual ? 0 : (raw.idCliente ?? 0),
-      nombreManual: isManual ? raw.nombreManual || undefined : undefined,
-      telefonoManual: isManual ? raw.telefonoManual || undefined : undefined,
-      fechaReserva: raw.fechaReserva!,
-      horaInicio: raw.horaInicio!,
+      idCliente: raw.idCliente ?? undefined,
+      fechaHoraInicio: ReservasMesaService.buildInstant(raw.fecha!, raw.hora!),
       numPersonas: raw.numPersonas!,
       notas: raw.notas || undefined
     };
@@ -463,7 +423,7 @@ export class ReservasListComponent implements OnInit {
         this.toastService.success(`Reserva marcada como ${this.getEstadoLabel(estado).toLowerCase()}`);
         this.loadData();
       },
-      error: () => this.toastService.error('Error al cambiar estado')
+      error: (err) => this.toastService.error(err?.error?.message || 'Error al cambiar estado')
     });
   }
 
@@ -475,13 +435,13 @@ export class ReservasListComponent implements OnInit {
   submitCancel(): void {
     const id = this.cancelId();
     if (!id) return;
-    this.reservasService.cancel(id).subscribe({
+    this.reservasService.changeEstado(id, 'CANCELADA').subscribe({
       next: () => {
         this.toastService.success('Reserva cancelada');
         this.showCancelModal.set(false);
         this.loadData();
       },
-      error: () => this.toastService.error('Error al cancelar reserva')
+      error: (err) => this.toastService.error(err?.error?.message || 'Error al cancelar reserva')
     });
   }
 }

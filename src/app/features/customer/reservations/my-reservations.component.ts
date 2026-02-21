@@ -1,5 +1,5 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
-import { MockReservasService } from '../../../core/services/mock-reservas.service';
+import { ReservasMesaService } from '../../../core/services/reservas-mesa.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { ReservasMesa } from '../../../core/models/reservas-mesa.interface';
 import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer-loader.component';
@@ -72,19 +72,16 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
                 <div class="reservation-card">
                   <div class="res-left">
                     <div class="res-date-badge">
-                      <span class="res-day">{{ getDay(res.fechaReserva) }}</span>
-                      <span class="res-month">{{ getMonth(res.fechaReserva) }}</span>
+                      <span class="res-day">{{ getDay(res.fechaHoraInicio) }}</span>
+                      <span class="res-month">{{ getMonth(res.fechaHoraInicio) }}</span>
                     </div>
                   </div>
                   <div class="res-center">
                     <div class="res-time">
                       <i class="fa-solid fa-clock"></i>
-                      {{ res.horaInicio }}@if (res.horaFin) { - {{ res.horaFin }} }
+                      {{ extractTime(res.fechaHoraInicio) }}@if (res.fechaHoraFin) { - {{ extractTime(res.fechaHoraFin) }} }
                     </div>
                     <div class="res-details">
-                      <span class="res-detail-item">
-                        <i class="fa-solid fa-chair"></i> Mesa {{ res.idMesa }}
-                      </span>
                       <span class="res-detail-item">
                         <i class="fa-solid fa-users"></i> {{ res.numPersonas }} personas
                       </span>
@@ -119,19 +116,16 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
                 <div class="reservation-card card-muted">
                   <div class="res-left">
                     <div class="res-date-badge muted">
-                      <span class="res-day">{{ getDay(res.fechaReserva) }}</span>
-                      <span class="res-month">{{ getMonth(res.fechaReserva) }}</span>
+                      <span class="res-day">{{ getDay(res.fechaHoraInicio) }}</span>
+                      <span class="res-month">{{ getMonth(res.fechaHoraInicio) }}</span>
                     </div>
                   </div>
                   <div class="res-center">
                     <div class="res-time">
                       <i class="fa-solid fa-clock"></i>
-                      {{ res.horaInicio }}@if (res.horaFin) { - {{ res.horaFin }} }
+                      {{ extractTime(res.fechaHoraInicio) }}@if (res.fechaHoraFin) { - {{ extractTime(res.fechaHoraFin) }} }
                     </div>
                     <div class="res-details">
-                      <span class="res-detail-item">
-                        <i class="fa-solid fa-chair"></i> Mesa {{ res.idMesa }}
-                      </span>
                       <span class="res-detail-item">
                         <i class="fa-solid fa-users"></i> {{ res.numPersonas }} personas
                       </span>
@@ -163,19 +157,16 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
                 <div class="reservation-card card-muted">
                   <div class="res-left">
                     <div class="res-date-badge muted">
-                      <span class="res-day">{{ getDay(res.fechaReserva) }}</span>
-                      <span class="res-month">{{ getMonth(res.fechaReserva) }}</span>
+                      <span class="res-day">{{ getDay(res.fechaHoraInicio) }}</span>
+                      <span class="res-month">{{ getMonth(res.fechaHoraInicio) }}</span>
                     </div>
                   </div>
                   <div class="res-center">
                     <div class="res-time">
                       <i class="fa-solid fa-clock"></i>
-                      {{ res.horaInicio }}@if (res.horaFin) { - {{ res.horaFin }} }
+                      {{ extractTime(res.fechaHoraInicio) }}@if (res.fechaHoraFin) { - {{ extractTime(res.fechaHoraFin) }} }
                     </div>
                     <div class="res-details">
-                      <span class="res-detail-item">
-                        <i class="fa-solid fa-chair"></i> Mesa {{ res.idMesa }}
-                      </span>
                       <span class="res-detail-item">
                         <i class="fa-solid fa-users"></i> {{ res.numPersonas }} personas
                       </span>
@@ -533,14 +524,14 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
   `]
 })
 export class MyReservationsComponent implements OnInit {
-  private reservasService = inject(MockReservasService);
+  private reservasService = inject(ReservasMesaService);
   private toastService = inject(ToastService);
 
   allReservations = signal<ReservasMesa[]>([]);
   activeTab = signal<'CONFIRMADA' | 'COMPLETADA' | 'CANCELADA'>('CONFIRMADA');
 
   activeReservations = computed(() =>
-    this.allReservations().filter(r => r.estado === 'CONFIRMADA')
+    this.allReservations().filter(r => r.estado === 'CONFIRMADA' || r.estado === 'PENDIENTE')
   );
 
   completedReservations = computed(() =>
@@ -558,24 +549,45 @@ export class MyReservationsComponent implements OnInit {
   }
 
   private loadReservations(): void {
-    this.reservasService.getByCliente(1).subscribe(reservas => {
-      this.allReservations.set(reservas);
-      this.isLoading.set(false);
+    this.reservasService.getMisReservas().subscribe({
+      next: reservas => {
+        this.allReservations.set(reservas);
+        this.isLoading.set(false);
+      },
+      error: () => {
+        this.toastService.error('Error al cargar reservas');
+        this.isLoading.set(false);
+      }
     });
   }
 
   cancelReservation(id: number): void {
-    this.reservasService.cancel(id).subscribe(() => {
-      this.toastService.success('Reserva cancelada correctamente');
-      this.loadReservations();
+    this.reservasService.cancelCliente(id).subscribe({
+      next: () => {
+        this.toastService.success('Reserva cancelada correctamente');
+        this.loadReservations();
+      },
+      error: () => this.toastService.error('Error al cancelar reserva')
     });
   }
 
-  getDay(dateStr: string): string {
-    return new Date(dateStr).getDate().toString();
+  extractDate(iso: string): string {
+    return ReservasMesaService.extractDate(iso);
   }
 
-  getMonth(dateStr: string): string {
-    return new Date(dateStr).toLocaleDateString('es-ES', { month: 'short' });
+  extractTime(iso: string): string {
+    return ReservasMesaService.extractTime(iso);
+  }
+
+  getDay(iso: string): string {
+    const d = ReservasMesaService.extractDate(iso);
+    if (!d) return '-';
+    return new Date(d + 'T12:00:00').getDate().toString();
+  }
+
+  getMonth(iso: string): string {
+    const d = ReservasMesaService.extractDate(iso);
+    if (!d) return '';
+    return new Date(d + 'T12:00:00').toLocaleDateString('es-ES', { month: 'short' });
   }
 }

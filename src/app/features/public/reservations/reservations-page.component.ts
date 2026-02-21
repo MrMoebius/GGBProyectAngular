@@ -1,6 +1,6 @@
 import { Component, signal, computed, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MockReservasService } from '../../../core/services/mock-reservas.service';
+import { ReservasMesaService } from '../../../core/services/reservas-mesa.service';
 import { JuegoService } from '../../../core/services/juego.service';
 import { MesaService } from '../../../core/services/mesa.service';
 import { ToastService } from '../../../core/services/toast.service';
@@ -1476,7 +1476,7 @@ interface ContactInfo {
   `]
 })
 export class ReservationsPageComponent {
-  private reservasService = inject(MockReservasService);
+  private reservasService = inject(ReservasMesaService);
   private juegosService = inject(JuegoService);
   private mesaService = inject(MesaService);
   private toastService = inject(ToastService);
@@ -1526,7 +1526,14 @@ export class ReservationsPageComponent {
         slots.push(`${h.toString().padStart(2, '0')}:30`);
       }
     }
-    return slots;
+    const isToday = dateStr === this.todayStr;
+    if (!isToday) return slots;
+    const now = new Date();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    return slots.filter(slot => {
+      const [hh, mm] = slot.split(':').map(Number);
+      return hh * 60 + mm > currentMinutes;
+    });
   });
 
   // Step 1 signals
@@ -1699,10 +1706,12 @@ export class ReservationsPageComponent {
     }
     notes.push('Contacto: ' + this.contactInfo().nombre + ' / ' + this.contactInfo().telefono + ' / ' + this.contactInfo().email);
 
+    const user = this.authService.currentUser();
     this.reservasService.create({
-      fechaReserva: this.selectedDate(),
-      horaInicio: this.selectedTime(),
+      fechaHoraInicio: ReservasMesaService.buildInstant(this.selectedDate(), this.selectedTime()),
       numPersonas: this.partySize(),
+      idCliente: (user as any)?.clienteId,
+      idJuegoDeseado: this.selectedGame()?.id,
       notas: notes.join(' | ')
     }).subscribe({
       next: (reserva) => {
