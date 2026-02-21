@@ -29,7 +29,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
     <main
       class="staff-content"
-      [style.margin-left]="collapsed() ? 'var(--sidebar-collapsed-width)' : 'var(--sidebar-width)'"
+      [class.sidebar-collapsed]="collapsed()"
     >
       <router-outlet></router-outlet>
     </main>
@@ -45,6 +45,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
     .staff-content {
       padding: 1.5rem;
+      margin-left: var(--sidebar-width);
       min-height: calc(100vh - 60px);
       transition: margin-left 0.3s ease;
       background-color: var(--content-bg);
