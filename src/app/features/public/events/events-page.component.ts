@@ -6,7 +6,7 @@ import { GGBEvent } from '../../../core/models/evento.interface';
 import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer-loader.component';
 
 type TabFilter = 'todos' | 'proximos' | 'este_mes' | 'pasados';
-type EventType = GGBEvent['type'];
+type EventType = GGBEvent['tipo'];
 
 @Component({
   selector: 'app-events-page',
@@ -74,51 +74,51 @@ type EventType = GGBEvent['type'];
             </div>
             <!-- Type badge -->
             <div class="card-top">
-              <span class="type-badge" [style.background-color]="getTypeColor(event.type)">
-                <i [class]="getTypeIcon(event.type)"></i>
-                {{ getTypeLabel(event.type) }}
+              <span class="type-badge" [style.background-color]="getTypeColor(event.tipo)">
+                <i [class]="getTypeIcon(event.tipo)"></i>
+                {{ getTypeLabel(event.tipo) }}
               </span>
-              @if (event.status === 'EN_CURSO') {
+              @if (event.estado === 'EN_CURSO') {
                 <span class="live-badge">
                   <i class="fa-solid fa-circle fa-beat-fade"></i> En curso
                 </span>
               }
-              @if (event.status === 'CANCELADO') {
+              @if (event.estado === 'CANCELADO') {
                 <span class="cancelled-badge">Cancelado</span>
               }
             </div>
 
             <!-- Title -->
-            <h3 class="card-title">{{ event.title }}</h3>
+            <h3 class="card-title">{{ event.titulo }}</h3>
 
             <!-- Date + Time -->
             <div class="card-meta">
               <span class="meta-item">
                 <i class="fa-regular fa-calendar"></i>
-                {{ formatDate(event.date) }}
+                {{ formatDate(event.fecha) }}
               </span>
               <span class="meta-item">
                 <i class="fa-regular fa-clock"></i>
-                {{ event.time }}{{ event.endTime ? ' - ' + event.endTime : '' }}
+                {{ event.hora }}{{ event.horaFin ? ' - ' + event.horaFin : '' }}
               </span>
             </div>
 
             <!-- Location -->
             <div class="card-location">
               <i class="fa-solid fa-location-dot"></i>
-              {{ event.location }}
+              {{ event.ubicacion }}
             </div>
 
             <!-- Description -->
             <p class="card-description">
-              {{ event.description.length > 150 ? event.description.substring(0, 150) + '...' : event.description }}
+              {{ event.descripcion.length > 150 ? event.descripcion.substring(0, 150) + '...' : event.descripcion }}
             </p>
 
             <!-- Capacity bar -->
             <div class="capacity-section">
               <div class="capacity-header">
                 <span class="capacity-label">Plazas</span>
-                <span class="capacity-text">{{ event.currentAttendees }}/{{ event.capacity }} plazas</span>
+                <span class="capacity-text">{{ event.inscritos }}/{{ event.capacidad }} plazas</span>
               </div>
               <div class="capacity-bar">
                 <div
@@ -131,7 +131,7 @@ type EventType = GGBEvent['type'];
               @if (getCapacityPercent(event) >= 100) {
                 <span class="capacity-full">
                   <i class="fa-solid fa-circle-exclamation"></i>
-                  COMPLETO - Lista de espera ({{ event.waitlistCount }})
+                  COMPLETO - Lista de espera ({{ event.listaEspera }})
                 </span>
               } @else if (getCapacityPercent(event) > 80) {
                 <span class="capacity-warning">
@@ -669,26 +669,26 @@ export class EventsPageComponent implements OnInit {
     const currentYear = now.getFullYear();
 
     if (tab === 'proximos') {
-      list = list.filter(e => e.status === 'PROXIMO' || e.status === 'EN_CURSO');
+      list = list.filter(e => e.estado === 'PROXIMO' || e.estado === 'EN_CURSO');
     } else if (tab === 'este_mes') {
       list = list.filter(e => {
-        const d = new Date(e.date);
+        const d = new Date(e.fecha);
         return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
       });
     } else if (tab === 'pasados') {
-      list = list.filter(e => e.status === 'FINALIZADO' || e.status === 'CANCELADO');
+      list = list.filter(e => e.estado === 'FINALIZADO' || e.estado === 'CANCELADO');
     }
 
     // Type filter
     const types = this.selectedTypes();
     if (types.length > 0) {
-      list = list.filter(e => types.includes(e.type));
+      list = list.filter(e => types.includes(e.tipo));
     }
 
     // Sort: upcoming first by date, then past
     return list.sort((a, b) => {
-      const dateCompare = a.date.localeCompare(b.date);
-      return dateCompare !== 0 ? dateCompare : a.time.localeCompare(b.time);
+      const dateCompare = a.fecha.localeCompare(b.fecha);
+      return dateCompare !== 0 ? dateCompare : a.hora.localeCompare(b.hora);
     });
   });
 
@@ -729,8 +729,8 @@ export class EventsPageComponent implements OnInit {
   }
 
   getCapacityPercent(event: GGBEvent): number {
-    if (event.capacity === 0) return 0;
-    return Math.min(100, Math.round((event.currentAttendees / event.capacity) * 100));
+    if (event.capacidad === 0) return 0;
+    return Math.min(100, Math.round((event.inscritos / event.capacidad) * 100));
   }
 
   formatDate(dateStr: string): string {
@@ -744,9 +744,9 @@ export class EventsPageComponent implements OnInit {
   }
 
   isPastEvent(event: GGBEvent): boolean {
-    if (event.status === 'FINALIZADO' || event.status === 'CANCELADO') return true;
-    const endTime = event.endTime ?? event.time;
-    const eventEnd = new Date(event.date + 'T' + endTime + ':00');
+    if (event.estado === 'FINALIZADO' || event.estado === 'CANCELADO') return true;
+    const endTime = event.horaFin ?? event.hora;
+    const eventEnd = new Date(event.fecha + 'T' + endTime + ':00');
     return eventEnd < new Date();
   }
 }

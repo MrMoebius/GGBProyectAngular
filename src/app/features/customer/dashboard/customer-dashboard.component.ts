@@ -179,30 +179,30 @@ import { GameCardPublicComponent } from '../../../shared/components/game-card-pu
             } @else {
               <ul class="event-list">
                 @for (sub of enrichedSubscriptions(); track sub.id) {
-                  <img class="event-img-probe" [src]="eventService.getImageUrl(sub.eventId)" (load)="onEventImageLoad(sub.eventId)" (error)="$event" />
-                  <a class="event-item" [class.event-item-with-bg]="eventHasImage(sub.eventId)" [routerLink]="'/public/eventos/' + sub.eventId"
-                     [style.background-image]="eventHasImage(sub.eventId) ? 'url(' + eventService.getImageUrl(sub.eventId) + ')' : ''">
-                    @if (eventHasImage(sub.eventId)) { <div class="event-item-overlay"></div> }
+                  <img class="event-img-probe" [src]="eventService.getImageUrl(sub.idEvento)" (load)="onEventImageLoad(sub.idEvento)" (error)="$event" />
+                  <a class="event-item" [class.event-item-with-bg]="eventHasImage(sub.idEvento)" [routerLink]="'/public/eventos/' + sub.idEvento"
+                     [style.background-image]="eventHasImage(sub.idEvento) ? 'url(' + eventService.getImageUrl(sub.idEvento) + ')' : ''">
+                    @if (eventHasImage(sub.idEvento)) { <div class="event-item-overlay"></div> }
                     <div class="event-item-content">
                       <div class="event-icon" [class.event-icon-finished]="sub.finished">
                         <i class="fa-solid" [class.fa-star]="!sub.finished" [class.fa-flag-checkered]="sub.finished"></i>
                       </div>
                       <div class="event-info">
-                        <span class="event-title">{{ sub.title }}</span>
-                        <span class="event-date">{{ sub.date }} a las {{ sub.time }}</span>
+                        <span class="event-title">{{ sub.titulo }}</span>
+                        <span class="event-date">{{ sub.fecha }} a las {{ sub.hora }}</span>
                         <div class="event-meta">
-                          <span class="event-status" [class.event-status-finished]="sub.finished" [class.event-status-waitlist]="sub.status === 'WAITLIST'">
+                          <span class="event-status" [class.event-status-finished]="sub.finished" [class.event-status-waitlist]="sub.estado === 'LISTA_ESPERA'">
                             @if (sub.finished) {
                               Finalizado
                             } @else {
-                              @switch (sub.status) {
-                                @case ('CONFIRMED') { Confirmado }
-                                @case ('WAITLIST') { Lista de espera }
+                              @switch (sub.estado) {
+                                @case ('CONFIRMADA') { Confirmado }
+                                @case ('LISTA_ESPERA') { Lista de espera }
                               }
                             }
                           </span>
                           <span class="event-capacity">
-                            <i class="fa-solid fa-users"></i> {{ sub.currentAttendees }}/{{ sub.capacity }}
+                            <i class="fa-solid fa-users"></i> {{ sub.inscritos }}/{{ sub.capacidad }}
                           </span>
                         </div>
                       </div>
@@ -1205,19 +1205,19 @@ export class CustomerDashboardComponent implements OnInit {
     const events = this.allEvents();
     const now = new Date();
     return subs.map(sub => {
-      const event = events.find(e => e.id === sub.eventId);
+      const event = events.find(e => e.id === sub.idEvento);
       let finished = false;
       if (event) {
-        const endStr = event.date + 'T' + (event.endTime ?? event.time) + ':00';
+        const endStr = event.fecha + 'T' + (event.horaFin ?? event.hora) + ':00';
         finished = new Date(endStr) < now;
       }
       return {
         ...sub,
-        title: event?.title ?? `Evento #${sub.eventId}`,
-        date: event?.date ?? '',
-        time: event?.time ?? '',
-        capacity: event?.capacity ?? 0,
-        currentAttendees: event?.currentAttendees ?? 0,
+        titulo: event?.titulo ?? `Evento #${sub.idEvento}`,
+        fecha: event?.fecha ?? '',
+        hora: event?.hora ?? '',
+        capacidad: event?.capacidad ?? 0,
+        inscritos: event?.inscritos ?? 0,
         finished
       };
     });
@@ -1262,9 +1262,7 @@ export class CustomerDashboardComponent implements OnInit {
       this.allEvents.set(events);
     });
 
-    // Subscribed events
-    const userEmail = user?.email ?? 'anonymous';
-    this.eventService.getSubscriptionsByUser(userEmail).subscribe(subs => {
+    this.eventService.getMisInscripciones().subscribe(subs => {
       this.subscribedEvents.set(subs);
     });
 
