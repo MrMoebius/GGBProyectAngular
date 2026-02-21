@@ -1,6 +1,7 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
 import { ComandaService } from '../../../core/services/comanda.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { Comanda } from '../../../core/models/comanda.interface';
@@ -49,48 +50,44 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
         </div>
       </div>
 
-      <!-- Table -->
-      <div class="card table-container">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>ID Sesion</th>
-              <th>Estado</th>
-              <th>Fecha / Hora</th>
-              <th>Total</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (cmd of filteredComandas(); track cmd.id) {
-              <tr>
-                <td>{{ cmd.id }}</td>
-                <td>{{ cmd.idSesion }}</td>
-                <td>
-                  <app-status-badge [status]="cmd.estado" />
-                </td>
-                <td>{{ formatDateTime(cmd.fechaHora) }}</td>
-                <td class="cell-total">{{ formatCurrency(cmd.total) }}</td>
-                <td class="actions-cell">
-                  <button class="btn btn-ghost btn-sm" (click)="openEdit(cmd)">
-                    <i class="fa-solid fa-pen-to-square"></i>
-                  </button>
-                  <button class="btn btn-danger btn-sm" (click)="openDelete(cmd.id)">
-                    <i class="fa-solid fa-trash"></i>
-                  </button>
-                </td>
-              </tr>
-            } @empty {
-              <tr>
-                <td colspan="6" class="empty-state">
-                  <i class="fa-solid fa-receipt empty-icon"></i>
-                  <p>No se encontraron comandas</p>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
+      <!-- Grid -->
+      <div class="comandas-grid">
+        @for (cmd of filteredComandas(); track cmd.id) {
+          <div class="comanda-card">
+            <div class="comanda-header">
+              <span class="comanda-id">#{{ cmd.id }}</span>
+              <app-status-badge [status]="cmd.estado" />
+            </div>
+            <div class="comanda-body">
+              <div class="comanda-field"><span class="field-label">Sesion</span><span class="field-value">{{ cmd.idSesion }}</span></div>
+              <div class="comanda-field"><span class="field-label">Total</span><span class="field-value total">{{ formatCurrency(cmd.total) }}</span></div>
+              <div class="comanda-field"><span class="field-label">Fecha</span><span class="field-value">{{ formatDateTime(cmd.fechaHora) }}</span></div>
+            </div>
+            <div class="comanda-actions">
+              @if (cmd.estado === 'PENDIENTE') {
+                <button class="btn btn-sm btn-success" (click)="doConfirmar(cmd.id)">Confirmar</button>
+                <button class="btn btn-sm btn-outline-danger" (click)="doCancelar(cmd.id)">Cancelar</button>
+              }
+              @if (cmd.estado === 'CONFIRMADA') {
+                <button class="btn btn-sm btn-warning" (click)="doPreparar(cmd.id)">Preparar</button>
+                <button class="btn btn-sm btn-outline-danger" (click)="doCancelar(cmd.id)">Cancelar</button>
+              }
+              @if (cmd.estado === 'PREPARACION') {
+                <button class="btn btn-sm btn-success" (click)="doServir(cmd.id)">Servir</button>
+              }
+              <div class="actions-right">
+                <button class="btn btn-ghost btn-sm" (click)="verSesion(cmd.idSesion)" title="Ver sesion"><i class="fa-solid fa-eye"></i></button>
+                <button class="btn btn-ghost btn-sm" (click)="openEdit(cmd)"><i class="fa-solid fa-pen-to-square"></i></button>
+                <button class="btn btn-danger btn-sm" (click)="openDelete(cmd.id)"><i class="fa-solid fa-trash"></i></button>
+              </div>
+            </div>
+          </div>
+        } @empty {
+          <div class="empty-state-full">
+            <i class="fa-solid fa-receipt empty-icon"></i>
+            <p>No se encontraron comandas</p>
+          </div>
+        }
       </div>
 
       <!-- Form Modal -->
@@ -116,8 +113,10 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
               <label class="form-label">Estado *</label>
               <select class="form-input" formControlName="estado">
                 <option value="PENDIENTE">PENDIENTE</option>
+                <option value="CONFIRMADA">CONFIRMADA</option>
                 <option value="PREPARACION">PREPARACION</option>
                 <option value="SERVIDA">SERVIDA</option>
+                <option value="PAGADA">PAGADA</option>
                 <option value="CANCELADA">CANCELADA</option>
               </select>
             </div>
@@ -198,56 +197,84 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       padding-left: 2.25rem;
     }
 
-    .table-container {
-      overflow-x: auto;
+    .comandas-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
     }
 
-    .data-table {
-      width: 100%;
-      border-collapse: collapse;
+    .comanda-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-md);
+      padding: 1.25rem;
+      transition: box-shadow 0.2s;
     }
 
-    .data-table thead {
-      background-color: var(--table-header-bg);
+    .comanda-card:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
-    .data-table th {
-      padding: 0.75rem 1rem;
-      text-align: left;
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      border-bottom: 1px solid var(--table-border);
-      white-space: nowrap;
-    }
-
-    .data-table td {
-      padding: 0.75rem 1rem;
-      font-size: 0.875rem;
-      color: var(--text-main);
-      border-bottom: 1px solid var(--table-border);
-    }
-
-    .data-table tbody tr:hover {
-      background-color: var(--table-row-hover);
-    }
-
-    .cell-total {
-      font-weight: 600;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .actions-cell {
+    .comanda-header {
       display: flex;
-      gap: 0.5rem;
-      white-space: nowrap;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
     }
 
-    .empty-state {
+    .comanda-id {
+      font-weight: 700;
+      font-size: 1rem;
+      color: var(--text-main);
+    }
+
+    .comanda-body {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .comanda-field {
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .field-label {
+      font-size: 0.8125rem;
+      color: var(--text-muted);
+    }
+
+    .field-value {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-main);
+    }
+
+    .field-value.total {
+      font-weight: 700;
+      color: var(--primary-coral);
+    }
+
+    .comanda-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+      border-top: 1px solid var(--card-border);
+      padding-top: 0.75rem;
+    }
+
+    .actions-right {
+      margin-left: auto;
+      display: flex;
+      gap: 0.25rem;
+    }
+
+    .empty-state-full {
+      grid-column: 1 / -1;
       text-align: center;
-      padding: 3rem 1rem;
+      padding: 3rem;
       color: var(--text-muted);
     }
 
@@ -257,7 +284,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       opacity: 0.5;
     }
 
-    .empty-state p {
+    .empty-state-full p {
       font-size: 0.9375rem;
     }
 
@@ -292,6 +319,7 @@ export class ComandasListComponent implements OnInit {
   private comandaService = inject(ComandaService);
   private toastService = inject(ToastService);
   private fb = inject(FormBuilder);
+  private router = inject(Router);
 
   // Signals
   comandas = signal<Comanda[]>([]);
@@ -448,5 +476,38 @@ export class ComandasListComponent implements OnInit {
   formatCurrency(value: number): string {
     if (value == null) return '0,00 EUR';
     return value.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' EUR';
+  }
+
+  doConfirmar(id: number): void {
+    this.comandaService.confirmar(id).subscribe({
+      next: () => { this.toastService.success('Comanda confirmada'); this.loadComandas(); },
+      error: (err) => this.toastService.error(err?.error?.message || 'Error')
+    });
+  }
+
+  doPreparar(id: number): void {
+    this.comandaService.preparar(id).subscribe({
+      next: () => { this.toastService.success('Comanda en preparacion'); this.loadComandas(); },
+      error: (err) => this.toastService.error(err?.error?.message || 'Error')
+    });
+  }
+
+  doServir(id: number): void {
+    this.comandaService.servir(id).subscribe({
+      next: () => { this.toastService.success('Comanda servida'); this.loadComandas(); },
+      error: (err) => this.toastService.error(err?.error?.message || 'Error')
+    });
+  }
+
+  doCancelar(id: number): void {
+    this.comandaService.cancelar(id).subscribe({
+      next: () => { this.toastService.success('Comanda cancelada'); this.loadComandas(); },
+      error: (err) => this.toastService.error(err?.error?.message || 'Error')
+    });
+  }
+
+  verSesion(idSesion: number): void {
+    const base = this.router.url.startsWith('/staff') ? '/staff' : '/admin';
+    this.router.navigate([`${base}/sesiones-mesa`, idSesion]);
   }
 }

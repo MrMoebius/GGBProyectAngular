@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProductoService } from '../../../core/services/producto.service';
 import { CartService } from '../../../core/services/cart.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { SesionMesaService } from '../../../core/services/sesion-mesa.service';
 import { Producto } from '../../../core/models/producto.interface';
 import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer-loader.component';
 
@@ -33,6 +35,7 @@ interface CategoryTab {
           <button
             class="tab-pill"
             [class.active]="selectedCategory() === tab.key"
+            [ngClass]="'tab-' + tab.key.toLowerCase()"
             (click)="selectedCategory.set(tab.key)">
             @if (tab.icon) {
               <i class="fa-solid" [ngClass]="tab.icon"></i>
@@ -66,24 +69,31 @@ interface CategoryTab {
       @if (filteredProducts().length > 0) {
         <div class="product-grid">
           @for (product of filteredProducts(); track product.id) {
-            <div class="product-card">
-              <div class="product-card-header">
-                <div class="product-icon" [ngClass]="'cat-' + product.categoria.toLowerCase()">
-                  <i class="fa-solid" [ngClass]="getCategoryIcon(product.categoria)"></i>
+            <div class="product-card" [class.has-image]="getProductImage(product.nombre)">
+              @if (getProductImage(product.nombre)) {
+                <div class="product-card-bg" [style.background-image]="'url(assets/products/' + getProductImage(product.nombre) + ')'"></div>
+              }
+              <div class="product-card-inner">
+                <div class="product-card-header">
+                  <div class="product-icon" [ngClass]="'cat-' + product.categoria.toLowerCase()">
+                    <i class="fa-solid" [ngClass]="getCategoryIcon(product.categoria)"></i>
+                  </div>
+                  <div class="product-info">
+                    <h3 class="product-name">{{ product.nombre }}</h3>
+                    @if (product.descripcion) {
+                      <p class="product-desc">{{ product.descripcion }}</p>
+                    }
+                  </div>
                 </div>
-                <div class="product-info">
-                  <h3 class="product-name">{{ product.nombre }}</h3>
-                  @if (product.descripcion) {
-                    <p class="product-desc">{{ product.descripcion }}</p>
+                <div class="product-card-footer">
+                  <span class="product-price">{{ product.precio.toFixed(2) }} EUR</span>
+                  @if (canOrder()) {
+                    <button class="btn-add" (click)="addToCart(product)">
+                      <i class="fa-solid fa-plus"></i>
+                      Anadir
+                    </button>
                   }
                 </div>
-              </div>
-              <div class="product-card-footer">
-                <span class="product-price">{{ product.precio.toFixed(2) }} EUR</span>
-                <button class="btn-add" (click)="addToCart(product)">
-                  <i class="fa-solid fa-plus"></i>
-                  Anadir
-                </button>
               </div>
             </div>
           }
@@ -204,7 +214,7 @@ interface CategoryTab {
     }
 
     <!-- Floating Cart Bar -->
-    @if (cartService.itemCount() > 0) {
+    @if (canOrder() && cartService.itemCount() > 0) {
       <div class="floating-cart">
         <div class="cart-info">
           <i class="fa-solid fa-cart-shopping"></i>
@@ -287,10 +297,15 @@ interface CategoryTab {
     }
 
     .tab-pill.active {
-      background-color: var(--primary-coral);
       color: var(--text-white, #FFFFFF);
-      border-color: var(--primary-coral);
     }
+
+    .tab-pill.tab-todos.active { background-color: var(--primary-coral); border-color: var(--primary-coral); }
+    .tab-pill.tab-comida.active { background-color: #EF4444; border-color: #EF4444; }
+    .tab-pill.tab-bebida.active { background-color: #3B82F6; border-color: #3B82F6; }
+    .tab-pill.tab-alcohol.active { background-color: #A855F7; border-color: #A855F7; }
+    .tab-pill.tab-postre.active { background-color: #F59E0B; border-color: #F59E0B; }
+    .tab-pill.tab-servicio.active { background-color: #10B981; border-color: #10B981; }
 
     .tab-pill i {
       font-size: 0.85rem;
@@ -379,18 +394,68 @@ interface CategoryTab {
       background-color: var(--card-bg);
       border: 1px solid var(--card-border);
       border-radius: var(--radius-md, 0.5rem);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+      position: relative;
+      overflow: hidden;
+      min-height: 160px;
+    }
+
+    .product-card:hover {
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+      border-color: var(--text-muted);
+      transform: translateY(-2px);
+    }
+
+    .product-card-bg {
+      position: absolute;
+      inset: 0;
+      background-size: cover;
+      background-position: center;
+      z-index: 0;
+    }
+
+    .product-card.has-image .product-card-bg::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.82) 0%, rgba(15, 23, 42, 0.7) 100%);
+    }
+
+    .product-card-inner {
+      position: relative;
+      z-index: 1;
       padding: 1.25rem;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       gap: 1rem;
-      transition: box-shadow 0.2s ease, border-color 0.2s ease;
+      flex: 1;
     }
 
-    .product-card:hover {
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-      border-color: var(--text-muted);
+    .product-card.has-image .product-name {
+      color: #FFFFFF;
     }
+
+    .product-card.has-image .product-desc {
+      color: #CBD5E1;
+    }
+
+    .product-card.has-image .product-price {
+      color: #FFD166;
+    }
+
+    .product-card.has-image .product-card-footer {
+      border-top-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .product-card.has-image .cat-comida { background: rgba(239, 68, 68, 0.25); color: #FCA5A5; }
+    .product-card.has-image .cat-bebida { background: rgba(59, 130, 246, 0.25); color: #93C5FD; }
+    .product-card.has-image .cat-alcohol { background: rgba(168, 85, 247, 0.25); color: #C4B5FD; }
+    .product-card.has-image .cat-postre { background: rgba(245, 158, 11, 0.25); color: #FCD34D; }
+    .product-card.has-image .cat-servicio { background: rgba(16, 185, 129, 0.25); color: #6EE7B7; }
 
     .product-card-header {
       display: flex;
@@ -422,7 +487,7 @@ interface CategoryTab {
     }
 
     .product-name {
-      font-size: 1rem;
+      font-size: 2rem;
       font-weight: 700;
       color: var(--text-main);
       margin-bottom: 0.25rem;
@@ -430,7 +495,7 @@ interface CategoryTab {
     }
 
     .product-desc {
-      font-size: 0.825rem;
+      font-size: 1.225rem;
       color: var(--text-muted);
       line-height: 1.4;
       display: -webkit-box;
@@ -883,8 +948,32 @@ interface CategoryTab {
       color: var(--text-main);
     }
 
-    /* === Responsive === */
+    /* === Responsive - Tablet === */
+    @media (max-width: 1024px) {
+      .product-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+      }
+
+      .product-name {
+        font-size: 1.5rem;
+      }
+
+      .product-desc {
+        font-size: 1.05rem;
+      }
+
+      .customizer-modal {
+        max-width: min(480px, 90vw);
+      }
+    }
+
+    /* === Responsive - Mobile === */
     @media (max-width: 768px) {
+      .menu-header {
+        padding: 2rem 1rem 0.75rem;
+      }
+
       .menu-title {
         font-size: 1.75rem;
       }
@@ -893,8 +982,8 @@ interface CategoryTab {
         font-size: 0.95rem;
       }
 
-      .product-grid {
-        grid-template-columns: 1fr;
+      .menu-tabs-wrapper {
+        padding: 1rem 1rem 0;
       }
 
       .menu-tabs {
@@ -908,6 +997,63 @@ interface CategoryTab {
       .tab-pill {
         white-space: nowrap;
         flex-shrink: 0;
+      }
+
+      .menu-search-wrapper {
+        padding: 1rem 1rem 0;
+      }
+
+      .search-bar {
+        max-width: 100%;
+      }
+
+      .menu-grid-wrapper {
+        padding: 1rem;
+      }
+
+      .product-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .product-card {
+        min-height: 140px;
+      }
+
+      .product-name {
+        font-size: 1.25rem;
+      }
+
+      .product-desc {
+        font-size: 0.95rem;
+      }
+
+      .product-icon {
+        width: 38px;
+        height: 38px;
+        min-width: 38px;
+        font-size: 1rem;
+      }
+
+      .product-card-inner {
+        padding: 1rem;
+      }
+
+      .customizer-modal {
+        max-width: 95vw;
+        max-height: 90vh;
+      }
+
+      .customizer-header {
+        padding: 1rem 1.25rem;
+      }
+
+      .customizer-body {
+        padding: 0.75rem 1.25rem;
+      }
+
+      .customizer-footer {
+        padding: 0.75rem 1.25rem;
       }
 
       .floating-cart {
@@ -928,11 +1074,103 @@ interface CategoryTab {
         flex: 1;
       }
     }
+
+    /* === Responsive - Small Phone === */
+    @media (max-width: 480px) {
+      .menu-header {
+        padding: 1.5rem 0.75rem 0.5rem;
+      }
+
+      .menu-title {
+        font-size: 1.5rem;
+      }
+
+      .menu-subtitle {
+        font-size: 0.85rem;
+      }
+
+      .menu-tabs-wrapper {
+        padding: 0.75rem 0.75rem 0;
+      }
+
+      .tab-pill {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.8rem;
+      }
+
+      .menu-search-wrapper {
+        padding: 0.75rem 0.75rem 0;
+      }
+
+      .search-input {
+        font-size: 16px;
+      }
+
+      .menu-grid-wrapper {
+        padding: 0.75rem;
+      }
+
+      .product-name {
+        font-size: 1.1rem;
+      }
+
+      .product-desc {
+        font-size: 0.85rem;
+        -webkit-line-clamp: 1;
+      }
+
+      .product-icon {
+        width: 34px;
+        height: 34px;
+        min-width: 34px;
+        font-size: 0.9rem;
+      }
+
+      .product-card-inner {
+        padding: 0.85rem;
+        gap: 0.75rem;
+      }
+
+      .product-price {
+        font-size: 1rem;
+      }
+
+      .btn-add {
+        padding: 0.35rem 0.7rem;
+        font-size: 0.75rem;
+      }
+
+      .customizer-modal {
+        max-width: 100vw;
+        max-height: 100vh;
+        border-radius: var(--radius-md, 0.5rem);
+      }
+
+      .customizer-title {
+        font-size: 1.1rem;
+      }
+
+      .floating-cart {
+        padding: 0.5rem 0.75rem;
+      }
+
+      .cart-info {
+        font-size: 0.75rem;
+      }
+
+      .cart-total {
+        font-size: 0.875rem;
+      }
+    }
   `]
 })
 export class MenuPageComponent implements OnInit {
   private productoService = inject(ProductoService);
+  private authService = inject(AuthService);
+  private sesionService = inject(SesionMesaService);
   readonly cartService = inject(CartService);
+
+  canOrder = signal(false);
 
   readonly isLoading = signal(true);
   readonly selectedCategory = signal<Categoria>('TODOS');
@@ -1011,6 +1249,94 @@ export class MenuPageComponent implements OnInit {
         this.isLoading.set(false);
       },
     });
+
+    if (this.authService.isAuthenticated() && this.authService.currentRole() === 'CLIENTE') {
+      this.sesionService.getMiSesion().subscribe({
+        next: (sesion) => this.canOrder.set(sesion?.estado === 'ACTIVA'),
+        error: () => this.canOrder.set(false),
+      });
+    }
+  }
+
+  private readonly productImageMap: Record<string, string> = {
+    'Acceso a Ludoteca: Master': 'ModoMaster.jpg',
+    'Acceso a Ludoteca: Experto': 'ModoExperto.jpg',
+    'Acceso a Ludoteca: Aprendiz': 'ModoAprendiz.jpg',
+    'Patatas Bravas': 'patatas-bravas.jpg',
+    'Patatas Braviolis': 'patatas-braviolis.jpg',
+    'Patatas 4 salsas': 'patatas-4-salsas.jpg',
+    'Palomitas de pollo': 'Palomitas-de-pollo.jpg',
+    'Nuggets de pollo': 'nuggets-de-pollo.jpg',
+    'Fingers de pollo': 'fingers-de-pollo.jpg',
+    'Croquetas de Jamón (Media)': 'croquetas.jpg',
+    'Croquetas de Jamón (Ración)': 'croquetas.jpg',
+    'Croquetas de Cabrales (Media)': 'croquetas.jpg',
+    'Croquetas de Cabrales (Ración)': 'croquetas.jpg',
+    'Alitas de pollo adobadas': 'alitas.jpg',
+    'Nuggets SIN GLUTEN': 'nuggets-de-pollo.jpg',
+    'Croquetas SIN GLUTEN': 'croquetas.jpg',
+    'GGBurguer': 'ggburguer.jpg',
+    'Goat Quest': 'goat-quest.jpg',
+    'Chicken Meeple': 'chicken-meeple.jpg',
+    'Combo Filete de pollo': 'combo-filete.jpg',
+    'Ensalada Mixta': 'ensalada-mixta.jpg',
+    'Ensalada César': 'ensalada-cesar.jpg',
+    'Ensalada Cabra': 'ensalada-cabra.jpg',
+    'Menú Kids Nuggets': 'kids-menu.jpg',
+    'Menú Kids Palomitas de pollo': 'kids-menu.jpg',
+    'Menú Kids Sándwich mixto': 'kids-menu.jpg',
+    'Final Explosion': 'brownie.jpg',
+    'Cheese Throne': 'cheesecake.jpg',
+    'Agua': 'agua.jpg',
+    'Agua con gas': 'agua.jpg',
+    'Coca-Cola': 'coca-cola.jpg',
+    'Coca-Cola Zero': 'coca-cola-zero.jpg',
+    'Coca-Cola Zero Zero': 'coca-cola-zero-zero.jpg',
+    'Fanta Naranja': 'fanta.jpg',
+    'Fanta Limón': 'fanta-limon.jpg',
+    'Sprite': 'sprite.jpg',
+    'Fuze Tea': 'fuze-tea.jpg',
+    'Aquarius Naranja': 'aquarius-naranja.jpg',
+    'Aquarius Limón': 'aquarius-limon.jpg',
+    'Casera': 'sprite.jpg',
+    'Tónica': 'tonica.jpg',
+    'Monster': 'monster.jpg',
+    'Néctar naranja': 'nectar-naranja.jpg',
+    'Néctar melocotón': 'nectar-melocoton.jpg',
+    'Batido de chocolate': 'batido-chocolate.jpg',
+    'Nesquik': 'nesquik.jpg',
+    'Chocolate a la taza': 'chocolate-taza.jpg',
+    'Café solo': 'cafe-solo.jpg',
+    'Café americano': 'cafe-solo.jpg',
+    'Cortado': 'cortado.jpg',
+    'Café con leche': 'cafe-con-leche.jpg',
+    'Bombón': 'bombon.jpg',
+    'Infusiones': 'infusiones.jpg',
+    'Caña': 'cerveza.jpg',
+    'Copa (Doble)': 'cerveza.jpg',
+    'Maceta (Medio)': 'cerveza.jpg',
+    'Tercio Mahou 5*': 'cerveza-botella.jpg',
+    'Tercio 1906': 'cerveza-botella.jpg',
+    'Tercio 0,0': 'cerveza-botella.jpg',
+    'Coronita': 'cerveza-botella.jpg',
+    'Tinto Verano': 'tinto-verano.jpg',
+    'Beronia Crianza': 'vino-tinto.jpg',
+    'Beronia Verdejo': 'vino-blanco.jpg',
+    'Ribera del Duero': 'vino-tinto.jpg',
+    'Alma': 'vermu.jpg',
+    'Vermú': 'vermu.jpg',
+    'Copazos': 'copazos.jpg',
+    'Hierbas': 'hierbas.jpg',
+    'Crema de Orujo': 'hierbas.jpg',
+    'Café con crema de orujo': 'bombon.jpg',
+    'Chupito': 'chupito.jpg',
+    // 'USO_LUDOTECA_ADULTO': 'ludoteca.jpg',
+    // 'USO_LUDOTECA_NINO_6_13': 'ludoteca.jpg',
+    // 'USO_LUDOTECA_NINO_0_5': 'ludoteca.jpg',
+  };
+
+  getProductImage(nombre: string): string | null {
+    return this.productImageMap[nombre] ?? null;
   }
 
   getCategoryIcon(categoria: string): string {

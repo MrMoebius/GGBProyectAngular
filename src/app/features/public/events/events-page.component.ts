@@ -68,6 +68,9 @@ type EventType = GGBEvent['type'];
             <!-- Card image -->
             <div class="card-image" [style.background-image]="'url(' + eventService.getImageUrl(event.id) + ')'">
               <div class="card-image-overlay"></div>
+              @if (isPastEvent(event)) {
+                <img class="completed-stamp" src="assets/GGBarPhotoSlide/Completed.png" alt="Finalizado" />
+              }
             </div>
             <!-- Type badge -->
             <div class="card-top">
@@ -149,8 +152,8 @@ type EventType = GGBEvent['type'];
 
             <!-- Action button -->
             <div class="card-action">
-              @if (event.status === 'FINALIZADO' || event.status === 'CANCELADO') {
-                <span class="btn btn-ghost btn-sm action-btn" disabled>
+              @if (isPastEvent(event)) {
+                <span class="btn btn-ghost btn-sm action-btn action-disabled">
                   <i class="fa-solid fa-clock-rotate-left"></i>
                   Evento pasado
                 </span>
@@ -345,6 +348,19 @@ type EventType = GGBEvent['type'];
       background: linear-gradient(to bottom, transparent 40%, var(--card-bg, #fff) 100%);
     }
 
+    .completed-stamp {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-15deg);
+      width: 140px;
+      height: auto;
+      z-index: 1;
+      pointer-events: none;
+      opacity: 0.9;
+      filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4));
+    }
+
     .card-top {
       display: flex;
       align-items: center;
@@ -536,6 +552,12 @@ type EventType = GGBEvent['type'];
       width: 100%;
     }
 
+    .action-disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
     /* ── Empty state ── */
     .empty-state {
       grid-column: 1 / -1;
@@ -566,38 +588,53 @@ type EventType = GGBEvent['type'];
 
     /* ── Responsive ── */
     @media (max-width: 1024px) {
-      .events-grid {
-        grid-template-columns: 1fr;
-      }
+      .events-page { padding: 2.5rem 1.5rem; }
+      .events-grid { grid-template-columns: 1fr; gap: 1.25rem; }
+      .card-image { height: 180px; }
+      .events-title { font-size: 2rem; }
+      .events-subtitle { font-size: 1rem; }
+      .tab-bar { flex-wrap: wrap; }
+      .type-pills { overflow-x: auto; flex-wrap: nowrap; scrollbar-width: thin; }
     }
 
-    @media (max-width: 640px) {
-      .events-page {
-        padding: 2rem 1rem;
-      }
+    @media (max-width: 768px) {
+      .events-page { padding: 1.5rem 1rem; }
+      .events-header { margin-bottom: 1.5rem; }
+      .events-title { font-size: 1.75rem; }
+      .events-subtitle { font-size: 0.9375rem; }
+      .tab-bar { overflow-x: auto; scrollbar-width: none; gap: 0; }
+      .tab-bar::-webkit-scrollbar { display: none; }
+      .type-filters { flex-direction: column; align-items: flex-start; }
+      .type-pills { width: 100%; overflow-x: auto; scrollbar-width: none; }
+      .type-pills::-webkit-scrollbar { display: none; }
+      .events-grid { gap: 1rem; }
+      .event-card { padding: 1.25rem; }
+      .card-image { height: 140px; margin: -1.25rem -1.25rem 1rem; width: calc(100% + 2.5rem); }
+      .completed-stamp { width: 110px; height: 110px; }
+      .card-title { font-size: 1.125rem; }
+      .card-meta { flex-direction: column; gap: 0.25rem; }
+      .card-description { font-size: 0.8125rem; }
+      .empty-state { padding: 2.5rem 1.5rem; }
+    }
 
-      .events-title {
-        font-size: 1.75rem;
-      }
-
-      .tab-bar {
-        gap: 0;
-      }
-
-      .tab-btn {
-        padding: 0.625rem 0.75rem;
-        font-size: 0.8125rem;
-      }
-
-      .type-filters {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-
-      .card-meta {
-        flex-direction: column;
-        gap: 0.25rem;
-      }
+    @media (max-width: 480px) {
+      .events-page { padding: 1rem 0.75rem; }
+      .events-title { font-size: 1.5rem; }
+      .events-subtitle { font-size: 0.875rem; }
+      .tab-btn { padding: 0.5rem 0.625rem; font-size: 0.75rem; }
+      .type-pill { font-size: 0.7rem; padding: 0.3rem 0.625rem; }
+      .events-grid { gap: 0.75rem; }
+      .event-card { padding: 1rem; }
+      .card-image { height: 120px; margin: -1rem -1rem 0.75rem; width: calc(100% + 2rem); }
+      .completed-stamp { width: 90px; height: 90px; font-size: 0.55rem; }
+      .card-title { font-size: 1rem; }
+      .capacity-text { font-size: 0.75rem; }
+      .capacity-label { font-size: 0.65rem; }
+      .tag-pill { font-size: 0.625rem; }
+      .empty-state { padding: 2rem 1rem; }
+      .empty-state i { font-size: 2.5rem; }
+      .empty-state h3 { font-size: 1.1rem; }
+      .empty-state p { font-size: 0.8rem; }
     }
   `]
 })
@@ -704,5 +741,12 @@ export class EventsPageComponent implements OnInit {
       month: 'long',
       year: 'numeric'
     });
+  }
+
+  isPastEvent(event: GGBEvent): boolean {
+    if (event.status === 'FINALIZADO' || event.status === 'CANCELADO') return true;
+    const endTime = event.endTime ?? event.time;
+    const eventEnd = new Date(event.date + 'T' + endTime + ':00');
+    return eventEnd < new Date();
   }
 }

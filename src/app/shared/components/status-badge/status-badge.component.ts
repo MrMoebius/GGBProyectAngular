@@ -27,10 +27,10 @@ import { CommonModule } from '@angular/common';
 export class StatusBadgeComponent {
   @Input({ required: true }) status!: string;
 
-  private readonly greenStates = ['LIBRE', 'ACTIVO', 'DISPONIBLE', 'COMPLETADO', 'SERVIDA'];
-  private readonly redStates = ['OCUPADA', 'BAJA', 'CANCELADA', 'DANADA'];
-  private readonly yellowStates = ['RESERVADA', 'PENDIENTE', 'EN_USO', 'PREPARACION'];
-  private readonly grayStates = ['MANTENIMIENTO', 'FUERA_DE_SERVICIO', 'INACTIVO'];
+  private readonly greenStates = ['LIBRE', 'ACTIVO', 'DISPONIBLE', 'COMPLETADO', 'SERVIDA', 'CONFIRMADA', 'PAGADA', 'PAGADO', 'COMPLETADA', 'ACTIVA'];
+  private readonly redStates = ['OCUPADA', 'BAJA', 'CANCELADA', 'DANADA', 'ANULADA', 'NO_PRESENTADO'];
+  private readonly yellowStates = ['RESERVADA', 'PENDIENTE', 'EN_USO', 'PREPARACION', 'EMITIDA'];
+  private readonly grayStates = ['MANTENIMIENTO', 'FUERA_DE_SERVICIO', 'INACTIVO', 'CERRADA'];
 
   get displayStatus(): string {
     return (this.status || '').replace(/_/g, ' ');

@@ -1,6 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NewsletterService } from '../../../core/services/newsletter.service';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-public-footer',
@@ -106,7 +107,9 @@ import { NewsletterService } from '../../../core/services/newsletter.service';
           <p class="copyright">
             &copy; 2026 Giber Games Bar. Todos los derechos reservados.
           </p>
-          <a class="admin-link" routerLink="/admin">Panel Admin</a>
+          @if (authService.currentRole() === 'ADMIN') {
+            <a class="admin-link" routerLink="/admin">Panel Admin</a>
+          }
         </div>
       </div>
     </footer>
@@ -119,8 +122,15 @@ import { NewsletterService } from '../../../core/services/newsletter.service';
 
     /* ===== Footer shell ===== */
     .footer {
+      background-color: var(--card-bg);
+      color: var(--text-main);
+      border-top: 1px solid var(--card-border);
+    }
+
+    :host-context([data-theme="dark"]) .footer {
       background-color: var(--secondary-dark);
       color: var(--text-white);
+      border-top: none;
     }
 
     /* ===== Inner container ===== */
@@ -147,12 +157,16 @@ import { NewsletterService } from '../../../core/services/newsletter.service';
     .col-title {
       font-size: 1.05rem;
       font-weight: 700;
-      color: var(--text-white);
+      color: var(--text-main);
       margin: 0 0 1.25rem;
       text-transform: uppercase;
       letter-spacing: 1px;
       position: relative;
       padding-bottom: 0.75rem;
+    }
+
+    :host-context([data-theme="dark"]) .col-title {
+      color: var(--text-white);
     }
 
     .col-title::after {
@@ -292,8 +306,12 @@ import { NewsletterService } from '../../../core/services/newsletter.service';
     .hours-title {
       font-size: 0.875rem;
       font-weight: 600;
-      color: var(--text-white);
+      color: var(--text-main);
       margin: 0 0 0.25rem;
+    }
+
+    :host-context([data-theme="dark"]) .hours-title {
+      color: var(--text-white);
     }
 
     .hours-line {
@@ -320,13 +338,18 @@ import { NewsletterService } from '../../../core/services/newsletter.service';
       width: 100%;
       padding: 0.7rem 0.9rem;
       font-size: 0.875rem;
-      color: var(--text-white);
-      background-color: rgba(255, 255, 255, 0.06);
+      color: var(--text-main);
+      background-color: var(--bg-main);
       border: 1px solid var(--card-border);
       border-radius: 8px;
       outline: none;
       transition: border-color 0.25s, box-shadow 0.25s;
       box-sizing: border-box;
+    }
+
+    :host-context([data-theme="dark"]) .newsletter-input {
+      color: var(--text-white);
+      background-color: rgba(255, 255, 255, 0.06);
     }
 
     .newsletter-input::placeholder {
@@ -363,6 +386,10 @@ import { NewsletterService } from '../../../core/services/newsletter.service';
     /* ===== Bottom bar ===== */
     .footer-bottom {
       border-top: 1px solid var(--card-border);
+      background-color: var(--secondary-bg);
+    }
+
+    :host-context([data-theme="dark"]) .footer-bottom {
       background-color: rgba(0, 0, 0, 0.15);
     }
 
@@ -383,13 +410,17 @@ import { NewsletterService } from '../../../core/services/newsletter.service';
 
     .admin-link {
       font-size: 0.8rem;
-      color: #FFFFFF;
+      color: var(--text-muted);
       text-decoration: none;
       padding: 0.4rem 1rem;
       border: 1px solid var(--card-border);
       border-radius: var(--radius-md, 8px);
       transition: color 0.2s, background-color 0.2s, border-color 0.2s;
       cursor: pointer;
+    }
+
+    :host-context([data-theme="dark"]) .admin-link {
+      color: #FFFFFF;
     }
 
     .admin-link:hover {
@@ -404,32 +435,112 @@ import { NewsletterService } from '../../../core/services/newsletter.service';
       background-color: rgba(0, 255, 209, 0.08);
     }
 
-    /* ===== Responsive ===== */
+    /* ===== Responsive - Tablet ===== */
     @media (max-width: 1024px) {
       .footer-grid {
         grid-template-columns: 1fr 1fr;
         gap: 2.5rem 2rem;
       }
-    }
 
-    @media (max-width: 640px) {
       .footer-inner {
         padding: 2.5rem 1.25rem 2rem;
+      }
+    }
+
+    /* ===== Responsive - Mobile ===== */
+    @media (max-width: 768px) {
+      .footer-inner {
+        padding: 2rem 1rem 1.5rem;
       }
 
       .footer-grid {
         grid-template-columns: 1fr;
-        gap: 2rem;
+        gap: 1.75rem;
+      }
+
+      .col-title {
+        font-size: 0.95rem;
+        margin-bottom: 1rem;
+      }
+
+      .brand-description {
+        font-size: 0.825rem;
+      }
+
+      .social-link {
+        width: 36px;
+        height: 36px;
+        font-size: 0.95rem;
+      }
+
+      .footer-links a {
+        font-size: 0.85rem;
+      }
+
+      .contact-list li {
+        font-size: 0.825rem;
+        gap: 0.5rem;
+      }
+
+      .hours-line {
+        font-size: 0.8rem;
+      }
+
+      .newsletter-input {
+        font-size: 16px;
+        padding: 0.6rem 0.8rem;
+      }
+
+      .newsletter-btn {
+        padding: 0.6rem 1rem;
+        font-size: 0.825rem;
       }
 
       .footer-bottom-inner {
         flex-direction: column;
         gap: 0.75rem;
         text-align: center;
+        padding: 1rem;
       }
 
-      .newsletter-form {
-        flex-direction: column;
+      .copyright {
+        font-size: 0.75rem;
+      }
+    }
+
+    /* ===== Responsive - Small Phone ===== */
+    @media (max-width: 480px) {
+      .footer-inner {
+        padding: 1.5rem 0.75rem 1.25rem;
+      }
+
+      .footer-grid {
+        gap: 1.5rem;
+      }
+
+      .logo-img {
+        height: 30px;
+      }
+
+      .social-link {
+        width: 34px;
+        height: 34px;
+      }
+
+      .col-title {
+        font-size: 0.9rem;
+      }
+
+      .footer-links a {
+        font-size: 0.8rem;
+      }
+
+      .contact-list li {
+        font-size: 0.8rem;
+      }
+
+      .newsletter-description {
+        font-size: 0.825rem;
       }
     }
   `]
@@ -437,6 +548,7 @@ import { NewsletterService } from '../../../core/services/newsletter.service';
 export class PublicFooterComponent {
   // ---------- DI ----------
   private readonly newsletterService = inject(NewsletterService);
+  protected readonly authService = inject(AuthService);
 
   // ---------- State ----------
   email = signal('');

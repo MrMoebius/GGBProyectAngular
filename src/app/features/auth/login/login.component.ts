@@ -55,6 +55,11 @@ import { AuthService } from '../../../core/services/auth.service';
             }
           </div>
 
+          <!-- Enlace recuperar contraseña -->
+          <div class="forgot-password">
+            <a class="forgot-link" routerLink="/auth/solicitar-recuperacion">¿Olvidaste tu contraseña?</a>
+          </div>
+
           <!-- Error Message -->
           @if (errorMessage()) {
             <div class="error-banner">
@@ -268,6 +273,27 @@ import { AuthService } from '../../../core/services/auth.service';
       cursor: not-allowed;
     }
 
+    /* ===== Forgot password ===== */
+    .forgot-password {
+      text-align: right;
+      margin-top: -0.5rem;
+    }
+
+    .forgot-link {
+      font-size: 0.8rem;
+      color: var(--text-muted, #94a3b8);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .forgot-link:hover {
+      color: var(--primary-coral, #FF6B6B);
+    }
+
+    :host-context([data-theme="dark"]) .forgot-link:hover {
+      color: var(--neon-cyan, #00FFD1);
+    }
+
     /* ===== Enlace a registro ===== */
     .register-link-text {
       text-align: center;
@@ -320,16 +346,33 @@ import { AuthService } from '../../../core/services/auth.service';
       transform: translateX(-3px);
     }
 
-    /* ===== Responsive ===== */
-    @media (max-width: 480px) {
-      .login-card {
-        padding: 2rem 1.25rem;
-      }
+    /* ===== Responsive - Tablet ===== */
+    @media (max-width: 1024px) {
+      .login-page { padding: 1.5rem 1rem; }
+    }
 
-      .logo-giber,
-      .logo-bar {
-        font-size: 1.65rem;
-      }
+    /* ===== Responsive - Mobile ===== */
+    @media (max-width: 768px) {
+      .login-page { padding: 1.25rem 0.75rem; }
+      .login-card { max-width: min(420px, 90vw); padding: 2rem 1.5rem; }
+      .form-input { font-size: 16px; padding: 0.7rem 0.875rem; }
+      .btn-submit { padding: 0.75rem 1.25rem; font-size: 0.9rem; }
+      .login-logo-img { height: 50px; }
+    }
+
+    /* ===== Responsive - Small Phone ===== */
+    @media (max-width: 480px) {
+      .login-page { padding: 1rem 0.5rem; }
+      .login-card { max-width: min(420px, 94vw); padding: 1.5rem 1.25rem; }
+      .login-form { gap: 1rem; }
+      .form-label { font-size: 0.775rem; }
+      .form-input { font-size: 16px; padding: 0.65rem 0.75rem; }
+      .btn-submit { padding: 0.7rem 1rem; font-size: 0.875rem; }
+      .login-logo-img { height: 45px; }
+      .logo-giber, .logo-bar { font-size: 1.65rem; }
+      .register-link-text { font-size: 0.8rem; }
+      .back-link { font-size: 0.8rem; }
+      .error-banner { font-size: 0.8rem; padding: 0.625rem 0.875rem; }
     }
   `]
 })

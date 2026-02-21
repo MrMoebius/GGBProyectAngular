@@ -144,7 +144,11 @@ import { ToastService } from '../../../core/services/toast.service';
             <div class="social-links">
               @for (social of socials(); track social.label) {
                 <a [href]="social.url" target="_blank" rel="noopener" class="social-link" [attr.aria-label]="social.label">
-                  <i [class]="social.icon"></i>
+                  @if (social.svg) {
+                    <svg class="x-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                  } @else {
+                    <i [class]="social.icon"></i>
+                  }
                 </a>
               }
             </div>
@@ -373,6 +377,11 @@ import { ToastService } from '../../../core/services/toast.service';
       font-size: 1.1rem;
     }
 
+    .social-link .x-icon {
+      width: 1.1rem;
+      height: 1.1rem;
+    }
+
     /* Map Placeholder */
     .map-section {
       padding: 0 2rem 3rem 2rem;
@@ -391,18 +400,94 @@ import { ToastService } from '../../../core/services/toast.service';
       width: 100%;
     }
 
-    /* Responsive */
+    /* Responsive - Tablet */
+    @media (max-width: 1024px) {
+      .contact-hero {
+        padding: 3rem 1.5rem;
+      }
+      .hero-title {
+        font-size: 2.2rem;
+      }
+      .contact-content {
+        padding: 2.5rem 1.5rem;
+      }
+      .contact-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+      }
+    }
+
+    /* Responsive - Mobile */
     @media (max-width: 768px) {
+      .contact-hero {
+        padding: 2.5rem 1.25rem;
+      }
+      .hero-title {
+        font-size: 1.85rem;
+      }
+      .hero-subtitle {
+        font-size: 0.95rem;
+      }
+      .contact-content {
+        padding: 2rem 1.25rem;
+      }
       .contact-grid {
         grid-template-columns: 1fr;
+        gap: 1.75rem;
       }
-
-      .hero-title {
-        font-size: 2rem;
-      }
-
       .contact-form-wrapper {
         padding: 1.5rem;
+      }
+      .form-input,
+      .contact-form input,
+      .contact-form select,
+      .contact-form textarea {
+        font-size: 16px;
+      }
+      .submit-btn {
+        width: 100%;
+        padding: 0.75rem 1.25rem;
+      }
+      .info-card {
+        padding: 1rem;
+        gap: 0.75rem;
+      }
+      .social-link {
+        width: 38px;
+        height: 38px;
+      }
+      .map-container iframe {
+        height: 280px;
+      }
+    }
+
+    /* Responsive - Small Phone */
+    @media (max-width: 480px) {
+      .contact-hero {
+        padding: 2rem 1rem;
+      }
+      .hero-title {
+        font-size: 1.55rem;
+      }
+      .hero-subtitle {
+        font-size: 0.88rem;
+      }
+      .contact-content {
+        padding: 1.5rem 1rem;
+      }
+      .contact-form-wrapper {
+        padding: 1.15rem;
+      }
+      .info-card {
+        padding: 0.85rem;
+        gap: 0.6rem;
+      }
+      .social-link {
+        width: 34px;
+        height: 34px;
+      }
+      .map-container iframe {
+        height: 220px;
       }
     }
   `]
@@ -434,10 +519,10 @@ export class ContactPageComponent {
   ]);
 
   socials = signal([
-    { icon: 'fa-brands fa-instagram', url: 'https://www.instagram.com/gibergamesbar/', label: 'Instagram Bar' },
-    { icon: 'fa-brands fa-instagram', url: 'https://www.instagram.com/gibergames/', label: 'Instagram Giber Games' },
-    { icon: 'fa-brands fa-x-twitter', url: 'https://x.com/giber_games', label: 'X (Twitter)' },
-    { icon: 'fa-brands fa-tiktok', url: 'https://www.tiktok.com/@gibergamesbar', label: 'TikTok' }
+    { icon: 'fa-brands fa-instagram', url: 'https://www.instagram.com/gibergamesbar/', label: 'Instagram Bar', svg: false },
+    { icon: 'fa-brands fa-instagram', url: 'https://www.instagram.com/gibergames/', label: 'Instagram Giber Games', svg: false },
+    { icon: '', url: 'https://x.com/giber_games', label: 'X (Twitter)', svg: true },
+    { icon: 'fa-brands fa-tiktok', url: 'https://www.tiktok.com/@gibergamesbar', label: 'TikTok', svg: false }
   ]);
 
   onSubmit(): void {

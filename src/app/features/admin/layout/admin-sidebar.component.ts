@@ -13,7 +13,7 @@ interface NavItem {
   standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
-    <aside class="sidebar" [class.collapsed]="collapsed">
+    <aside class="sidebar" [class.collapsed]="collapsed" [class.mobile-open]="mobileOpen">
       <!-- Logo -->
       <div class="sidebar-logo">
         <a routerLink="/admin/dashboard" class="logo-link">
@@ -290,22 +290,50 @@ interface NavItem {
     .sidebar-nav::-webkit-scrollbar-thumb:hover {
       background: rgba(255, 255, 255, 0.2);
     }
+
+    /* Responsive - Tablet & Mobile: overlay sidebar */
+    @media (max-width: 1024px) {
+      .sidebar {
+        width: 280px;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        z-index: 30;
+      }
+      .sidebar.mobile-open {
+        transform: translateX(0);
+      }
+      .nav-link { justify-content: flex-start; padding: 0.7rem 1rem; font-size: 0.875rem; }
+      .nav-icon { font-size: 1rem; }
+      .logo-text, .nav-label, .collapse-label { display: inline; }
+      .sidebar-logo { padding: 1.25rem 1rem; display: block; }
+      .logo-link { justify-content: flex-start; }
+      .logo-icon { width: 36px; height: 36px; font-size: 1.125rem; }
+      .sidebar-footer { padding: 0.75rem 1rem; }
+      .collapse-btn { justify-content: flex-start; padding: 0.6rem 0.5rem; }
+    }
   `]
 })
 export class AdminSidebarComponent {
   @Input() collapsed = false;
+  @Input() mobileOpen = false;
   @Output() toggleCollapse = new EventEmitter<void>();
 
   navItems: NavItem[] = [
-    { label: 'Dashboard',       icon: 'fa-gauge-high',   route: '/admin/dashboard' },
-    { label: 'Mesas',           icon: 'fa-chair',        route: '/admin/mesas' },
-    { label: 'Productos',       icon: 'fa-utensils',     route: '/admin/productos' },
-    { label: 'Empleados',       icon: 'fa-users-gear',   route: '/admin/empleados' },
-    { label: 'Clientes',        icon: 'fa-people-group', route: '/admin/clientes' },
-    { label: 'Comandas',        icon: 'fa-receipt',      route: '/admin/comandas' },
-    { label: 'Juegos',           icon: 'fa-puzzle-piece', route: '/admin/juegos' },
-    { label: 'Copias Juegos',   icon: 'fa-dice',         route: '/admin/juegos-copia' },
-    { label: 'Peticiones Pago', icon: 'fa-credit-card',  route: '/admin/peticiones-pago' },
-    { label: 'Eventos',         icon: 'fa-calendar-days', route: '/admin/eventos' }
+    { label: 'Dashboard',       icon: 'fa-gauge-high',    route: '/admin/dashboard' },
+    // TPV
+    { label: 'Reservas',         icon: 'fa-calendar-check', route: '/admin/reservas' },
+    { label: 'Sesiones Mesa',   icon: 'fa-door-open',     route: '/admin/sesiones-mesa' },
+    { label: 'Pagos Mesa',      icon: 'fa-money-bill',    route: '/admin/pagos-mesa' },
+    { label: 'Facturas',        icon: 'fa-file-invoice',  route: '/admin/facturas' },
+    // Catalogo
+    { label: 'Productos',       icon: 'fa-utensils',      route: '/admin/productos' },
+    { label: 'Mesas',           icon: 'fa-chair',         route: '/admin/mesas' },
+    { label: 'Juegos',          icon: 'fa-puzzle-piece',  route: '/admin/juegos' },
+    { label: 'Ludoteca',        icon: 'fa-children',      route: '/admin/ludoteca-sesiones' },
+    // Personas
+    { label: 'Empleados',       icon: 'fa-users-gear',    route: '/admin/empleados' },
+    { label: 'Clientes',        icon: 'fa-people-group',  route: '/admin/clientes' },
+    // Otros
+    { label: 'Eventos',         icon: 'fa-calendar-days', route: '/admin/eventos' },
   ];
 }
