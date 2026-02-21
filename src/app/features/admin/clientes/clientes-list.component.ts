@@ -368,6 +368,11 @@ export class ClientesListComponent implements OnInit {
       delete payload.password;
     }
 
+    const handleError = (err: any) => {
+      const msg = err?.error?.message || err?.error?.error || 'Error al guardar cliente';
+      this.toastService.error(msg);
+    };
+
     if (this.isEditing() && this.currentId()) {
       this.clienteService.update(this.currentId()!, payload).subscribe({
         next: () => {
@@ -375,7 +380,7 @@ export class ClientesListComponent implements OnInit {
           this.closeFormModal();
           this.loadClientes();
         },
-        error: () => this.toastService.error('Error al actualizar cliente')
+        error: handleError
       });
     } else {
       this.clienteService.create(payload).subscribe({
@@ -384,7 +389,7 @@ export class ClientesListComponent implements OnInit {
           this.closeFormModal();
           this.loadClientes();
         },
-        error: () => this.toastService.error('Error al crear cliente')
+        error: handleError
       });
     }
   }
@@ -405,7 +410,10 @@ export class ClientesListComponent implements OnInit {
         this.deleteId.set(null);
         this.loadClientes();
       },
-      error: () => this.toastService.error('Error al eliminar cliente')
+      error: (err) => {
+        const msg = err?.error?.message || err?.error?.error || 'Error al eliminar cliente';
+        this.toastService.error(msg);
+      }
     });
   }
 }

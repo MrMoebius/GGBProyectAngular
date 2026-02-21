@@ -1,6 +1,6 @@
 import { Component, inject, signal, computed, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { JuegoService } from '../../../core/services/juego.service';
 import { ToastService } from '../../../core/services/toast.service';
 import { Juego } from '../../../core/models/juego.interface';
@@ -174,16 +174,28 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
             <div class="form-group form-col">
               <label class="form-label">Min. Jugadores</label>
               <input type="number" class="form-input" formControlName="minJugadores" min="1" />
+              @if (form.get('minJugadores')?.hasError('min') && form.get('minJugadores')?.touched) {
+                <span class="form-error">Minimo 1</span>
+              }
             </div>
             <div class="form-group form-col">
               <label class="form-label">Max. Jugadores</label>
               <input type="number" class="form-input" formControlName="maxJugadores" min="1" />
+              @if (form.get('maxJugadores')?.hasError('min') && form.get('maxJugadores')?.touched) {
+                <span class="form-error">Minimo 1</span>
+              }
             </div>
             <div class="form-group form-col">
               <label class="form-label">Duracion (min)</label>
               <input type="number" class="form-input" formControlName="duracionMediaMin" min="1" />
+              @if (form.get('duracionMediaMin')?.hasError('min') && form.get('duracionMediaMin')?.touched) {
+                <span class="form-error">Minimo 1</span>
+              }
             </div>
           </div>
+          @if (form.hasError('minMayorQueMax')) {
+            <div class="form-error" style="margin-bottom: 0.5rem;">El minimo de jugadores no puede ser mayor que el maximo</div>
+          }
 
           <div class="form-row">
             <div class="form-group form-col">
@@ -541,9 +553,9 @@ export class JuegosListComponent implements OnInit {
 
   form = this.fb.group({
     nombre: ['', Validators.required],
-    minJugadores: [null as number | null],
-    maxJugadores: [null as number | null],
-    duracionMediaMin: [null as number | null],
+    minJugadores: [null as number | null, [Validators.min(1)]],
+    maxJugadores: [null as number | null, [Validators.min(1)]],
+    duracionMediaMin: [null as number | null, [Validators.min(1)]],
     complejidad: [''],
     genero: [''],
     idioma: [''],
@@ -552,7 +564,16 @@ export class JuegosListComponent implements OnInit {
     activo: [true],
     descripcion: [''],
     observaciones: ['']
-  });
+  }, { validators: this.jugadoresValidator });
+
+  jugadoresValidator(group: AbstractControl): ValidationErrors | null {
+    const min = group.get('minJugadores')?.value;
+    const max = group.get('maxJugadores')?.value;
+    if (min != null && max != null && min > max) {
+      return { minMayorQueMax: true };
+    }
+    return null;
+  }
 
   isLoading = signal(true);
 
@@ -653,8 +674,9 @@ export class JuegosListComponent implements OnInit {
         this.loadJuegos();
         this.showDeleteModal.set(false);
       },
-      error: () => {
-        this.toastService.error('Error al eliminar el juego');
+      error: (err) => {
+        const msg = err?.error?.message || err?.error?.error || 'Error al eliminar el juego';
+        this.toastService.error(msg);
         this.showDeleteModal.set(false);
       }
     });
@@ -668,6 +690,11 @@ export class JuegosListComponent implements OnInit {
 
     const payload = this.form.getRawValue() as any;
 
+    const handleError = (err: any) => {
+      const msg = err?.error?.message || err?.error?.error || 'Error al guardar el juego';
+      this.toastService.error(msg);
+    };
+
     if (this.isEditing() && this.currentId() !== null) {
       this.juegoService.updateJuego(this.currentId()!, payload).subscribe({
         next: () => {
@@ -675,7 +702,7 @@ export class JuegosListComponent implements OnInit {
           this.loadJuegos();
           this.showFormModal.set(false);
         },
-        error: () => this.toastService.error('Error al actualizar el juego')
+        error: handleError
       });
     } else {
       this.juegoService.saveJuego(payload).subscribe({
@@ -684,7 +711,7 @@ export class JuegosListComponent implements OnInit {
           this.loadJuegos();
           this.showFormModal.set(false);
         },
-        error: () => this.toastService.error('Error al crear el juego')
+        error: handleError
       });
     }
   }

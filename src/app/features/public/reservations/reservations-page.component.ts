@@ -1,6 +1,7 @@
 import { Component, signal, computed, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MockReservasService } from '../../../core/services/mock-reservas.service';
+import { ReservasMesaService } from '../../../core/services/reservas-mesa.service';
+import { AuthService } from '../../../core/services/auth.service';
 import { JuegoService } from '../../../core/services/juego.service';
 import { MesaService } from '../../../core/services/mesa.service';
 import { ToastService } from '../../../core/services/toast.service';
@@ -1426,7 +1427,8 @@ interface ContactInfo {
   `]
 })
 export class ReservationsPageComponent {
-  private reservasService = inject(MockReservasService);
+  private reservasService = inject(ReservasMesaService);
+  private authService = inject(AuthService);
   private juegosService = inject(JuegoService);
   private mesaService = inject(MesaService);
   private toastService = inject(ToastService);
@@ -1597,21 +1599,34 @@ export class ReservationsPageComponent {
       return;
     }
 
+    if (!this.authService.isAuthenticated()) {
+      this.toastService.error('Debes iniciar sesion para hacer una reserva.');
+      return;
+    }
+
     this.submitting.set(true);
 
     const notes: string[] = [];
     if (this.reservationNotes().trim()) {
       notes.push(this.reservationNotes().trim());
     }
-    if (this.selectedGame()) {
-      notes.push('Juego reservado: ' + this.selectedGame()!.nombre);
-    }
     notes.push('Contacto: ' + this.contactInfo().nombre + ' / ' + this.contactInfo().telefono + ' / ' + this.contactInfo().email);
 
+    const fechaHoraInicio = ReservasMesaService.toInstant(this.selectedDate(), this.selectedTime());
+
+    // Calcular hora fin = inicio + 2 horas
+    const [h, m] = this.selectedTime().split(':').map(Number);
+    const horaFin = `${String(h + 2).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+    const fechaHoraFin = ReservasMesaService.toInstant(this.selectedDate(), horaFin);
+
+    const user = this.authService.currentUser();
+
     this.reservasService.create({
-      fechaReserva: this.selectedDate(),
-      horaInicio: this.selectedTime(),
+      idCliente: user ? (user as any).id : undefined,
+      fechaHoraInicio,
+      fechaHoraFin,
       numPersonas: this.partySize(),
+      idJuegoDeseado: this.selectedGame()?.id,
       notas: notes.join(' | ')
     }).subscribe({
       next: (reserva) => {
@@ -1620,9 +1635,16 @@ export class ReservationsPageComponent {
         this.reservationConfirmed.set(true);
         this.toastService.success('Reserva confirmada con exito!');
       },
-      error: () => {
+      error: (err) => {
         this.submitting.set(false);
-        this.toastService.error('Error al crear la reserva. Intentalo de nuevo.');
+        if (err.status === 401 || err.status === 403) {
+          this.toastService.error('Debes iniciar sesion para hacer una reserva.');
+        } else if (err.status === 400) {
+          const msg = err.error?.message || 'Datos de reserva invalidos. Revisa las fechas.';
+          this.toastService.error(msg);
+        } else {
+          this.toastService.error('Error al crear la reserva. Intentalo de nuevo.');
+        }
       }
     });
   }

@@ -123,11 +123,9 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
             </div>
 
             <div class="form-group form-col">
-              <label class="form-label">Total (EUR) *</label>
-              <input type="number" class="form-input" formControlName="total" placeholder="0.00" min="0" step="0.01" />
-              @if (form.get('total')?.invalid && form.get('total')?.touched) {
-                <span class="form-error">El total debe ser mayor o igual a 0</span>
-              }
+              <label class="form-label">Total (EUR)</label>
+              <input type="number" class="form-input" formControlName="total" placeholder="0.00" step="0.01" readonly style="opacity: 0.6; cursor: not-allowed;" />
+              <span class="form-hint">Se calcula automaticamente desde las lineas</span>
             </div>
           </div>
 
@@ -319,7 +317,7 @@ export class ComandasListComponent implements OnInit {
     idSesion: [null as number | null, Validators.required],
     estado: ['PENDIENTE' as string, Validators.required],
     fechaHora: [''],
-    total: [0 as number, [Validators.required, Validators.min(0)]]
+    total: [{value: 0 as number, disabled: true}]
   });
 
   isLoading = signal(true);
@@ -382,14 +380,18 @@ export class ComandasListComponent implements OnInit {
     const raw = this.form.getRawValue();
     const payload: any = {
       idSesion: raw.idSesion,
-      estado: raw.estado,
-      total: raw.total
+      estado: raw.estado
     };
 
     // Convert datetime-local to ISO if present
     if (raw.fechaHora) {
       payload.fechaHora = new Date(raw.fechaHora).toISOString();
     }
+
+    const handleError = (err: any) => {
+      const msg = err?.error?.message || err?.error?.error || 'Error al guardar comanda';
+      this.toastService.error(msg);
+    };
 
     if (this.isEditing() && this.currentId()) {
       this.comandaService.update(this.currentId()!, payload).subscribe({
@@ -398,7 +400,7 @@ export class ComandasListComponent implements OnInit {
           this.closeFormModal();
           this.loadComandas();
         },
-        error: () => this.toastService.error('Error al actualizar comanda')
+        error: handleError
       });
     } else {
       this.comandaService.create(payload).subscribe({
@@ -407,7 +409,7 @@ export class ComandasListComponent implements OnInit {
           this.closeFormModal();
           this.loadComandas();
         },
-        error: () => this.toastService.error('Error al crear comanda')
+        error: handleError
       });
     }
   }
@@ -428,7 +430,10 @@ export class ComandasListComponent implements OnInit {
         this.deleteId.set(null);
         this.loadComandas();
       },
-      error: () => this.toastService.error('Error al eliminar comanda')
+      error: (err) => {
+        const msg = err?.error?.message || err?.error?.error || 'Error al eliminar comanda';
+        this.toastService.error(msg);
+      }
     });
   }
 
