@@ -412,7 +412,9 @@ export class LoginComponent {
       },
       error: (err) => {
         this.isLoading.set(false);
-        if (err.status === 401 || err.status === 403) {
+        if (err.status === 403 && err.error?.message) {
+          this.errorMessage.set(err.error.message);
+        } else if (err.status === 401) {
           this.errorMessage.set('Credenciales incorrectas. Por favor, inténtalo de nuevo.');
         } else {
           this.errorMessage.set('Ocurrió un error inesperado. Inténtalo más tarde.');
