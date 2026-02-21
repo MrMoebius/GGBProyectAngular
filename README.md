@@ -58,3 +58,10 @@ API https://boardgamegeek.com/join
 Usuario: GiberGamesBar
 Mail:  picoc90328@aixind.com 
 Pass: bgX@wQQjGGh4F!i
+
+
+
+API https://boardgamegeek.com/join
+Usuario: GiberGamesBar
+Mail:  picoc90328@aixind.com 
+Pass: bgX@wQQjGGh4F!i
