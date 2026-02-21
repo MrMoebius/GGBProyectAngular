@@ -333,11 +333,14 @@ export class ComandasListComponent implements OnInit {
   // Computed
   filteredComandas = computed(() => {
     const term = this.searchTerm().toLowerCase().trim();
-    if (!term) return this.comandas();
-    return this.comandas().filter(c =>
-      c.idSesion.toString().includes(term) ||
-      c.estado.toLowerCase().includes(term)
-    );
+    let list = this.comandas();
+    if (term) {
+      list = list.filter(c =>
+        c.idSesion.toString().includes(term) ||
+        c.estado.toLowerCase().includes(term)
+      );
+    }
+    return [...list].sort((a, b) => new Date(b.fechaHora).getTime() - new Date(a.fechaHora).getTime());
   });
 
   // Form
