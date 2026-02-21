@@ -153,8 +153,11 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
 
           <div class="form-group">
             <label class="form-label">Fecha de Ingreso</label>
-            <input type="date" class="form-input" formControlName="fechaIngreso" />
+            <input type="date" class="form-input" formControlName="fechaIngreso" [max]="maxFechaIngreso" />
             <span class="form-hint">Si se deja vacio, se usara la fecha de hoy</span>
+            @if (fechaIngresoFutura()) {
+              <span class="form-error">La fecha de ingreso no puede ser en el futuro</span>
+            }
           </div>
 
           <div class="form-group">
@@ -361,6 +364,14 @@ export class EmpleadosListComponent implements OnInit {
     fechaIngreso: ['']
   });
 
+  maxFechaIngreso = new Date().toISOString().split('T')[0];
+
+  fechaIngresoFutura = computed(() => {
+    const fecha = this.form.get('fechaIngreso')?.value;
+    if (!fecha) return false;
+    return fecha > this.maxFechaIngreso;
+  });
+
   isLoading = signal(true);
 
   ngOnInit(): void {
@@ -412,11 +423,20 @@ export class EmpleadosListComponent implements OnInit {
 
   saveEmpleado(): void {
     if (this.form.invalid) return;
+    if (this.fechaIngresoFutura()) {
+      this.toastService.error('La fecha de ingreso no puede ser en el futuro');
+      return;
+    }
 
     const payload = this.form.getRawValue() as any;
     if (this.isEditing() && !payload.password) {
       delete payload.password;
     }
+
+    const handleError = (err: any) => {
+      const msg = err?.error?.message || err?.error?.error || 'Error al guardar empleado';
+      this.toastService.error(msg);
+    };
 
     if (this.isEditing() && this.currentId()) {
       this.empleadoService.update(this.currentId()!, payload).subscribe({
@@ -425,7 +445,7 @@ export class EmpleadosListComponent implements OnInit {
           this.closeFormModal();
           this.loadEmpleados();
         },
-        error: () => this.toastService.error('Error al actualizar empleado')
+        error: handleError
       });
     } else {
       this.empleadoService.create(payload).subscribe({
@@ -434,7 +454,7 @@ export class EmpleadosListComponent implements OnInit {
           this.closeFormModal();
           this.loadEmpleados();
         },
-        error: () => this.toastService.error('Error al crear empleado')
+        error: handleError
       });
     }
   }
@@ -455,7 +475,10 @@ export class EmpleadosListComponent implements OnInit {
         this.deleteId.set(null);
         this.loadEmpleados();
       },
-      error: () => this.toastService.error('Error al eliminar empleado')
+      error: (err) => {
+        const msg = err?.error?.message || err?.error?.error || 'Error al eliminar empleado';
+        this.toastService.error(msg);
+      }
     });
   }
 }
