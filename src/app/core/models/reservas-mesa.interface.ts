@@ -1,14 +1,11 @@
 export interface ReservasMesa {
   id: number;
-  idCliente: number;
-  nombreManual?: string;
-  telefonoManual?: string;
+  idCliente?: number;
   idMesa?: number;
-  fechaReserva: string;
-  horaInicio: string;
-  horaFin?: string;
+  fechaHoraInicio: string;
+  fechaHoraFin?: string;
   numPersonas: number;
-  estado: string;
+  idJuegoDeseado?: number;
+  estado?: string;
   notas?: string;
-  fechaSolicitud?: string;
 }

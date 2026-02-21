@@ -6,7 +6,7 @@ import { SesionMesaService } from '../../../core/services/sesion-mesa.service';
 import { MesaService } from '../../../core/services/mesa.service';
 import { ClienteService } from '../../../core/services/cliente.service';
 import { ToastService } from '../../../core/services/toast.service';
-import { MockReservasService } from '../../../core/services/mock-reservas.service';
+import { ReservasMesaService } from '../../../core/services/reservas-mesa.service';
 import { SesionMesa } from '../../../core/models/sesion-mesa.interface';
 import { Mesa } from '../../../core/models/mesa.interface';
 import { Cliente } from '../../../core/models/cliente.interface';
@@ -144,7 +144,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
             <select class="form-input" formControlName="idReserva" (change)="onReservaChange($event)">
               <option [ngValue]="null">Sin reserva</option>
               @for (r of reservasPendientes(); track r.id) {
-                <option [ngValue]="r.id">{{ r.fechaReserva }} {{ r.horaInicio }} - Mesa #{{ r.idMesa }} ({{ r.numPersonas }} pax)</option>
+                <option [ngValue]="r.id">{{ extractDate(r.fechaHoraInicio) }} {{ extractTime(r.fechaHoraInicio) }} - Mesa #{{ r.idMesa }} ({{ r.numPersonas }} pax)</option>
               }
             </select>
           </div>
@@ -249,7 +249,7 @@ export class SesionesMesaListComponent implements OnInit {
   private sesionService = inject(SesionMesaService);
   private mesaService = inject(MesaService);
   private clienteService = inject(ClienteService);
-  private reservasService = inject(MockReservasService);
+  private reservasService = inject(ReservasMesaService);
   private toastService = inject(ToastService);
   private fb = inject(FormBuilder);
   private router = inject(Router);
@@ -377,7 +377,7 @@ export class SesionesMesaListComponent implements OnInit {
     this.sesionService.abrir(payload).subscribe({
       next: (sesion) => {
         if (mockReservaId) {
-          this.reservasService.changeEstado(mockReservaId, 'COMPLETADA').subscribe();
+          this.reservasService.changeEstado(mockReservaId, 'COMPLETADA').subscribe({ error: () => {} });
         }
         this.toastService.success('Sesion abierta correctamente');
         this.showAbrirModal.set(false);
@@ -447,6 +447,14 @@ export class SesionesMesaListComponent implements OnInit {
     const days = Math.floor(hours / 24);
     const remHours = hours % 24;
     return remHours > 0 ? `${days}d ${remHours}h` : `${days} dias`;
+  }
+
+  extractDate(iso: string): string {
+    return ReservasMesaService.extractDate(iso);
+  }
+
+  extractTime(iso: string): string {
+    return ReservasMesaService.extractTime(iso);
   }
 
   formatDateTime(iso: string): string {
