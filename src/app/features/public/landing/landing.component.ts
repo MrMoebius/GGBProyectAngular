@@ -220,8 +220,8 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
                 @if (eventHasImage(event.id)) { <div class="event-card-overlay"></div> }
                 <div class="event-card-content">
                   <div class="event-card-header">
-                    <span class="event-type-badge" [class]="'type-' + event.type.toLowerCase()">
-                      @switch (event.type) {
+                    <span class="event-type-badge" [class]="'type-' + event.tipo.toLowerCase()">
+                      @switch (event.tipo) {
                         @case ('TORNEO') { <i class="fa-solid fa-trophy"></i> Torneo }
                         @case ('NOCHE_TEMATICA') { <i class="fa-solid fa-moon"></i> Noche Tematica }
                         @case ('TALLER') { <i class="fa-solid fa-palette"></i> Taller }
@@ -229,19 +229,19 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
                       }
                     </span>
                     <span class="event-date">
-                      <i class="fa-solid fa-calendar"></i> {{ formatDate(event.date) }}
+                      <i class="fa-solid fa-calendar"></i> {{ formatDate(event.fecha) }}
                     </span>
                   </div>
-                  <h3 class="event-card-title">{{ event.title }}</h3>
-                  <p class="event-card-desc">{{ event.description | slice:0:100 }}...</p>
+                  <h3 class="event-card-title">{{ event.titulo }}</h3>
+                  <p class="event-card-desc">{{ event.descripcion | slice:0:100 }}...</p>
                   <div class="event-card-footer">
                     <div class="event-capacity">
                       <div class="capacity-bar">
-                        <div class="capacity-fill" [style.width.%]="(event.currentAttendees / event.capacity) * 100"></div>
+                        <div class="capacity-fill" [style.width.%]="(event.inscritos / event.capacidad) * 100"></div>
                       </div>
-                      <span class="capacity-text">{{ event.currentAttendees }}/{{ event.capacity }} plazas</span>
+                      <span class="capacity-text">{{ event.inscritos }}/{{ event.capacidad }} plazas</span>
                     </div>
-                    <span class="event-time"><i class="fa-solid fa-clock"></i> {{ event.time }}</span>
+                    <span class="event-time"><i class="fa-solid fa-clock"></i> {{ event.hora }}</span>
                   </div>
                 </div>
               </a>
@@ -1571,7 +1571,13 @@ export class LandingComponent implements OnInit, OnDestroy {
       error: () => {}
     });
 
-    this.eventService.getUpcoming(3).subscribe(events => this.upcomingEvents.set(events));
+    this.eventService.getAll().subscribe(events => {
+      const upcoming = events
+        .filter(e => e.estado === 'PROXIMO')
+        .sort((a, b) => a.fecha.localeCompare(b.fecha) || a.hora.localeCompare(b.hora))
+        .slice(0, 3);
+      this.upcomingEvents.set(upcoming);
+    });
   }
 
   formatDate(dateStr: string): string {
