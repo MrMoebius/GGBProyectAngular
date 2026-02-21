@@ -9,7 +9,7 @@ import { AuthService } from '../../../core/services/auth.service';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <header class="header" [style.margin-left]="collapsed ? 'var(--sidebar-collapsed-width)' : 'var(--sidebar-width)'">
+    <header class="header" [class.sidebar-collapsed]="collapsed">
       <div class="header-left">
         <button class="header-btn" (click)="toggleSidebar.emit()">
           <i class="fa-solid fa-bars"></i>
@@ -41,9 +41,14 @@ import { AuthService } from '../../../core/services/auth.service';
       justify-content: space-between;
       height: 60px;
       padding: 0 1.5rem;
+      margin-left: var(--sidebar-width);
       background-color: var(--header-bg);
       border-bottom: 1px solid var(--header-border);
       transition: margin-left 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    .header.sidebar-collapsed {
+      margin-left: var(--sidebar-collapsed-width);
     }
 
     .header-left {

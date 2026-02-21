@@ -5,9 +5,11 @@ import { JuegoService } from '../../../core/services/juego.service';
 import { RecommendationService } from '../../../core/services/recommendation.service';
 import { MesaService } from '../../../core/services/mesa.service';
 import { EventService } from '../../../core/services/event.service';
+import { ProductoService } from '../../../core/services/producto.service';
 import { JuegoExtended } from '../../../core/models/juego-extended.interface';
 import { Mesa } from '../../../core/models/mesa.interface';
 import { GGBEvent } from '../../../core/models/evento.interface';
+import { Producto } from '../../../core/models/producto.interface';
 import { GameCardPublicComponent } from '../../../shared/components/game-card-public/game-card-public.component';
 import { AuthService } from '../../../core/services/auth.service';
 import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer-loader.component';
@@ -150,6 +152,39 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
               <div class="daily-card-large">
                 <i class="fa-solid fa-dice-d20"></i>
                 <span class="daily-genre">{{ dailyPick()!.genero }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+    }
+
+    <!-- TARIFAS LUDOTECA -->
+    @if (ludotecaTarifas().length > 0) {
+      <section class="ludoteca-section">
+        <div class="section">
+          <div class="section-header">
+            <div>
+              <h2 class="section-title">Ludoteca</h2>
+              <p class="section-subtitle">Elige tu modo de juego y disfruta de nuestra coleccion</p>
+            </div>
+          </div>
+          <div class="ludoteca-grid">
+            @for (tarifa of ludotecaTarifas(); track tarifa.id) {
+              <div class="ludoteca-card">
+                <div class="ludoteca-card-img">
+                  <img [src]="getLudotecaImage(tarifa.nombre)" [alt]="tarifa.nombre" />
+                  <div class="ludoteca-card-img-overlay"></div>
+                </div>
+                <div class="ludoteca-card-body">
+                  <span class="ludoteca-plan-name">{{ getLudotecaPlanName(tarifa.nombre) }}</span>
+                  <div class="ludoteca-price-badge">
+                    <span class="ludoteca-price">{{ tarifa.precio | number:'1.2-2' }}€</span>
+                  </div>
+                  @if (tarifa.descripcion) {
+                    <p class="ludoteca-desc">{{ tarifa.descripcion }}</p>
+                  }
+                </div>
               </div>
             }
           </div>
@@ -1184,6 +1219,116 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       color: #FFFFFF;
     }
 
+    /* LUDOTECA PRICING */
+    .ludoteca-section {
+      background: var(--secondary-bg);
+    }
+
+    :host-context([data-theme="dark"]) .ludoteca-section {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95));
+    }
+
+    .ludoteca-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+    }
+
+    .ludoteca-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .ludoteca-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    :host-context([data-theme="dark"]) .ludoteca-card {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.08);
+    }
+
+    :host-context([data-theme="dark"]) .ludoteca-card:hover {
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+      border-color: rgba(0, 255, 209, 0.2);
+    }
+
+    .ludoteca-card-img {
+      position: relative;
+      width: 100%;
+      height: 200px;
+      overflow: hidden;
+    }
+
+    .ludoteca-card-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+
+    .ludoteca-card:hover .ludoteca-card-img img {
+      transform: scale(1.05);
+    }
+
+    .ludoteca-card-img-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 40%, rgba(0, 0, 0, 0.4) 100%);
+    }
+
+    .ludoteca-card-body {
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 0.75rem;
+    }
+
+    .ludoteca-plan-name {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-main);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    :host-context([data-theme="dark"]) .ludoteca-plan-name {
+      color: #FFFFFF;
+    }
+
+    .ludoteca-price-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.5rem 1.25rem;
+      background: linear-gradient(135deg, var(--primary-coral), #FF8E8E);
+      border-radius: 9999px;
+      box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+    }
+
+    :host-context([data-theme="dark"]) .ludoteca-price-badge {
+      background: linear-gradient(135deg, var(--neon-cyan), #00CCB1);
+      box-shadow: 0 4px 15px rgba(0, 255, 209, 0.25);
+    }
+
+    .ludoteca-price {
+      font-size: 1.375rem;
+      font-weight: 800;
+      color: #FFFFFF;
+    }
+
+    .ludoteca-desc {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      max-width: 280px;
+    }
+
     /* RESPONSIVE - TABLET */
     @media (max-width: 1024px) {
       .hero-title {
@@ -1225,6 +1370,14 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
 
       .section-header-actions {
         flex-wrap: wrap;
+      }
+
+      .ludoteca-grid {
+        gap: 1.25rem;
+      }
+
+      .ludoteca-card-img {
+        height: 170px;
       }
     }
 
@@ -1336,6 +1489,17 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
 
       .event-card-title {
         font-size: 1rem;
+      }
+
+      .ludoteca-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        max-width: 400px;
+        margin: 0 auto;
+      }
+
+      .ludoteca-card-img {
+        height: 180px;
       }
 
       .sala-grid {
@@ -1470,6 +1634,7 @@ export class LandingComponent implements OnInit, OnDestroy {
   private mesaService = inject(MesaService);
   protected eventService = inject(EventService);
   private authService = inject(AuthService);
+  private productoService = inject(ProductoService);
 
   isCliente = computed(() => this.authService.currentRole() === 'CLIENTE' || !this.authService.isAuthenticated());
 
@@ -1481,6 +1646,7 @@ export class LandingComponent implements OnInit, OnDestroy {
   private rouletteTimers: ReturnType<typeof setTimeout>[] = [];
   featuredGames = signal<JuegoExtended[]>([]);
 
+  ludotecaTarifas = signal<Producto[]>([]);
   dailyDescExpanded = signal(false);
 
   // Games coverflow
@@ -1572,6 +1738,12 @@ export class LandingComponent implements OnInit, OnDestroy {
     });
 
     this.eventService.getUpcoming(3).subscribe(events => this.upcomingEvents.set(events));
+
+    this.productoService.getAll().subscribe(productos => {
+      this.ludotecaTarifas.set(
+        productos.filter(p => p.activo && p.nombre.toLowerCase().includes('ludoteca'))
+      );
+    });
   }
 
   formatDate(dateStr: string): string {
@@ -1589,6 +1761,28 @@ export class LandingComponent implements OnInit, OnDestroy {
 
   eventHasImage(eventId: number): boolean {
     return this.loadedEventImages().has(eventId);
+  }
+
+  private readonly ludotecaImageMap: Record<string, string> = {
+    'aprendiz': 'assets/products/ModoAprendiz.jpg',
+    'experto': 'assets/products/ModoExperto.jpg',
+    'master': 'assets/products/ModoMaster.jpg',
+  };
+
+  getLudotecaImage(nombre: string): string {
+    const lower = nombre.toLowerCase();
+    for (const [key, img] of Object.entries(this.ludotecaImageMap)) {
+      if (lower.includes(key)) return img;
+    }
+    return 'assets/products/ModoAprendiz.jpg';
+  }
+
+  getLudotecaPlanName(nombre: string): string {
+    const lower = nombre.toLowerCase();
+    if (lower.includes('master')) return 'Master';
+    if (lower.includes('experto')) return 'Experto';
+    if (lower.includes('aprendiz')) return 'Aprendiz';
+    return nombre;
   }
 
   // Carousel methods

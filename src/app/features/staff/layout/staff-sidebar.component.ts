@@ -31,6 +31,7 @@ interface NavItem {
               routerLinkActive="active"
               class="nav-link"
               [title]="collapsed ? item.label : ''"
+              (click)="onNavClick()"
             >
               <i class="fa-solid {{ item.icon }} nav-icon"></i>
               <span class="nav-label" *ngIf="!collapsed">{{ item.label }}</span>
@@ -41,7 +42,7 @@ interface NavItem {
 
       <!-- External link -->
       <div class="sidebar-external">
-        <a routerLink="/public" class="nav-link external-link" [title]="collapsed ? 'Ver Web' : ''">
+        <a routerLink="/public" class="nav-link external-link" [title]="collapsed ? 'Ver Web' : ''" (click)="onNavClick()">
           <i class="fa-solid fa-arrow-up-right-from-square nav-icon"></i>
           <span class="nav-label" *ngIf="!collapsed">Ver Web</span>
         </a>
@@ -311,6 +312,13 @@ export class StaffSidebarComponent {
   @Input() collapsed = false;
   @Input() mobileOpen = false;
   @Output() toggleCollapse = new EventEmitter<void>();
+  @Output() closeMobile = new EventEmitter<void>();
+
+  onNavClick(): void {
+    if (window.innerWidth <= 480) {
+      this.closeMobile.emit();
+    }
+  }
 
   navItems: NavItem[] = [
     { label: 'Dashboard',       icon: 'fa-gauge-high',    route: '/staff/dashboard' },
@@ -323,7 +331,6 @@ export class StaffSidebarComponent {
     { label: 'Productos',       icon: 'fa-utensils',      route: '/staff/productos' },
     { label: 'Mesas',           icon: 'fa-chair',         route: '/staff/mesas' },
     { label: 'Juegos',          icon: 'fa-puzzle-piece',  route: '/staff/juegos' },
-    { label: 'Ludoteca',        icon: 'fa-children',      route: '/staff/ludoteca-sesiones' },
     // Personas
     { label: 'Clientes',        icon: 'fa-people-group',  route: '/staff/clientes' },
     // Otros

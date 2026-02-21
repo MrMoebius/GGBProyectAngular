@@ -37,7 +37,7 @@ import { CommonModule } from '@angular/common';
       position: fixed;
       inset: 0;
       z-index: 50;
-      background-color: rgba(107, 114, 128, 0.75);
+      background-color: var(--modal-overlay, rgba(107, 114, 128, 0.75));
       display: flex;
       align-items: center;
       justify-content: center;
@@ -45,7 +45,8 @@ import { CommonModule } from '@angular/common';
     }
 
     .modal-container {
-      background-color: white;
+      background-color: var(--card-bg, white);
+      border: 1px solid var(--card-border, #e5e7eb);
       border-radius: var(--radius-lg);
       box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
       overflow: hidden;
@@ -99,7 +100,7 @@ import { CommonModule } from '@angular/common';
     }
 
     .modal-actions {
-      background-color: #f9fafb;
+      background-color: var(--card-bg, white);
       padding: 1rem 1.5rem;
       display: flex;
       flex-direction: row-reverse;
@@ -121,9 +122,9 @@ import { CommonModule } from '@angular/common';
     }
 
     .btn-cancel {
-      background-color: white;
+      background-color: var(--card-bg, white);
       color: var(--text-main);
-      border: 1px solid #d1d5db;
+      border: 1px solid var(--card-border, #d1d5db);
       padding: 0.5rem 1rem;
       border-radius: var(--radius-md);
       font-weight: 500;
@@ -131,7 +132,7 @@ import { CommonModule } from '@angular/common';
     }
 
     .btn-cancel:hover {
-      background-color: #f3f4f6;
+      background-color: var(--table-row-hover, #f3f4f6);
     }
   `]
 })
