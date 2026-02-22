@@ -1,67 +1,65 @@
 # GGBProyect - Frontend
 
-Frontend desarrollado en Angular 17+ para el sistema de gestión de local de juegos de mesa y restauración "GGBProyect".
+Aplicacion web para **GGBar** (Giber Games Bar), desarrollada en Angular 17. Interfaz para clientes (reservas, sesion en mesa, eventos), empleados (gestion de sala, comandas) y administracion (CRUD completo de todas las entidades).
 
-## Estructura del Proyecto
+## Tecnologias
 
-El proyecto sigue una arquitectura modular con carga perezosa (Lazy Loading) y Standalone Components.
+- **Angular 17.3** (Standalone Components, Signals, lazy-loaded routes)
+- **CSS Variables** con dark mode (`[data-theme="dark"]`)
+- **FontAwesome** para iconografia
+- **RxJS** (forkJoin, concatMap, signals para estado)
 
-### Módulos Principales (Features)
+## Estructura
 
-*   **auth/**: Gestión de autenticación (Login, Registro).
-*   **public/**: Área pública accesible sin login (Landing, Catálogo, Carta).
-*   **customer/**: Área privada para clientes (Dashboard, Sesión en mesa, Historial).
-*   **staff/**: Área para empleados (Gestión de sala, TPV, Ludoteca).
-*   **admin/**: Área de administración (Inventario, Personal, Configuración).
+```
+src/app/
+  core/
+    services/     24 servicios (ApiService, AuthService, ComandaService, etc.)
+    models/       21 interfaces TypeScript
+    guards/       role.guard.ts (CanActivateFn, JWT role check)
+    interceptors/ auth.interceptor.ts (Bearer token)
+  features/
+    auth/         Login, registro, verificacion email, recuperacion password
+    public/       Landing, catalogo juegos, carta, eventos, reservas
+    customer/     Dashboard, mi sesion (comandas), notificaciones, facturas
+    staff/        Dashboard empleado, gestion sala (reutiliza componentes admin)
+    admin/        CRUD: juegos, productos, mesas, sesiones, comandas, empleados,
+                  clientes, reservas, eventos, facturas
+  shared/
+    components/   beer-loader, confirm-modal, entity-form-modal, game-card,
+                  status-badge, table-map, toast, skeleton
+```
 
-### Core & Shared
+## Funcionalidades principales
 
-*   **core/**: Servicios singleton, modelos de datos (interfaces), guards e interceptores.
-*   **shared/**: Componentes reutilizables (UI Kit), pipes y directivas comunes.
+| Area         | Funcionalidades                                                                                                                           |
+|--------------|-------------------------------------------------------------------------------------------------------------------------------------------|
+| **Publica**  | Landing, catalogo de juegos con filtros, carta de productos, listado de eventos con inscripcion, formulario de reservas                   |
+| **Cliente**  | Dashboard (sesion activa, proximos eventos, reservas), gestion de comandas en tiempo real, historial de facturas con detalle de productos |
+| **Empleado** | Dashboard con resumen del dia, mapa de mesas interactivo, gestion de comandas (confirmar, preparar, servir), reservas                     |
+| **Admin**    | CRUD completo de todas las entidades, gestion de imagenes (juegos, eventos, clientes), estadisticas                                       |
 
-## Flujos de Trabajo Clave
+## Patrones
 
-### 1. QR -> Sesión -> Pago (Cliente)
+- `signal<T>()` para estado local, `computed()` para derivados
+- `ApiService` centralizado: `getAll()` extrae `.content` de respuestas paginadas Spring
+- Inline templates y estilos en componentes (no archivos separados .html/.css)
+- `ToastService` para notificaciones
+- `BeerLoaderComponent` para estados de carga
 
-1.  El cliente escanea un código QR en la mesa.
-2.  Accede a la ruta `/customer/live-session/:tableId`.
-3.  Si no está logueado, se redirige a `/auth/login` y luego vuelve a la sesión.
-4.  En la vista "Live Session", puede ver el estado de su mesa, añadir productos al carrito (Comanda) y solicitar la cuenta.
+## Configuracion
 
-### 2. Gestión de Sala (Empleado)
+```bash
+npm install
+ng serve
+```
 
-1.  El empleado accede a `/staff/sala`.
-2.  Visualiza un mapa de mesas con indicadores de estado (Libre, Ocupada, Reservada).
-3.  Puede abrir mesas, asignar clientes y gestionar pedidos.
+Se inicia en `http://localhost:4200` con proxy a `http://localhost:8080` para la API.
 
-## Roles de Usuario
+## Despliegue
 
-*   **CLIENTE**: Acceso a su perfil, historial y sesión activa en mesa.
-*   **EMPLEADO**: Acceso a TPV, gestión de sala y ludoteca.
-*   **ADMIN**: Acceso total, incluyendo configuración y gestión de personal.
+El build de produccion se sirve como archivos estaticos via nginx en Raspberry Pi 5.
 
-## Tecnologías
-
-*   **Angular 17+**: Framework principal (Standalone Components, Signals).
-*   **Tailwind CSS**: Framework de estilos utility-first.
-*   **FontAwesome**: Iconografía.
-
-## Configuración de Desarrollo
-
-1.  Instalar dependencias: `npm install`
-2.  Iniciar servidor de desarrollo: `ng serve`
-3.  Acceder a `http://localhost:4200`
-
-
-
-API https://boardgamegeek.com/join
-Usuario: GiberGamesBar
-Mail:  picoc90328@aixind.com 
-Pass: bgX@wQQjGGh4F!i
-
-
-
-API https://boardgamegeek.com/join
-Usuario: GiberGamesBar
-Mail:  picoc90328@aixind.com 
-Pass: bgX@wQQjGGh4F!i
+```bash
+ng build --configuration=production
+```
