@@ -8,6 +8,13 @@ import { AuthService } from '../../../core/services/auth.service';
   standalone: true,
   imports: [RouterLink],
   template: `
+    <!-- Wave separator -->
+    <div class="footer-wave">
+      <svg viewBox="0 0 1440 60" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M0,30 C360,60 720,0 1080,30 C1260,45 1380,20 1440,30 L1440,60 L0,60 Z" />
+      </svg>
+    </div>
+
     <footer class="footer">
       <div class="footer-inner">
         <div class="footer-grid">
@@ -41,11 +48,11 @@ import { AuthService } from '../../../core/services/auth.service';
           <div class="footer-col">
             <h4 class="col-title">Descubre</h4>
             <ul class="footer-links">
-              <li><a routerLink="/public/juegos">Catalogo de Juegos</a></li>
-              <li><a routerLink="/public/carta">Nuestra Carta</a></li>
-              <li><a routerLink="/public/eventos">Eventos</a></li>
-              <li><a routerLink="/public/reservas">Reservar Mesa</a></li>
-              <li><a routerLink="/public/encuentra-tu-juego">Encuentra tu Juego</a></li>
+              <li><a routerLink="/public/juegos"><i class="fa-solid fa-dice"></i> Catalogo de Juegos</a></li>
+              <li><a routerLink="/public/carta"><i class="fa-solid fa-utensils"></i> Nuestra Carta</a></li>
+              <li><a routerLink="/public/eventos"><i class="fa-solid fa-calendar-days"></i> Eventos</a></li>
+              <li><a routerLink="/public/reservas"><i class="fa-solid fa-chair"></i> Reservar Mesa</a></li>
+              <li><a routerLink="/public/encuentra-tu-juego"><i class="fa-solid fa-magnifying-glass"></i> Encuentra tu Juego</a></li>
             </ul>
           </div>
 
@@ -68,38 +75,56 @@ import { AuthService } from '../../../core/services/auth.service';
             </ul>
             <div class="contact-divider"></div>
             <div class="hours">
-              <p class="hours-title">Horario:</p>
-              <p class="hours-line">Lunes: Cerrado</p>
-              <p class="hours-line">Mar-Jue: 17:00 - 23:00</p>
-              <p class="hours-line">Vie: 17:00 - 00:00</p>
-              <p class="hours-line">Sab: 12:00 - 00:00</p>
-              <p class="hours-line">Dom: 12:00 - 22:00</p>
+              <p class="hours-title"><i class="fa-regular fa-clock"></i> Horario</p>
+              <p class="hours-line"><span class="hours-day">Lunes:</span> Cerrado</p>
+              <p class="hours-line"><span class="hours-day">Mar-Jue:</span> 17:00 - 23:00</p>
+              <p class="hours-line"><span class="hours-day">Vie:</span> 17:00 - 00:00</p>
+              <p class="hours-line"><span class="hours-day">Sab:</span> 12:00 - 00:00</p>
+              <p class="hours-line"><span class="hours-day">Dom:</span> 12:00 - 22:00</p>
             </div>
           </div>
 
-          <!-- Column 4: Newsletter -->
+          <!-- Column 4: Newsletter + Map -->
           <div class="footer-col">
             <h4 class="col-title">Newsletter</h4>
             <p class="newsletter-description">
               Recibe novedades, eventos y ofertas exclusivas.
             </p>
             <form class="newsletter-form" (submit)="onSubscribe($event)">
-              <input
-                type="email"
-                class="newsletter-input"
-                placeholder="Tu email"
-                [value]="email()"
-                (input)="email.set($any($event.target).value)"
-                required
-              />
-              <button type="submit" class="newsletter-btn">
-                Suscribirse
-              </button>
+              <div class="newsletter-row">
+                <input
+                  type="email"
+                  class="newsletter-input"
+                  placeholder="Tu email"
+                  [value]="email()"
+                  (input)="email.set($any($event.target).value)"
+                  required
+                />
+                <button type="submit" class="newsletter-btn">
+                  <i class="fa-solid fa-paper-plane"></i>
+                </button>
+              </div>
             </form>
+
+            <!-- Mini map -->
+            <div class="map-wrapper">
+              <iframe
+                class="map-iframe"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3040.5!2d-3.8258!3d40.3456!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd4187e5d2e6ad5b%3A0x5b2a7c07e1c9c0!2sGiber%20Games%20Bar!5e0!3m2!1ses!2ses!4v1700000000000!5m2!1ses!2ses"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+                title="Ubicacion Giber Games Bar"
+              ></iframe>
+            </div>
           </div>
 
         </div>
       </div>
+
+      <!-- Scroll to top -->
+      <button class="scroll-top-btn" (click)="scrollToTop()" aria-label="Volver arriba">
+        <i class="fa-solid fa-chevron-up"></i>
+      </button>
 
       <!-- Bottom bar -->
       <div class="footer-bottom">
@@ -120,24 +145,42 @@ import { AuthService } from '../../../core/services/auth.service';
       display: block;
     }
 
+    /* ===== Wave separator ===== */
+    .footer-wave {
+      margin-bottom: -2px;
+    }
+
+    .footer-wave svg {
+      display: block;
+      width: 100%;
+      height: 40px;
+    }
+
+    .footer-wave path {
+      fill: var(--card-bg);
+    }
+
+    :host-context([data-theme="dark"]) .footer-wave path {
+      fill: var(--secondary-dark);
+    }
+
     /* ===== Footer shell ===== */
     .footer {
       background-color: var(--card-bg);
       color: var(--text-main);
-      border-top: 1px solid var(--card-border);
+      position: relative;
     }
 
     :host-context([data-theme="dark"]) .footer {
       background-color: var(--secondary-dark);
       color: var(--text-white);
-      border-top: none;
     }
 
     /* ===== Inner container ===== */
     .footer-inner {
       max-width: var(--max-content-width, 1280px);
       margin: 0 auto;
-      padding: 3.5rem 1.5rem 2.5rem;
+      padding: 2rem 1.5rem 2.5rem;
     }
 
     /* ===== Grid layout ===== */
@@ -201,6 +244,14 @@ import { AuthService } from '../../../core/services/auth.service';
       filter: drop-shadow(0 0 14px rgba(0, 255, 209, 0.5));
     }
 
+    :host-context([data-theme="dark"]) .logo-img {
+      filter: invert(1) hue-rotate(180deg) drop-shadow(0 0 8px rgba(0, 255, 209, 0.3));
+    }
+
+    :host-context([data-theme="dark"]) .logo:hover .logo-img {
+      filter: invert(1) hue-rotate(180deg) drop-shadow(0 0 14px rgba(0, 255, 209, 0.5));
+    }
+
     .brand-description {
       font-size: 0.875rem;
       line-height: 1.65;
@@ -256,12 +307,27 @@ import { AuthService } from '../../../core/services/auth.service';
       text-decoration: none;
       font-size: 0.9rem;
       transition: color 0.2s, padding-left 0.2s;
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .footer-links a i {
+      width: 16px;
+      text-align: center;
+      font-size: 0.8rem;
+      opacity: 0.6;
+      transition: opacity 0.2s, color 0.2s;
     }
 
     .footer-links a:hover {
       color: var(--primary-coral);
       padding-left: 4px;
+    }
+
+    .footer-links a:hover i {
+      opacity: 1;
+      color: var(--primary-coral);
     }
 
     /* ===== Column 3: Contact ===== */
@@ -308,6 +374,14 @@ import { AuthService } from '../../../core/services/auth.service';
       font-weight: 600;
       color: var(--text-main);
       margin: 0 0 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .hours-title i {
+      color: var(--primary-coral);
+      font-size: 0.85rem;
     }
 
     :host-context([data-theme="dark"]) .hours-title {
@@ -320,31 +394,47 @@ import { AuthService } from '../../../core/services/auth.service';
       margin: 0;
     }
 
+    .hours-day {
+      font-weight: 600;
+      color: var(--text-main);
+      min-width: 55px;
+      display: inline-block;
+    }
+
+    :host-context([data-theme="dark"]) .hours-day {
+      color: var(--text-white);
+    }
+
     /* ===== Column 4: Newsletter ===== */
     .newsletter-description {
       font-size: 0.875rem;
       color: var(--text-muted);
       line-height: 1.6;
-      margin: 0 0 1.25rem;
+      margin: 0 0 1rem;
     }
 
     .newsletter-form {
+      margin-bottom: 1.25rem;
+    }
+
+    .newsletter-row {
       display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
+      gap: 0;
     }
 
     .newsletter-input {
-      width: 100%;
-      padding: 0.7rem 0.9rem;
+      flex: 1;
+      padding: 0.65rem 0.9rem;
       font-size: 0.875rem;
       color: var(--text-main);
       background-color: var(--bg-main);
       border: 1px solid var(--card-border);
-      border-radius: 8px;
+      border-right: none;
+      border-radius: 8px 0 0 8px;
       outline: none;
       transition: border-color 0.25s, box-shadow 0.25s;
       box-sizing: border-box;
+      min-width: 0;
     }
 
     :host-context([data-theme="dark"]) .newsletter-input {
@@ -362,25 +452,80 @@ import { AuthService } from '../../../core/services/auth.service';
     }
 
     .newsletter-btn {
-      padding: 0.7rem 1.25rem;
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: #fff;
+      padding: 0.65rem 1rem;
+      font-size: 1rem;
+      color: var(--text-white);
       background-color: var(--primary-coral);
       border: none;
-      border-radius: 8px;
+      border-radius: 0 8px 8px 0;
       cursor: pointer;
-      transition: background-color 0.25s, transform 0.15s, box-shadow 0.25s;
+      transition: background-color 0.25s, transform 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
     }
 
     .newsletter-btn:hover {
       filter: brightness(1.1);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 14px rgba(255, 107, 107, 0.35);
     }
 
     .newsletter-btn:active {
-      transform: translateY(0);
+      transform: scale(0.96);
+    }
+
+    /* ===== Mini Map ===== */
+    .map-wrapper {
+      border-radius: var(--radius-md, 8px);
+      overflow: hidden;
+      border: 1px solid var(--card-border);
+      aspect-ratio: 16 / 9;
+    }
+
+    .map-iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    :host-context([data-theme="dark"]) .map-iframe {
+      filter: invert(0.9) hue-rotate(180deg) brightness(0.95) contrast(1.1);
+    }
+
+    /* ===== Scroll to top ===== */
+    .scroll-top-btn {
+      position: absolute;
+      right: 2rem;
+      top: -20px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid var(--card-border);
+      background-color: var(--card-bg);
+      color: var(--primary-coral);
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+      box-shadow: var(--shadow-md);
+    }
+
+    .scroll-top-btn:hover {
+      transform: translateY(-3px);
+      border-color: var(--primary-coral);
+      box-shadow: var(--shadow-lg);
+    }
+
+    :host-context([data-theme="dark"]) .scroll-top-btn {
+      background-color: var(--secondary-light);
+      color: var(--neon-cyan);
+    }
+
+    :host-context([data-theme="dark"]) .scroll-top-btn:hover {
+      border-color: var(--neon-cyan);
     }
 
     /* ===== Bottom bar ===== */
@@ -420,7 +565,7 @@ import { AuthService } from '../../../core/services/auth.service';
     }
 
     :host-context([data-theme="dark"]) .admin-link {
-      color: #FFFFFF;
+      color: var(--text-white);
     }
 
     .admin-link:hover {
@@ -443,14 +588,18 @@ import { AuthService } from '../../../core/services/auth.service';
       }
 
       .footer-inner {
-        padding: 2.5rem 1.25rem 2rem;
+        padding: 2rem 1.25rem;
+      }
+
+      .scroll-top-btn {
+        right: 1.25rem;
       }
     }
 
     /* ===== Responsive - Mobile ===== */
     @media (max-width: 768px) {
       .footer-inner {
-        padding: 2rem 1rem 1.5rem;
+        padding: 1.5rem 1rem;
       }
 
       .footer-grid {
@@ -492,8 +641,7 @@ import { AuthService } from '../../../core/services/auth.service';
       }
 
       .newsletter-btn {
-        padding: 0.6rem 1rem;
-        font-size: 0.825rem;
+        padding: 0.6rem 0.875rem;
       }
 
       .footer-bottom-inner {
@@ -506,12 +654,23 @@ import { AuthService } from '../../../core/services/auth.service';
       .copyright {
         font-size: 0.75rem;
       }
+
+      .scroll-top-btn {
+        right: 1rem;
+        width: 36px;
+        height: 36px;
+        font-size: 0.8rem;
+      }
+
+      .footer-wave svg {
+        height: 25px;
+      }
     }
 
     /* ===== Responsive - Small Phone ===== */
     @media (max-width: 480px) {
       .footer-inner {
-        padding: 1.5rem 0.75rem 1.25rem;
+        padding: 1.25rem 0.75rem;
       }
 
       .footer-grid {
@@ -542,6 +701,10 @@ import { AuthService } from '../../../core/services/auth.service';
       .newsletter-description {
         font-size: 0.825rem;
       }
+
+      .footer-wave svg {
+        height: 18px;
+      }
     }
   `]
 })
@@ -563,5 +726,9 @@ export class PublicFooterComponent {
     if (success) {
       this.email.set('');
     }
+  }
+
+  scrollToTop(): void {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 }

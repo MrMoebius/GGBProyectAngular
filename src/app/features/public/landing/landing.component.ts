@@ -79,9 +79,6 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
           ></button>
         }
       </div>
-      <div class="hero-scroll-indicator">
-        <i class="fa-solid fa-chevron-down"></i>
-      </div>
     </section>
 
     <!-- JUEGOS DESTACADOS -->
@@ -502,20 +499,6 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       background: var(--neon-cyan);
       border-color: var(--neon-cyan);
       box-shadow: 0 0 8px var(--neon-cyan);
-    }
-
-    .hero-scroll-indicator {
-      position: absolute;
-      bottom: 2rem;
-      z-index: 3;
-      color: rgba(255, 255, 255, 0.4);
-      font-size: 1.25rem;
-      animation: bounce 2s ease-in-out infinite;
-    }
-
-    @keyframes bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(8px); }
     }
 
     /* SECTION HEADER */
@@ -1422,10 +1405,6 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
 
       .hero-dots {
         bottom: 3.5rem;
-      }
-
-      .hero-scroll-indicator {
-        bottom: 1.25rem;
       }
 
       .section-header {
