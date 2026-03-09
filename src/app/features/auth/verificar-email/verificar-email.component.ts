@@ -15,6 +15,15 @@ import { AuthService } from '../../../core/services/auth.service';
   imports: [ReactiveFormsModule, RouterModule],
   template: `
     <div class="verificar-page">
+      <!-- Split-screen image panel -->
+      <div class="verificar-image-panel">
+        <div class="verificar-image-overlay"></div>
+        <div class="verificar-image-content">
+          <img src="assets/GGBarPhotoSlide/GiberGamesBarLogo.webp" alt="Giber Games Bar" class="verificar-image-logo">
+          <h2 class="verificar-image-title">Verifica tu cuenta</h2>
+          <p class="verificar-image-text">Un paso más para empezar a disfrutar</p>
+        </div>
+      </div>
       <div class="verificar-card">
         <!-- Logo -->
         <div class="verificar-logo">
@@ -58,14 +67,19 @@ import { AuthService } from '../../../core/services/auth.service';
             <!-- Campo contraseña -->
             <div class="form-group">
               <label for="password" class="form-label">Contraseña</label>
-              <input
-                type="password"
-                id="password"
-                formControlName="password"
-                class="form-input"
-                [class.input-error]="isFieldInvalid('password')"
-                placeholder="Minimo 6 caracteres"
-              >
+              <div class="input-password-wrapper">
+                <input
+                  [type]="showPassword() ? 'text' : 'password'"
+                  id="password"
+                  formControlName="password"
+                  class="form-input"
+                  [class.input-error]="isFieldInvalid('password')"
+                  placeholder="Minimo 6 caracteres"
+                >
+                <button type="button" class="toggle-password" (click)="showPassword.set(!showPassword())" tabindex="-1">
+                  <i [class]="showPassword() ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+                </button>
+              </div>
               @if (isFieldInvalid('password')) {
                 <p class="field-error">
                   <i class="fa-solid fa-circle-exclamation"></i>
@@ -77,14 +91,19 @@ import { AuthService } from '../../../core/services/auth.service';
             <!-- Campo confirmar contraseña -->
             <div class="form-group">
               <label for="confirmPassword" class="form-label">Confirmar contraseña</label>
-              <input
-                type="password"
-                id="confirmPassword"
-                formControlName="confirmPassword"
-                class="form-input"
-                [class.input-error]="passwordsMismatch()"
-                placeholder="Repite tu contraseña"
-              >
+              <div class="input-password-wrapper">
+                <input
+                  [type]="showConfirmPassword() ? 'text' : 'password'"
+                  id="confirmPassword"
+                  formControlName="confirmPassword"
+                  class="form-input"
+                  [class.input-error]="passwordsMismatch()"
+                  placeholder="Repite tu contraseña"
+                >
+                <button type="button" class="toggle-password" (click)="showConfirmPassword.set(!showConfirmPassword())" tabindex="-1">
+                  <i [class]="showConfirmPassword() ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></i>
+                </button>
+              </div>
               @if (passwordsMismatch()) {
                 <p class="field-error">
                   <i class="fa-solid fa-circle-exclamation"></i>
@@ -127,12 +146,10 @@ import { AuthService } from '../../../core/services/auth.service';
     </div>
   `,
   styles: [`
+    /* ===== Full page layout - Split screen ===== */
     .verificar-page {
       min-height: 100vh;
       display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem 1rem;
       background: var(--content-bg, #F3F4F6);
     }
 
@@ -140,25 +157,72 @@ import { AuthService } from '../../../core/services/auth.service';
       background: linear-gradient(135deg, var(--hero-gradient-start, #0F172A), var(--hero-gradient-end, #1E293B));
     }
 
+    /* ===== Image panel (left side) ===== */
+    .verificar-image-panel {
+      flex: 1;
+      position: relative;
+      background: url('/assets/GGBarPhotoSlide/GiberGamesBarSlide10.webp') center/cover no-repeat;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .verificar-image-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(30, 41, 59, 0.7));
+    }
+
+    .verificar-image-content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 2rem;
+      color: #fff;
+    }
+
+    .verificar-image-logo {
+      height: 80px;
+      object-fit: contain;
+      margin-bottom: 1.5rem;
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+    }
+
+    .verificar-image-title {
+      font-family: var(--font-heading, 'Orbitron', sans-serif);
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin: 0 0 0.75rem;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .verificar-image-text {
+      font-size: 1.05rem;
+      opacity: 0.85;
+      margin: 0;
+      font-weight: 300;
+    }
+
+    /* ===== Card (right side) ===== */
     .verificar-card {
       width: 100%;
-      max-width: 420px;
+      max-width: 520px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
       background-color: var(--card-bg, #FFFFFF);
-      border: 1px solid var(--card-border, #E5E7EB);
-      border-radius: var(--radius-lg, 16px);
-      padding: 2.5rem 2rem;
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+      border-left: 1px solid var(--card-border, #E5E7EB);
+      padding: 3rem 2.5rem;
+      box-shadow: -4px 0 24px rgba(0, 0, 0, 0.06);
     }
 
     :host-context([data-theme="dark"]) .verificar-card {
-      background-color: rgba(30, 41, 59, 0.85);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background-color: rgba(22, 27, 34, 0.95);
+      border-left: 1px solid rgba(255, 255, 255, 0.06);
       box-shadow:
-        0 8px 32px rgba(0, 0, 0, 0.4),
-        0 0 60px rgba(0, 255, 209, 0.04),
-        inset 0 1px 0 rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+        -4px 0 32px rgba(0, 0, 0, 0.4),
+        0 0 60px rgba(0, 255, 209, 0.03);
     }
 
     .verificar-logo { text-align: center; margin-bottom: 0.5rem; }
@@ -223,6 +287,40 @@ import { AuthService } from '../../../core/services/auth.service';
     .form-input.input-error {
       border-color: var(--danger, #EF4444);
       box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12);
+    }
+
+    /* ===== Password toggle ===== */
+    .input-password-wrapper {
+      position: relative;
+    }
+
+    .input-password-wrapper .form-input {
+      padding-right: 2.75rem;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-muted, #94a3b8);
+      font-size: 0.95rem;
+      padding: 0.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.2s;
+    }
+
+    .toggle-password:hover {
+      color: var(--text-main, #1F2937);
+    }
+
+    :host-context([data-theme="dark"]) .toggle-password:hover {
+      color: var(--neon-cyan, #00FFD1);
     }
 
     .field-error {
@@ -320,16 +418,46 @@ import { AuthService } from '../../../core/services/auth.service';
     .back-link i { font-size: 0.75rem; transition: transform 0.2s; }
     .back-link:hover i { transform: translateX(-3px); }
 
+    /* ===== Responsive - Tablet ===== */
     @media (max-width: 1024px) {
-      .verificar-page { padding: 1.5rem 1rem; }
+      .verificar-image-panel { flex: 0.8; }
+      .verificar-card { max-width: 460px; padding: 2.5rem 2rem; }
+      .verificar-image-title { font-size: 1.5rem; }
+      .verificar-image-logo { height: 65px; }
     }
+
+    /* ===== Responsive - Mobile: hide image panel ===== */
     @media (max-width: 768px) {
-      .verificar-page { padding: 1.25rem 0.75rem; }
-      .verificar-card { max-width: min(420px, 90vw); padding: 2rem 1.5rem; }
+      .verificar-image-panel { display: none; }
+      .verificar-page {
+        justify-content: center;
+        align-items: center;
+        padding: 1.25rem 0.75rem;
+      }
+      .verificar-card {
+        max-width: min(420px, 90vw);
+        min-height: auto;
+        border-left: none;
+        border: 1px solid var(--card-border, #E5E7EB);
+        border-radius: var(--radius-lg, 16px);
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+        padding: 2rem 1.5rem;
+      }
+      :host-context([data-theme="dark"]) .verificar-card {
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow:
+          0 8px 32px rgba(0, 0, 0, 0.4),
+          0 0 60px rgba(0, 255, 209, 0.04),
+          inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+      }
       .form-input { font-size: 16px; padding: 0.7rem 0.875rem; }
       .btn-submit { padding: 0.75rem 1.25rem; font-size: 0.9rem; }
       .verificar-logo-img { height: 50px; }
     }
+
+    /* ===== Responsive - Small Phone ===== */
     @media (max-width: 480px) {
       .verificar-page { padding: 1rem 0.5rem; }
       .verificar-card { max-width: min(420px, 94vw); padding: 1.5rem 1.25rem; }
@@ -360,6 +488,8 @@ export class VerificarEmailComponent implements OnInit {
   errorMessage = signal('');
   isLoading = signal(false);
   verificado = signal(false);
+  showPassword = signal(false);
+  showConfirmPassword = signal(false);
 
   /** Lee el token de la URL al iniciar el componente */
   ngOnInit() {

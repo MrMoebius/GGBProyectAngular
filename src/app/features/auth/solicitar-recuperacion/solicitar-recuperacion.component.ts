@@ -9,6 +9,15 @@ import { AuthService } from '../../../core/services/auth.service';
   imports: [ReactiveFormsModule, RouterModule],
   template: `
     <div class="recuperar-page">
+      <!-- Split-screen image panel -->
+      <div class="recuperar-image-panel">
+        <div class="recuperar-image-overlay"></div>
+        <div class="recuperar-image-content">
+          <img src="assets/GGBarPhotoSlide/GiberGamesBarLogo.webp" alt="Giber Games Bar" class="recuperar-image-logo">
+          <h2 class="recuperar-image-title">Recupera tu acceso</h2>
+          <p class="recuperar-image-text">Te ayudamos a volver a tu cuenta</p>
+        </div>
+      </div>
       <div class="recuperar-card">
         <div class="recuperar-logo">
           <img src="assets/GGBarPhotoSlide/GiberGamesBarLogo.webp" alt="Giber Games Bar" class="recuperar-logo-img">
@@ -80,12 +89,10 @@ import { AuthService } from '../../../core/services/auth.service';
     </div>
   `,
   styles: [`
+    /* ===== Full page layout - Split screen ===== */
     .recuperar-page {
       min-height: 100vh;
       display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem 1rem;
       background: var(--content-bg, #F3F4F6);
     }
 
@@ -93,25 +100,72 @@ import { AuthService } from '../../../core/services/auth.service';
       background: linear-gradient(135deg, var(--hero-gradient-start, #0F172A), var(--hero-gradient-end, #1E293B));
     }
 
+    /* ===== Image panel (left side) ===== */
+    .recuperar-image-panel {
+      flex: 1;
+      position: relative;
+      background: url('/assets/GGBarPhotoSlide/GiberGamesBarSlide09.webp') center/cover no-repeat;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .recuperar-image-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.85), rgba(30, 41, 59, 0.7));
+    }
+
+    .recuperar-image-content {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      padding: 2rem;
+      color: #fff;
+    }
+
+    .recuperar-image-logo {
+      height: 80px;
+      object-fit: contain;
+      margin-bottom: 1.5rem;
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.3));
+    }
+
+    .recuperar-image-title {
+      font-family: var(--font-heading, 'Orbitron', sans-serif);
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin: 0 0 0.75rem;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .recuperar-image-text {
+      font-size: 1.05rem;
+      opacity: 0.85;
+      margin: 0;
+      font-weight: 300;
+    }
+
+    /* ===== Card (right side) ===== */
     .recuperar-card {
       width: 100%;
-      max-width: 420px;
+      max-width: 520px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
       background-color: var(--card-bg, #FFFFFF);
-      border: 1px solid var(--card-border, #E5E7EB);
-      border-radius: var(--radius-lg, 16px);
-      padding: 2.5rem 2rem;
-      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+      border-left: 1px solid var(--card-border, #E5E7EB);
+      padding: 3rem 2.5rem;
+      box-shadow: -4px 0 24px rgba(0, 0, 0, 0.06);
     }
 
     :host-context([data-theme="dark"]) .recuperar-card {
-      background-color: rgba(30, 41, 59, 0.85);
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      background-color: rgba(22, 27, 34, 0.95);
+      border-left: 1px solid rgba(255, 255, 255, 0.06);
       box-shadow:
-        0 8px 32px rgba(0, 0, 0, 0.4),
-        0 0 60px rgba(0, 255, 209, 0.04),
-        inset 0 1px 0 rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+        -4px 0 32px rgba(0, 0, 0, 0.4),
+        0 0 60px rgba(0, 255, 209, 0.03);
     }
 
     .recuperar-logo { text-align: center; margin-bottom: 0.5rem; }
@@ -270,16 +324,46 @@ import { AuthService } from '../../../core/services/auth.service';
     .back-link i { font-size: 0.75rem; transition: transform 0.2s; }
     .back-link:hover i { transform: translateX(-3px); }
 
+    /* ===== Responsive - Tablet ===== */
     @media (max-width: 1024px) {
-      .recuperar-page { padding: 1.5rem 1rem; }
+      .recuperar-image-panel { flex: 0.8; }
+      .recuperar-card { max-width: 460px; padding: 2.5rem 2rem; }
+      .recuperar-image-title { font-size: 1.5rem; }
+      .recuperar-image-logo { height: 65px; }
     }
+
+    /* ===== Responsive - Mobile: hide image panel ===== */
     @media (max-width: 768px) {
-      .recuperar-page { padding: 1.25rem 0.75rem; }
-      .recuperar-card { max-width: min(420px, 90vw); padding: 2rem 1.5rem; }
+      .recuperar-image-panel { display: none; }
+      .recuperar-page {
+        justify-content: center;
+        align-items: center;
+        padding: 1.25rem 0.75rem;
+      }
+      .recuperar-card {
+        max-width: min(420px, 90vw);
+        min-height: auto;
+        border-left: none;
+        border: 1px solid var(--card-border, #E5E7EB);
+        border-radius: var(--radius-lg, 16px);
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+        padding: 2rem 1.5rem;
+      }
+      :host-context([data-theme="dark"]) .recuperar-card {
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow:
+          0 8px 32px rgba(0, 0, 0, 0.4),
+          0 0 60px rgba(0, 255, 209, 0.04),
+          inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+      }
       .form-input { font-size: 16px; padding: 0.7rem 0.875rem; }
       .btn-submit { padding: 0.75rem 1.25rem; font-size: 0.9rem; }
       .recuperar-logo-img { height: 50px; }
     }
+
+    /* ===== Responsive - Small Phone ===== */
     @media (max-width: 480px) {
       .recuperar-page { padding: 1rem 0.5rem; }
       .recuperar-card { max-width: min(420px, 94vw); padding: 1.5rem 1.25rem; }
