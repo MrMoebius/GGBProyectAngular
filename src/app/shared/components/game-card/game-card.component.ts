@@ -34,13 +34,13 @@ import { Juego } from '../../../core/models/juego.interface';
       display: flex;
       flex-direction: column;
       height: 100%;
-      border: 1px solid #e5e7eb;
+      border: 1px solid var(--card-border, #E5E7EB);
       transition: transform 0.2s, box-shadow 0.2s;
     }
 
     .game-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      box-shadow: var(--shadow-md);
     }
 
     .card-body {
@@ -82,13 +82,13 @@ import { Juego } from '../../../core/models/juego.interface';
     .location {
       margin-top: var(--spacing-sm);
       font-size: 0.75rem;
-      color: #9ca3af;
+      color: var(--text-muted);
     }
 
     .card-footer {
-      background-color: #f9fafb;
+      background-color: var(--table-header-bg, #F0F1F3);
       padding: var(--spacing-md);
-      border-top: 1px solid #f3f4f6;
+      border-top: 1px solid var(--card-border, #E5E7EB);
     }
 
     .full-width {

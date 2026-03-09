@@ -293,7 +293,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
 
     .reservation-card:hover {
       transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      box-shadow: var(--shadow-md);
     }
 
     .card-muted {
@@ -449,7 +449,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
 
     .btn-cancel:hover {
       background-color: var(--danger, #EF4444);
-      color: #fff;
+      color: var(--text-white);
     }
 
     .btn-cancel i { font-size: 0.65rem; }

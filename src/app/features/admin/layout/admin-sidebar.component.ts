@@ -103,17 +103,17 @@ interface NavItem {
       width: 36px;
       height: 36px;
       background-color: var(--sidebar-active);
-      color: #fff;
+      color: var(--text-white);
       font-weight: 800;
       font-size: 1.125rem;
-      border-radius: 0.5rem;
+      border-radius: var(--radius-md);
       flex-shrink: 0;
     }
 
     .logo-text {
       font-size: 1.25rem;
       font-weight: 700;
-      color: #fff;
+      color: var(--text-white);
       white-space: nowrap;
       overflow: hidden;
     }
@@ -153,12 +153,12 @@ interface NavItem {
 
     .nav-link:hover {
       background-color: var(--sidebar-hover);
-      color: #fff;
+      color: var(--text-white);
     }
 
     .nav-link.active {
       background-color: var(--sidebar-hover);
-      color: #fff;
+      color: var(--text-white);
       border-left-color: var(--sidebar-active);
     }
 
@@ -243,7 +243,7 @@ interface NavItem {
       color: var(--sidebar-text);
       font-size: 0.875rem;
       cursor: pointer;
-      border-radius: 0.375rem;
+      border-radius: var(--radius-sm);
       transition: background-color 0.2s ease, color 0.2s ease;
       white-space: nowrap;
       overflow: hidden;
@@ -251,7 +251,7 @@ interface NavItem {
 
     .collapse-btn:hover {
       background-color: var(--sidebar-hover);
-      color: #fff;
+      color: var(--text-white);
     }
 
     .collapse-btn i {

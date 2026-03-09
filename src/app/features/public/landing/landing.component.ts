@@ -1702,25 +1702,14 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
 
   // Carousel
   readonly heroSlides = [
-    'assets/GGBarPhotoSlide/GiberGamesBarSlide01.webp',
-    'assets/GGBarPhotoSlide/GiberGamesBarSlide02.webp',
-    'assets/GGBarPhotoSlide/GiberGamesBarSlide03.webp',
-    'assets/GGBarPhotoSlide/GiberGamesBarSlide04.webp',
-    'assets/GGBarPhotoSlide/GiberGamesBarSlide05.webp',
-    'assets/GGBarPhotoSlide/GiberGamesBarSlide06.webp',
-    'assets/GGBarPhotoSlide/GiberGamesBarSlide07.webp',
-    'assets/GGBarPhotoSlide/GiberGamesBarSlide08.webp',
-    // 'assets/GGBarPhotoSlide/GiberGamesBarSlide09.webp',
-    'assets/GGBarPhotoSlide/GiberGamesBarSlide10.webp',
-    'assets/GGBarPhotoSlide/GiberGamesBarSlide11.webp',
-    'assets/GGBarPhotoSlide/GiberGamesBarSlide12.webp',
-    'assets/GGBarPhotoSlide/GiberGamesBarSlide13.webp',
-    'assets/GGBarPhotoSlide/GiberGamesBarSlide14.webp',
-    'assets/GGBarPhotoSlide/GiberGamesBarSlide16.webp',
-    'assets/GGBarPhotoSlide/GiberGamesBarSlide17.webp',
-    'assets/GGBarPhotoSlide/GiberGamesBarSlide18.webp',
-    'assets/GGBarPhotoSlide/GiberGamesBarSlide19.webp',
-    'assets/GGBarPhotoSlide/GiberGamesBarSlide20.webp',
+    'assets/GGBarPhotoSlide/GiberGamesBarSlide21.webp',
+    'assets/GGBarPhotoSlide/GiberGamesBarSlide22.webp',
+    'assets/GGBarPhotoSlide/GiberGamesBarSlide23.webp',
+    'assets/GGBarPhotoSlide/GiberGamesBarSlide24.webp',
+    'assets/GGBarPhotoSlide/GiberGamesBarSlide25.webp',
+    'assets/GGBarPhotoSlide/GiberGamesBarSlide26.webp',
+    'assets/GGBarPhotoSlide/GiberGamesBarSlide27.webp',
+    'assets/GGBarPhotoSlide/GiberGamesBarSlide28.webp',
   ];
   currentSlide = signal(0);
   private slideInterval: ReturnType<typeof setInterval> | null = null;

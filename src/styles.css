@@ -67,6 +67,12 @@
   --input-border: #C9CDD3;
   --input-focus: #3B82F6;
 
+  /* Sombras */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.15);
+
   /* Semanticos */
   --success: #10B981;
   --success-bg: #D1FAE5;
@@ -129,6 +135,11 @@
   --danger: #FF6B6B;
   --danger-bg: rgba(255, 107, 107, 0.1);
   --danger-text: #FF6B6B;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.25);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.3);
+  --shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.35);
+
   --info: #58A6FF;
   --info-bg: rgba(88, 166, 255, 0.1);
   --info-text: #58A6FF;
@@ -216,7 +227,7 @@ body {
   background-color: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: var(--radius-md);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-sm);
   transition: background-color 0.3s, border-color 0.3s;
 }
 

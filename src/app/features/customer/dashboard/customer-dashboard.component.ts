@@ -320,7 +320,7 @@ import { GameCardPublicComponent } from '../../../shared/components/game-card-pu
       position: relative;
       cursor: pointer;
       overflow: hidden;
-      box-shadow: 0 4px 20px rgba(0, 255, 209, 0.2), 0 4px 20px rgba(255, 107, 157, 0.2);
+      box-shadow: 0 4px 20px rgba(0, 255, 209, 0.15), 0 4px 20px rgba(255, 107, 157, 0.15);
     }
 
     .welcome-avatar-img {
@@ -392,7 +392,7 @@ import { GameCardPublicComponent } from '../../../shared/components/game-card-pu
 
     .stat-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+      box-shadow: var(--shadow-hover);
     }
 
     .clickable {
@@ -762,7 +762,7 @@ import { GameCardPublicComponent } from '../../../shared/components/game-card-pu
 
     .event-item-with-bg:hover {
       transform: translateY(-2px);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+      box-shadow: var(--shadow-hover);
     }
 
     .event-icon {
@@ -952,12 +952,12 @@ import { GameCardPublicComponent } from '../../../shared/components/game-card-pu
 
     .rec-card:hover {
       transform: translateY(-3px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+      box-shadow: var(--shadow-lg);
       border-color: var(--primary-coral);
     }
 
     :host-context([data-theme="dark"]) .rec-card:hover {
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+      box-shadow: var(--shadow-lg);
       border-color: rgba(0, 255, 209, 0.15);
     }
 
