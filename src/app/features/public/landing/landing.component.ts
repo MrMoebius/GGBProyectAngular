@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, OnDestroy, signal, ViewChild, ElementRef } from '@angular/core';
+import { Component, computed, inject, OnInit, OnDestroy, AfterViewInit, signal, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { JuegoService } from '../../../core/services/juego.service';
@@ -85,7 +85,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
     </section>
 
     <!-- JUEGOS DESTACADOS -->
-    <section class="section">
+    <section class="section scroll-reveal reveal-up">
       <div class="section-header">
         <div>
           <h2 class="section-title">Juegos Destacados</h2>
@@ -120,7 +120,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
 
     <!-- JUEGO DEL DIA -->
     @if (dailyPick()) {
-      <section class="daily-section">
+      <section class="daily-section scroll-reveal reveal-left">
         <div class="section daily-inner">
           <div class="daily-content">
             <span class="daily-badge">
@@ -161,7 +161,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
 
     <!-- TARIFAS LUDOTECA -->
     @if (ludotecaTarifas().length > 0) {
-      <section class="ludoteca-section">
+      <section class="ludoteca-section scroll-reveal reveal-up">
         <div class="section">
           <div class="section-header">
             <div>
@@ -193,7 +193,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
     }
 
     <!-- NUESTRA CARTA -->
-    <section class="section">
+    <section class="section scroll-reveal reveal-right">
       <div class="section-header">
         <div>
           <h2 class="section-title">Nuestra Carta</h2>
@@ -234,7 +234,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
 
     <!-- PROXIMOS EVENTOS -->
     @if (upcomingEvents().length > 0) {
-      <section class="events-section">
+      <section class="events-section scroll-reveal reveal-up">
         <div class="section">
           <div class="section-header">
             <div>
@@ -288,7 +288,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
 
     <!-- ESTADO DE LA SALA (oculto para clientes logueados) -->
     @if (!isCliente()) {
-      <section class="section">
+      <section class="section scroll-reveal reveal-up">
         <div class="section-header">
           <div>
             <h2 class="section-title">Estado de la Sala</h2>
@@ -317,7 +317,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
     }
 
     <!-- SOBRE NOSOTROS CTA -->
-    <section class="cta-section">
+    <section class="cta-section scroll-reveal reveal-up">
       <div class="section cta-inner">
         <h2 class="cta-title">Ven a conocernos</h2>
         <p class="cta-text">
@@ -1626,9 +1626,32 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
         font-size: 0.7rem;
       }
     }
+
+    /* SCROLL REVEAL ANIMATIONS */
+    .scroll-reveal {
+      opacity: 0;
+      transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+    }
+
+    .scroll-reveal.reveal-up {
+      transform: translateY(40px);
+    }
+
+    .scroll-reveal.reveal-left {
+      transform: translateX(-40px);
+    }
+
+    .scroll-reveal.reveal-right {
+      transform: translateX(40px);
+    }
+
+    .scroll-reveal.revealed {
+      opacity: 1;
+      transform: translate(0, 0);
+    }
   `]
 })
-export class LandingComponent implements OnInit, OnDestroy {
+export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
   private mockJuegos = inject(JuegoService);
   private recommendation = inject(RecommendationService);
   private mesaService = inject(MesaService);
@@ -1644,6 +1667,8 @@ export class LandingComponent implements OnInit, OnDestroy {
   rouletteActive = signal(false);
   rouletteIndex = signal(-1);
   private rouletteTimers: ReturnType<typeof setTimeout>[] = [];
+  private scrollObserver: IntersectionObserver | null = null;
+  private mutationObserver: MutationObserver | null = null;
   featuredGames = signal<JuegoExtended[]>([]);
 
   ludotecaTarifas = signal<Producto[]>([]);
@@ -1715,6 +1740,31 @@ export class LandingComponent implements OnInit, OnDestroy {
   });
   private maxFoodSlide = this.foodSlides.length - 1;
   private foodInterval: ReturnType<typeof setInterval> | null = null;
+
+  ngAfterViewInit(): void {
+    this.scrollObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('revealed');
+          this.scrollObserver?.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.15 });
+
+    this.observeScrollElements();
+
+    // Watch for new .scroll-reveal elements added by @if blocks after API responses
+    this.mutationObserver = new MutationObserver(() => this.observeScrollElements());
+    this.mutationObserver.observe(document.body, { childList: true, subtree: true });
+  }
+
+  private observeScrollElements(): void {
+    const elements = document.querySelectorAll('.scroll-reveal:not(.revealed):not([data-observed])');
+    elements.forEach(el => {
+      el.setAttribute('data-observed', 'true');
+      this.scrollObserver?.observe(el);
+    });
+  }
 
   ngOnInit(): void {
     this.startCarousel();
@@ -1913,5 +1963,7 @@ export class LandingComponent implements OnInit, OnDestroy {
     if (this.foodInterval) clearInterval(this.foodInterval);
     this.stopGamesCarousel();
     this.rouletteTimers.forEach(t => clearTimeout(t));
+    this.scrollObserver?.disconnect();
+    this.mutationObserver?.disconnect();
   }
 }
