@@ -26,7 +26,8 @@
   --text-white: #FFFFFF;
 
   /* Tipografia */
-  --font-main: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-main: 'Poppins', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-heading: 'Orbitron', 'Poppins', sans-serif;
 
   /* Espaciado */
   --spacing-xs: 0.25rem;
@@ -405,6 +406,20 @@ textarea.form-input {
 
 .stars .fa-star.empty {
   color: var(--input-border);
+}
+
+/* Headings con fuente gaming */
+h1, h2, h3 {
+  font-family: var(--font-heading);
+}
+
+h4, h5, h6 {
+  font-family: var(--font-main);
+  font-weight: 600;
+}
+
+.section-title {
+  font-family: var(--font-heading);
 }
 
 /* Smooth scroll */
