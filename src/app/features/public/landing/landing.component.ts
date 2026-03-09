@@ -834,8 +834,8 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
 
     .food-slide-item img {
       width: 100%;
-      height: 300px;
-      object-fit: cover;
+      aspect-ratio: 16 / 9;
+      object-fit: fill;
       border-radius: var(--radius-lg);
     }
 
@@ -1472,7 +1472,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       }
 
       .food-slide-item img {
-        height: 220px;
+        aspect-ratio: 16 / 9;
       }
 
       .food-arrow {
@@ -1580,7 +1580,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       }
 
       .food-slide-item img {
-        height: 180px;
+        aspect-ratio: 16 / 9;
       }
 
       .food-arrow {
@@ -1728,11 +1728,11 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
   // Food carousel
   readonly foodSlides = [
     'assets/GGBarFood/GGBarFood01.webp',
-    'assets/GGBarFood/GGBarFood02.webp',
-    'assets/GGBarFood/GGBarFood003.webp',
-    'assets/GGBarFood/GGBarFood04.webp',
     'assets/GGBarFood/GGBarFood05.webp',
+    'assets/GGBarFood/GGBarFood02.webp',
     'assets/GGBarFood/GGBarFood06.webp',
+    'assets/GGBarFood/GGBarFood04.webp',
+    'assets/GGBarFood/GGBarFood003.webp',
   ];
   currentFoodSlide = signal(0);
   foodTrackTransform = computed(() => {

@@ -169,8 +169,8 @@ const DEFAULT_GENRE: GenreConfig = {
     }
 
     .game-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+      transform: translateY(-6px) scale(1.02);
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.15);
     }
 
     :host-context([data-theme="dark"]) .game-card:hover {
@@ -184,11 +184,26 @@ const DEFAULT_GENRE: GenreConfig = {
     /* ===== Image / Gradient placeholder ===== */
     .card-image {
       position: relative;
-      height: 180px;
+      aspect-ratio: 16 / 10;
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
+    }
+
+    .card-image::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 50%, rgba(0, 0, 0, 0.3) 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .game-card:hover .card-image::after {
+      opacity: 1;
     }
 
     .card-img {
@@ -198,6 +213,11 @@ const DEFAULT_GENRE: GenreConfig = {
       width: 100%;
       height: 100%;
       object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+
+    .game-card:hover .card-img {
+      transform: scale(1.08);
     }
 
     .genre-icon {
@@ -425,7 +445,7 @@ const DEFAULT_GENRE: GenreConfig = {
     /* ===== Responsive ===== */
     @media (max-width: 768px) {
       .card-image {
-        height: 150px;
+        aspect-ratio: 16 / 9;
       }
 
       .card-content {
@@ -449,7 +469,7 @@ const DEFAULT_GENRE: GenreConfig = {
 
     @media (max-width: 480px) {
       .card-image {
-        height: 130px;
+        aspect-ratio: 16 / 9;
       }
 
       .card-content {
