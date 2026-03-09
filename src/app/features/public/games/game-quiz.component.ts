@@ -678,7 +678,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
 
     .results-icon {
       font-size: 3rem;
-      color: #F59E0B;
+      color: var(--warning);
       margin-bottom: 0.75rem;
       display: block;
     }

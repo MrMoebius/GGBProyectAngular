@@ -903,11 +903,11 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
     }
 
     .list-fav-btn.is-favorite {
-      color: #EF4444;
+      color: var(--danger);
     }
 
     .list-fav-btn.is-favorite:hover {
-      color: #DC2626;
+      color: var(--danger-text);
     }
 
     .list-card-meta {
@@ -944,16 +944,12 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
     }
 
     .list-rating {
-      color: #F59E0B;
+      color: var(--warning);
       font-weight: 600;
     }
 
     .list-rating i {
       opacity: 1 !important;
-    }
-
-    :host-context([data-theme="dark"]) .list-rating {
-      color: #FBBF24;
     }
 
     /* ===== PAGINATION ===== */

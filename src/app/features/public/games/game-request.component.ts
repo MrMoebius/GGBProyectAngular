@@ -124,7 +124,7 @@ const SEED_SUGGESTIONS: GameSuggestion[] = [
       gap: 0.5rem;
     }
 
-    .form-title i { color: #F59E0B; }
+    .form-title i { color: var(--warning); }
 
     .list-title {
       font-size: 1.25rem;

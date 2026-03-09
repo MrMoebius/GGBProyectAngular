@@ -193,11 +193,11 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
     .card-hora { font-size: 0.8125rem; color: var(--primary-coral); font-weight: 600; }
 
     .estado-badge { font-size: 0.6875rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.05em; }
-    .estado-badge[data-estado="CONFIRMADA"] { background: rgba(34,197,94,0.15); color: #22C55E; }
-    .estado-badge[data-estado="PENDIENTE"] { background: rgba(250,204,21,0.15); color: #FACC15; }
-    .estado-badge[data-estado="CANCELADA"] { background: rgba(239,68,68,0.15); color: #EF4444; }
-    .estado-badge[data-estado="COMPLETADA"] { background: rgba(59,130,246,0.15); color: #3B82F6; }
-    .estado-badge[data-estado="NO_PRESENTADO"] { background: rgba(107,114,128,0.15); color: #9CA3AF; }
+    .estado-badge[data-estado="CONFIRMADA"] { background: var(--success-bg); color: var(--success); }
+    .estado-badge[data-estado="PENDIENTE"] { background: var(--warning-bg); color: var(--warning); }
+    .estado-badge[data-estado="CANCELADA"] { background: var(--danger-bg); color: var(--danger); }
+    .estado-badge[data-estado="COMPLETADA"] { background: var(--info-bg); color: var(--info); }
+    .estado-badge[data-estado="NO_PRESENTADO"] { background: var(--secondary-bg); color: var(--text-muted); }
 
     .card-body { display: flex; flex-direction: column; gap: 0.375rem; }
     .card-field { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8125rem; color: var(--text-muted); }
@@ -206,10 +206,10 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
     .solicitud { font-size: 0.75rem; opacity: 0.7; }
 
     .card-actions { display: flex; gap: 0.5rem; border-top: 1px solid var(--card-border); padding-top: 0.75rem; flex-wrap: wrap; }
-    .btn-success { background-color: var(--success, #22C55E); color: #fff; border: none; }
+    .btn-success { background-color: var(--success); color: var(--text-white); border: none; }
     .btn-success:hover { opacity: 0.9; }
     .btn-cancel-action { color: var(--danger); }
-    .btn-cancel-action:hover { background-color: rgba(239,68,68,0.1); }
+    .btn-cancel-action:hover { background-color: var(--danger-bg); }
 
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing-md); }
 

@@ -48,7 +48,7 @@ import { CommonModule } from '@angular/common';
       background-color: var(--card-bg, white);
       border: 1px solid var(--card-border, #e5e7eb);
       border-radius: var(--radius-lg);
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      box-shadow: var(--shadow-lg);
       overflow: hidden;
       max-width: 32rem;
       width: 100%;
@@ -71,7 +71,7 @@ import { CommonModule } from '@angular/common';
       height: 3rem;
       width: 3rem;
       border-radius: 50%;
-      background-color: #fee2e2;
+      background-color: var(--danger-bg);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -80,7 +80,7 @@ import { CommonModule } from '@angular/common';
     .icon {
       height: 1.5rem;
       width: 1.5rem;
-      color: #dc2626;
+      color: var(--danger);
     }
 
     .text-content {
@@ -108,8 +108,8 @@ import { CommonModule } from '@angular/common';
     }
 
     .btn-danger {
-      background-color: #dc2626;
-      color: white;
+      background-color: var(--danger);
+      color: var(--text-white);
       border: none;
       padding: 0.5rem 1rem;
       border-radius: var(--radius-md);
@@ -118,7 +118,7 @@ import { CommonModule } from '@angular/common';
     }
 
     .btn-danger:hover {
-      background-color: #b91c1c;
+      background-color: var(--danger-text);
     }
 
     .btn-cancel {

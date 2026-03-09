@@ -333,7 +333,7 @@ import { GameCardPublicComponent } from '../../../shared/components/game-card-pu
     .welcome-avatar-initial {
       font-size: 2.5rem;
       font-weight: 800;
-      color: #0F172A;
+      color: var(--secondary-dark);
       text-transform: uppercase;
     }
 
@@ -412,7 +412,7 @@ import { GameCardPublicComponent } from '../../../shared/components/game-card-pu
       flex-shrink: 0;
     }
 
-    .icon-games { background-color: rgba(16, 185, 129, 0.12); color: #10B981; }
+    .icon-games { background-color: var(--success-bg); color: var(--success); }
     .icon-hours { background-color: rgba(255, 127, 80, 0.12); color: var(--primary-coral); }
     .icon-genre { background-color: rgba(255, 107, 157, 0.12); color: #FF6B9D; }
     .icon-unique { background-color: rgba(139, 92, 246, 0.12); color: #A78BFA; }
@@ -680,9 +680,9 @@ import { GameCardPublicComponent } from '../../../shared/components/game-card-pu
       width: 28px;
       height: 28px;
       border-radius: 50%;
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      background: rgba(239, 68, 68, 0.08);
-      color: #EF4444;
+      border: 1px solid var(--danger);
+      background: var(--danger-bg);
+      color: var(--danger);
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -819,7 +819,7 @@ import { GameCardPublicComponent } from '../../../shared/components/game-card-pu
     }
 
     .event-status-waitlist {
-      color: #FACC15;
+      color: var(--warning);
     }
 
     .event-capacity {
@@ -1009,7 +1009,7 @@ import { GameCardPublicComponent } from '../../../shared/components/game-card-pu
       gap: 0.3rem;
       font-size: 0.8rem;
       font-weight: 700;
-      color: #FBBF24;
+      color: var(--warning);
       margin-top: auto;
     }
 
@@ -1146,7 +1146,7 @@ import { GameCardPublicComponent } from '../../../shared/components/game-card-pu
       padding: 0.5rem 1rem;
       border-radius: var(--radius-md, 8px);
       background-color: var(--neon-cyan, #00FFD1);
-      color: #0F172A;
+      color: var(--secondary-dark);
       font-size: 0.8125rem;
       font-weight: 700;
       white-space: nowrap;

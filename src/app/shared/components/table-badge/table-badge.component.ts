@@ -22,21 +22,21 @@ import { CommonModule } from '@angular/common';
     }
 
     .badge.LIBRE {
-      background-color: #d1fae5;
-      color: #065f46;
-      border-color: #a7f3d0;
+      background-color: var(--success-bg);
+      color: var(--success-text);
+      border-color: var(--success);
     }
 
     .badge.OCUPADA {
-      background-color: #fee2e2;
-      color: #991b1b;
-      border-color: #fecaca;
+      background-color: var(--danger-bg);
+      color: var(--danger-text);
+      border-color: var(--danger);
     }
 
     .badge.RESERVADA {
-      background-color: #fef3c7;
-      color: #92400e;
-      border-color: #fde68a;
+      background-color: var(--warning-bg);
+      color: var(--warning-text);
+      border-color: var(--warning);
     }
   `]
 })

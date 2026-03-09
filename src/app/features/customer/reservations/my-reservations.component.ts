@@ -265,7 +265,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       padding: 0 6px;
       border-radius: 9999px;
       background-color: var(--neon-pink, #FF6B9D);
-      color: #fff;
+      color: var(--text-white);
       font-size: 0.65rem;
       font-weight: 700;
       display: flex;
@@ -421,8 +421,8 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
 
     .badge-completed {
       background-color: rgba(59, 130, 246, 0.12);
-      color: #60A5FA;
-      border: 1px solid #60A5FA;
+      color: var(--info);
+      border: 1px solid var(--info);
     }
 
     .badge-cancelled {

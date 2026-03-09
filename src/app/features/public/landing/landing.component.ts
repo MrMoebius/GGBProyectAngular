@@ -360,7 +360,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       position: absolute;
       inset: 0;
       z-index: 0;
-      background: #0F172A;
+      background: var(--secondary-dark);
     }
 
     .hero-slide {
@@ -990,10 +990,10 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       letter-spacing: 0.05em;
     }
 
-    .type-torneo { background: rgba(245, 158, 11, 0.15); color: #F59E0B; }
+    .type-torneo { background: var(--warning-bg); color: var(--warning); }
     .type-noche_tematica { background: rgba(168, 85, 247, 0.15); color: #A855F7; }
-    .type-taller { background: rgba(16, 185, 129, 0.15); color: #10B981; }
-    .type-evento_especial { background: rgba(59, 130, 246, 0.15); color: #3B82F6; }
+    .type-taller { background: var(--success-bg); color: var(--success); }
+    .type-evento_especial { background: var(--info-bg); color: var(--info); }
 
     .event-date {
       font-size: 0.8125rem;

@@ -266,11 +266,11 @@ import { NotificationService } from '../../../core/services/notification.service
     }
 
     :host-context([data-theme="dark"]) .logo-img {
-      filter: drop-shadow(0 0 8px rgba(0, 255, 209, 0.3));
+      filter: invert(1) hue-rotate(180deg) drop-shadow(0 0 8px rgba(0, 255, 209, 0.3));
     }
 
     :host-context([data-theme="dark"]) .logo:hover .logo-img {
-      filter: drop-shadow(0 0 14px rgba(0, 255, 209, 0.5));
+      filter: invert(1) hue-rotate(180deg) drop-shadow(0 0 14px rgba(0, 255, 209, 0.5));
     }
 
     /* ===== Desktop nav links ===== */
@@ -457,9 +457,9 @@ import { NotificationService } from '../../../core/services/notification.service
     }
 
     :host-context([data-theme="dark"]) .user-dropdown {
-      background-color: #1E293B;
+      background-color: var(--secondary-light);
       border-color: rgba(255, 255, 255, 0.1);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      box-shadow: var(--shadow-lg);
     }
 
     @keyframes dropdownFade {
@@ -547,8 +547,8 @@ import { NotificationService } from '../../../core/services/notification.service
     }
 
     :host-context([data-theme="dark"]) .modal-card {
-      background-color: #1E293B;
-      border-color: rgba(255, 255, 255, 0.08);
+      background-color: var(--secondary-light);
+      border-color: var(--card-border);
     }
 
     @keyframes modalScale {
@@ -619,7 +619,7 @@ import { NotificationService } from '../../../core/services/notification.service
     }
 
     .modal-btn-confirm:hover {
-      background-color: #DC2626;
+      background-color: var(--danger-text);
     }
 
     /* ===== Mobile logout ===== */
@@ -656,7 +656,7 @@ import { NotificationService } from '../../../core/services/notification.service
     }
 
     .staff-btn:hover {
-      background-color: #2563EB;
+      background-color: var(--info);
       transform: scale(1.03);
     }
 

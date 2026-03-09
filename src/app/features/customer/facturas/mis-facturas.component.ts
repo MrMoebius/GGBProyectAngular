@@ -135,7 +135,7 @@ interface FacturaLineDetail {
     .tabs { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; flex-wrap: wrap; }
     .tab { padding: 0.5rem 1rem; border-radius: 9999px; border: 1px solid var(--card-border, rgba(255,255,255,0.08)); background: var(--card-bg, #1E293B); color: var(--text-muted); font-size: 0.8125rem; font-weight: 500; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 0.5rem; }
     .tab:hover { border-color: var(--neon-cyan, #00FFD1); color: var(--neon-cyan, #00FFD1); }
-    .tab-active { background: var(--neon-cyan, #00FFD1); border-color: var(--neon-cyan, #00FFD1); color: #0F172A; font-weight: 600; }
+    .tab-active { background: var(--neon-cyan, #00FFD1); border-color: var(--neon-cyan, #00FFD1); color: var(--secondary-dark); font-weight: 600; }
     .tab-count { min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9999px; background: rgba(255,255,255,0.2); font-size: 0.65rem; font-weight: 700; display: flex; align-items: center; justify-content: center; }
     .tab-active .tab-count { background: rgba(0,0,0,0.2); }
 
@@ -158,9 +158,9 @@ interface FacturaLineDetail {
     .factura-right { display: flex; align-items: center; gap: 0.75rem; }
     .factura-total { font-weight: 700; font-size: 1rem; color: var(--neon-cyan, #00FFD1); font-variant-numeric: tabular-nums; }
     .factura-estado { font-size: 0.6875rem; font-weight: 600; padding: 0.2rem 0.6rem; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.05em; }
-    .factura-estado[data-estado="EMITIDA"] { background: rgba(250,204,21,0.15); color: #FACC15; }
-    .factura-estado[data-estado="PAGADA"] { background: rgba(34,197,94,0.15); color: #22C55E; }
-    .factura-estado[data-estado="ANULADA"] { background: rgba(239,68,68,0.15); color: #EF4444; }
+    .factura-estado[data-estado="EMITIDA"] { background: var(--warning-bg); color: var(--warning); }
+    .factura-estado[data-estado="PAGADA"] { background: var(--success-bg); color: var(--success); }
+    .factura-estado[data-estado="ANULADA"] { background: var(--danger-bg); color: var(--danger); }
     .expand-icon { font-size: 0.75rem; color: var(--text-muted); transition: transform 0.2s; }
     .factura-card.expanded .expand-icon { transform: rotate(180deg); }
 
@@ -189,7 +189,7 @@ interface FacturaLineDetail {
     .ludoteca-row { padding: 0.5rem 0.75rem; background: rgba(255,255,255,0.03); border-radius: var(--radius-md, 8px); margin-bottom: 0.75rem; }
     .detail-totals { border-top: 1px solid var(--card-border, rgba(255,255,255,0.08)); padding-top: 0.75rem; }
     .total-row span:last-child { font-weight: 700; font-size: 1rem; color: var(--neon-cyan, #00FFD1); }
-    .pending-row span:last-child { color: #FACC15; }
+    .pending-row span:last-child { color: var(--warning); }
 
     .btn-export { display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 1rem; padding: 0.5rem 1rem; border: 1px solid var(--card-border, rgba(255,255,255,0.08)); border-radius: var(--radius-md, 8px); background: var(--secondary-bg, rgba(255,255,255,0.04)); color: var(--text-main); font-size: 0.8125rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
     .btn-export:hover { border-color: var(--neon-cyan, #00FFD1); color: var(--neon-cyan, #00FFD1); }

@@ -405,8 +405,8 @@ const DEFAULT_GENRE: GenreConfig = {
     }
 
     .hero-favorite-btn.is-favorite {
-      color: #EF4444;
-      border-color: #EF4444;
+      color: var(--danger);
+      border-color: var(--danger);
     }
 
     .hero-title {
@@ -474,11 +474,11 @@ const DEFAULT_GENRE: GenreConfig = {
     }
 
     .stat-highlight .stat-icon {
-      color: #10b981;
+      color: var(--success);
     }
 
     .stat-highlight .stat-value {
-      color: #10b981;
+      color: var(--success);
     }
 
     .stat-divider {
@@ -624,15 +624,15 @@ const DEFAULT_GENRE: GenreConfig = {
     }
 
     .btn-outline-favorite:hover {
-      border-color: #EF4444;
-      color: #EF4444;
-      background: rgba(239, 68, 68, 0.06);
+      border-color: var(--danger);
+      color: var(--danger);
+      background: var(--danger-bg);
     }
 
     .btn-outline-favorite.is-favorite {
-      border-color: #EF4444;
-      color: #EF4444;
-      background: rgba(239, 68, 68, 0.06);
+      border-color: var(--danger);
+      color: var(--danger);
+      background: var(--danger-bg);
     }
 
     .btn-outline-favorite.is-favorite:hover {
@@ -676,15 +676,11 @@ const DEFAULT_GENRE: GenreConfig = {
       display: flex;
       gap: 0.25rem;
       font-size: 1.5rem;
-      color: #F59E0B;
+      color: var(--warning);
     }
 
     .rating-stars-large .fa-star.fa-regular {
       color: var(--input-border, #d1d5db);
-    }
-
-    :host-context([data-theme="dark"]) .rating-stars-large {
-      color: #FBBF24;
     }
 
     .rating-total-text {
@@ -741,12 +737,7 @@ const DEFAULT_GENRE: GenreConfig = {
 
     .star-btn.star-active,
     .star-btn.star-hover {
-      color: #F59E0B;
-    }
-
-    :host-context([data-theme="dark"]) .star-btn.star-active,
-    :host-context([data-theme="dark"]) .star-btn.star-hover {
-      color: #FBBF24;
+      color: var(--warning);
     }
 
     .review-textarea {
@@ -867,15 +858,11 @@ const DEFAULT_GENRE: GenreConfig = {
       display: flex;
       gap: 0.15rem;
       font-size: 0.875rem;
-      color: #F59E0B;
+      color: var(--warning);
     }
 
     .review-star-icon.fa-regular {
       color: var(--input-border, #d1d5db);
-    }
-
-    :host-context([data-theme="dark"]) .review-stars {
-      color: #FBBF24;
     }
 
     .review-text {

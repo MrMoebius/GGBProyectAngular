@@ -938,9 +938,9 @@ interface ContactInfo {
       width: 22px;
       height: 22px;
       border-radius: 50%;
-      background: #fff;
+      background: var(--text-white);
       transition: transform 0.3s ease;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+      box-shadow: var(--shadow-sm);
     }
 
     .toggle-btn.active .toggle-knob {
