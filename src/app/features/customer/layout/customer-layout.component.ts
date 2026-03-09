@@ -361,6 +361,13 @@ import { ClienteService } from '../../../core/services/cliente.service';
         flex-direction: row;
         flex-wrap: wrap;
         gap: 0.25rem;
+        overflow-x: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+
+      .sidebar-nav::-webkit-scrollbar {
+        display: none;
       }
 
       .sidebar-link {

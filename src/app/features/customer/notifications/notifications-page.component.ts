@@ -382,26 +382,32 @@ import { GGBNotification } from '../../../core/models/notification.interface';
     }
 
     /* ===== Responsive ===== */
-    @media (max-width: 640px) {
-      .page-header {
-        flex-direction: column;
-      }
+    @media (max-width: 768px) {
+      .page-header { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+      .page-title { font-size: 1.25rem; }
+      .btn-mark-all { align-self: flex-start; font-size: 0.8rem; padding: 0.5rem 1rem; white-space: normal; }
+      .notification-item { padding: 0.875rem 1rem; gap: 0.75rem; }
+      .notif-icon { width: 36px; height: 36px; font-size: 0.9rem; }
+      .notif-dismiss { opacity: 1; }
+      .notif-title { font-size: 0.85rem; }
+      .notif-body { font-size: 0.8rem; }
+      .notif-time { font-size: 0.7rem; }
+    }
 
-      .btn-mark-all {
-        align-self: flex-start;
-      }
-
-      .notification-item {
-        padding: 0.85rem 1rem;
-      }
-
-      .notif-dismiss {
-        opacity: 1;
-      }
-
-      .page-title {
-        font-size: 1.25rem;
-      }
+    @media (max-width: 480px) {
+      .page-header { margin-bottom: 1rem; }
+      .page-title { font-size: 1.1rem; gap: 0.5rem; }
+      .btn-mark-all { font-size: 0.75rem; padding: 0.4rem 0.875rem; }
+      .notification-item { padding: 0.75rem 0.875rem; gap: 0.625rem; }
+      .notif-icon { width: 32px; height: 32px; font-size: 0.8rem; }
+      .notif-title { font-size: 0.8125rem; }
+      .notif-body { font-size: 0.775rem; }
+      .notif-dismiss { width: 24px; height: 24px; font-size: 0.6rem; }
+      .section-header { font-size: 0.8rem; padding: 0.4rem 0.875rem; }
+      .empty-state { padding: 2.5rem 1rem; }
+      .empty-icon { font-size: 2.5rem; }
+      .empty-title { font-size: 1rem; }
+      .empty-subtitle { font-size: 0.8125rem; }
     }
   `]
 })

@@ -409,7 +409,7 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
       .header-detail { font-size: 0.7rem; }
       .section-title { font-size: 0.875rem; }
       .section-title i { font-size: 0.8rem; }
-      .productos-grid { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 0.375rem; }
+      .productos-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.375rem; }
       .producto-card { padding: 0.625rem; }
       .producto-name { font-size: 0.75rem; }
       .producto-price { font-size: 0.8125rem; }

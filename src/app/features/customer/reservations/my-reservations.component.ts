@@ -495,6 +495,23 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
     }
 
     /* ===== Responsive ===== */
+    @media (max-width: 768px) {
+      .page-title { font-size: 1.25rem; }
+      .page-title i { font-size: 1rem; }
+      .page-subtitle { font-size: 0.8125rem; }
+      .tabs { overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; -ms-overflow-style: none; }
+      .tabs::-webkit-scrollbar { display: none; }
+      .tab { flex-shrink: 0; padding: 0.5rem 0.875rem; font-size: 0.8rem; }
+      .reservation-card { padding: 0.875rem; gap: 0.875rem; }
+      .res-date-badge { width: 48px; height: 56px; }
+      .res-date-badge .date-day { font-size: 1.1rem; }
+      .res-date-badge .date-month { font-size: 0.6rem; }
+      .res-info h3 { font-size: 0.9rem; }
+      .res-detail { font-size: 0.775rem; }
+      .badge { font-size: 0.65rem; padding: 0.2rem 0.5rem; }
+      .btn-cancel { font-size: 0.75rem; padding: 0.35rem 0.75rem; }
+    }
+
     @media (max-width: 640px) {
       .reservation-card {
         flex-direction: column;
@@ -511,15 +528,24 @@ import { BeerLoaderComponent } from '../../../shared/components/beer-loader/beer
         width: 100%;
         justify-content: space-between;
       }
+    }
 
-      .tabs {
-        flex-direction: column;
-        gap: 0.25rem;
-      }
-
-      .page-title {
-        font-size: 1.25rem;
-      }
+    @media (max-width: 480px) {
+      .page-header { margin-bottom: 1rem; }
+      .page-title { font-size: 1.1rem; gap: 0.5rem; }
+      .page-subtitle { font-size: 0.75rem; }
+      .tabs { gap: 0.25rem; margin-bottom: 1rem; }
+      .tab { padding: 0.4rem 0.7rem; font-size: 0.75rem; }
+      .tab-count { min-width: 16px; height: 16px; font-size: 0.6rem; }
+      .reservation-card { padding: 0.75rem; gap: 0.625rem; }
+      .res-date-badge { width: 42px; height: 50px; }
+      .res-date-badge .date-day { font-size: 1rem; }
+      .res-info h3 { font-size: 0.85rem; }
+      .res-detail { font-size: 0.725rem; }
+      .empty-state { padding: 2.5rem 1rem; }
+      .empty-icon { font-size: 2.5rem; }
+      .empty-title { font-size: 1rem; }
+      .empty-subtitle { font-size: 0.8125rem; }
     }
   `]
 })
