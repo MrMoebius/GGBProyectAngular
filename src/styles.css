@@ -453,10 +453,27 @@ html {
   transform: translateY(0);
 }
 
-/* Scrollbar personalizada (tema oscuro) */
-[data-theme="dark"] ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+/* Scrollbar personalizada (ambos temas) */
+html {
+  scrollbar-gutter: stable;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F0F1F3;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #FF7F50;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #E67346;
 }
 
 [data-theme="dark"] ::-webkit-scrollbar-track {
@@ -465,7 +482,6 @@ html {
 
 [data-theme="dark"] ::-webkit-scrollbar-thumb {
   background: #30363D;
-  border-radius: 4px;
 }
 
 [data-theme="dark"] ::-webkit-scrollbar-thumb:hover {

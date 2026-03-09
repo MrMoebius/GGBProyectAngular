@@ -207,22 +207,29 @@ import { NotificationService } from '../../../core/services/notification.service
       left: 0;
       right: 0;
       height: var(--public-nav-height);
-      background: rgba(240, 241, 243, 0.9);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      transition: background 0.35s ease, box-shadow 0.35s ease, backdrop-filter 0.35s ease;
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(16px) saturate(180%);
+      -webkit-backdrop-filter: blur(16px) saturate(180%);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+      transition: background 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
       z-index: 1000;
     }
 
     :host-context([data-theme="dark"]) .navbar {
-      background: rgba(15, 23, 42, 0.92);
+      background: rgba(13, 17, 23, 0.65);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     }
 
     .navbar.scrolled {
-      background: var(--card-bg);
-      box-shadow: 0 2px 16px rgba(0, 0, 0, 0.15);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      background: rgba(255, 255, 255, 0.85);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      border-bottom-color: rgba(0, 0, 0, 0.06);
+    }
+
+    :host-context([data-theme="dark"]) .navbar.scrolled {
+      background: rgba(13, 17, 23, 0.88);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      border-bottom-color: rgba(0, 255, 209, 0.08);
     }
 
     /* ===== Inner layout ===== */
